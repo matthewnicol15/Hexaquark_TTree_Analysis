@@ -17,10 +17,10 @@
 void Strangeness_Analysis_Sideband_Kaon_part1(){
 
   // Read file with information on vectors
-  gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
+  gROOT->ProcessLine(".L ~/work/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_201021_04.root");
+  TFile *f = new TFile("/shared/storage/physhad/JLab/mn688/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_201021_01.root");
 
   // Read TTree within root file and assign it to 't1'
   TTree *t1 = (TTree*)f->Get("RGA_Spring2019_Inbending_201021");
@@ -74,14 +74,31 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   t1->SetBranchAddress("triggerno",&readtriggerno);
 
   // Path and name for the output file to save
-  TFile fileOutput1("/media/mn688/Elements1/PhD/Analysis_Output/RGA/Strangeness_1_RGA_SPRING_2019_Inbending_eFD_Kp_101121_04_part1.root","recreate");
+  TFile fileOutput1("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_01_141121_part1.root","recreate");
 
 
   // Getting particle database to use for masses
   auto db=TDatabasePDG::Instance();
 
-  // Define function for fitting kaon calculated mass
-  TF1 *f1 = new TF1("f1","gaus(0) + pol4(3)",0.36,0.65);
+  // Define functions for fitting kaon calculated mass
+  // Function for strangeness 1 - kaon 1
+  TF1 *func1 = new TF1("func1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
+  TF1 *func2 = new TF1("func2","gaus(0)",0.36,0.7);
+  TF1 *func3 = new TF1("func3","pol3(0)",0.36,0.7);
+  TF1 *func4 = new TF1("func4","gaus(0)",0.36,0.7);
+  TF1 *func5 = new TF1("func5","gaus(0) + gaus(3)",0.36,0.7);
+
+  // Function for strangeness 2 - kaon 1
+  TF1 *func1_s2_kp1 = new TF1("func1_s2_kp1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
+  TF1 *func2_s2_kp1 = new TF1("func2_s2_kp1","gaus(0)",0.36,0.7);
+  TF1 *func3_s2_kp1 = new TF1("func3_s2_kp1","pol3(0)",0.36,0.7);
+  TF1 *func4_s2_kp1 = new TF1("func4_s2_kp1","gaus(0)",0.36,0.7);
+  TF1 *func5_s2_kp1 = new TF1("func5_s2_kp1","gaus(0) + gaus(3)",0.36,0.7);
+
+  // Function for strangeness 3 - kaon 1
+  TF1 *f7 = new TF1("f7","gaus(0) + pol4(3)",0.36,0.65);
+  TF1 *f8 = new TF1("f8","gaus(0)",0.36,0.65);
+  TF1 *f9 = new TF1("f9","pol4(0)",0.36,0.65);
 
 
 
@@ -91,7 +108,15 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hkaon=new TH1D("hkaon","kaon momentum; kaon momentum [GeV];Counts",200,0,10);
   auto* hkaons=new TH1D("hkaons","kaon numbers; Kaons in event;Counts",6,0,6);
   auto* hproton=new TH1D("hproton","proton momentum; proton momentum [GeV];Counts",200,0,10);
-  auto* hmass_kp_1=new TH1F("hmass_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S1_kp_1=new TH1F("hmass_S1_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S2_kp_1=new TH1F("hmass_S2_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S2_kp_2=new TH1F("hmass_S2_kp_2","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_1=new TH1F("hmass_S3_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_2=new TH1F("hmass_S3_kp_2","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_3=new TH1F("hmass_S3_kp_3","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_1_a=new TH1F("hmass_S3_kp_1_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_2_a=new TH1F("hmass_S3_kp_2_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* hmass_S3_kp_3_a=new TH1F("hmass_S3_kp_3_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
 
   // Histograms for strangeness 1 channel
   auto* hmiss_mass_all=new TH1D("miss_all","MM^2(e' K^{+} p #pi^{-});MM^2(e' K^{+} p #pi^{-}) [GeV];Counts",200,-1,1);
@@ -675,7 +700,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         if(fabs(v_delta_beta_kp.at(0))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95)){
           hmiss_1_a->Fill(miss1.M());
 
-          hmass_kp_1->Fill(v_Mass_kp.at(0));
+          hmass_S1_kp_1->Fill(v_Mass_kp.at(0));
 
 
 
@@ -730,6 +755,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
         if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) && (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95)){
           hmiss_s2_a->Fill(miss_s2.M());
+          hmass_S2_kp_1->Fill(v_Mass_kp.at(0));
+          hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
 
 
         }
@@ -738,6 +765,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         miss_s3 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
 
         hmiss_s3->Fill(miss_s3.M());
+        hmass_S3_kp_1->Fill(v_Mass_kp.at(0));
+        hmass_S3_kp_2->Fill(v_Mass_kp.at(1));
+        hmass_S3_kp_3->Fill(v_Mass_kp.at(2));
 
         if(v_region_kp.at(0) != 1 || v_region_kp.at(1) != 1 || v_region_kp.at(2) != 1) continue;
         h_delta_beta_kp_s3_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
@@ -747,17 +777,116 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
         if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && fabs(v_delta_beta_kp.at(2))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) && (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95) && (v_kp.at(2).Rho() < 0.55 || v_kp.at(2).Rho() > 0.95)){
           hmiss_s3_a->Fill(miss_s3.M());
-
+          hmass_S3_kp_1_a->Fill(v_Mass_kp.at(0));
+          hmass_S3_kp_2_a->Fill(v_Mass_kp.at(1));
+          hmass_S3_kp_3_a->Fill(v_Mass_kp.at(2));
         }
       }
     }
   }
 
-  // Set parameteres for kaon mass fit
-  f1->SetParameters(hmass_kp_1->GetMaximum(),0.494,0.1);
-  hmass_kp_1->Fit("f1","RB");
+//////////////////////////////////////////////////////////////////////////////////////
+//// Fitting functions to calculated kaon mass  //////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
-  f1->Write();
+  // Set parameteres for kaon mass fit
+
+  // Strangeness 1 - kaon 1
+  // Setting parameters before fitting
+  func1->SetParameters(hmass_S1_kp_1->GetMaximum(),0.493,0.02); // Amplitude, mean, sigma for firs gauss
+  func1->SetParameter(7,hmass_S1_kp_1->GetMaximum() / 2); // amplitude for second gauss
+  func1->SetParameter(8,0.493); // mean for second gauss
+  func1->SetParameter(9,0.02); // sigma for second gauss
+  // Setting parameter limits before fitting
+  func1->SetParLimits(0,hmass_S1_kp_1->GetMaximum() / 3,hmass_S1_kp_1->GetMaximum()); // amplitude for first gauss
+  func1->SetParLimits(1,0.480,0.505); // mean for first gauss
+  func1->SetParLimits(2,0.005,0.03); // sigma for first gauss
+  func1->SetParLimits(7,hmass_S1_kp_1->GetMaximum() / 3,hmass_S1_kp_1->GetMaximum()); // amplitude for second gauss
+  func1->SetParLimits(8,0.480,0.505); // mean for second gauss
+  func1->SetParLimits(9,0.005,0.05); // sigma for second gauss
+
+  // Strangeness 1 - kaon 1
+  hmass_S1_kp_1->Fit("func1","RB");
+  func2->FixParameter(0, func1->GetParameter(0));
+  func2->FixParameter(1, func1->GetParameter(1));
+  func2->FixParameter(2, func1->GetParameter(2));
+  func3->FixParameter(0, func1->GetParameter(3));
+  func3->FixParameter(1, func1->GetParameter(4));
+  func3->FixParameter(2, func1->GetParameter(5));
+  func3->FixParameter(3, func1->GetParameter(6));
+  func4->FixParameter(0, func1->GetParameter(7));
+  func4->FixParameter(1, func1->GetParameter(8));
+  func4->FixParameter(2, func1->GetParameter(9));
+  func5->FixParameter(0, func1->GetParameter(0));
+  func5->FixParameter(1, func1->GetParameter(1));
+  func5->FixParameter(2, func1->GetParameter(2));
+  func5->FixParameter(3, func1->GetParameter(7));
+  func5->FixParameter(4, func1->GetParameter(8));
+  func5->FixParameter(5, func1->GetParameter(9));
+
+
+  // Strangeness 2 - kaon 1
+  // Setting parameters before fitting
+  func1_s2_kp1->SetParameters(hmass_S2_kp_1->GetMaximum() / 2,0.493,0.02);
+  func1_s2_kp1->SetParameter(7,hmass_S2_kp_1->GetMaximum() / 2);
+  func1_s2_kp1->SetParameter(8,0.493);
+  func1_s2_kp1->SetParameter(9,0.02);
+  // Setting parameter limits before fitting
+  func1_s2_kp1->SetParLimits(0,hmass_S2_kp_1->GetMaximum() / 3,hmass_S2_kp_1->GetMaximum());
+  func1_s2_kp1->SetParLimits(1,0.480,0.505);
+  func1_s2_kp1->SetParLimits(2,0.005,0.03);
+  func1_s2_kp1->SetParLimits(7,hmass_S2_kp_1->GetMaximum() / 3,hmass_S2_kp_1->GetMaximum());
+  func1_s2_kp1->SetParLimits(8,0.480,0.505);
+  func1_s2_kp1->SetParLimits(9,0.005,0.05);
+
+  // Strangeness 1 - kaon 1
+  hmass_S2_kp_1->Fit("func1_s2_kp1","RB");
+  func2_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(0));
+  func2_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(1));
+  func2_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(2));
+  func3_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(3));
+  func3_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(4));
+  func3_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(5));
+  func3_s2_kp1->FixParameter(3, func1_s2_kp1->GetParameter(6));
+  func4_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(7));
+  func4_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(8));
+  func4_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(9));
+  func5_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(0));
+  func5_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(1));
+  func5_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(2));
+  func5_s2_kp1->FixParameter(3, func1_s2_kp1->GetParameter(7));
+  func5_s2_kp1->FixParameter(4, func1_s2_kp1->GetParameter(8));
+  func5_s2_kp1->FixParameter(5, func1_s2_kp1->GetParameter(9));
+
+
+  // Strangeness 3 - kaon 1
+  f7->SetParameters(hmass_S3_kp_1->GetMaximum(),0.494,0.1);
+  hmass_S3_kp_1->Fit("f7","RB");
+  f8->FixParameter(0, f7->GetParameter(0));
+  f8->FixParameter(1, f7->GetParameter(1));
+  f8->FixParameter(2, f7->GetParameter(2));
+  f9->FixParameter(0, f7->GetParameter(3));
+  f9->FixParameter(1, f7->GetParameter(4));
+  f9->FixParameter(2, f7->GetParameter(5));
+  f9->FixParameter(3, f7->GetParameter(6));
+  f9->FixParameter(4, f7->GetParameter(7));
+  f9->FixParameter(5, f7->GetParameter(8));
+
+
+  // Saving the function for part 2
+  func1->Write();
+  func2->Write();
+  func3->Write();
+  func4->Write();
+  func5->Write();
+  func1_s2_kp1->Write();
+  func2_s2_kp1->Write();
+  func3_s2_kp1->Write();
+  func4_s2_kp1->Write();
+  func5_s2_kp1->Write();
+  f7->Write();
+  f8->Write();
+  f9->Write();
 
   fileOutput1.Write();
 
