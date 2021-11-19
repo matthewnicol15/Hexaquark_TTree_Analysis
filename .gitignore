@@ -1,0 +1,5 @@
+# File types to be ignored 
+*.root
+*.d
+*.so
+*.pcm
