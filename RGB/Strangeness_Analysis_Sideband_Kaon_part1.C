@@ -31,7 +31,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
   Quantity<<"Total";
   Date<<"19112021";
-  Version<<"02";
+  Version<<"03";
 
   Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
