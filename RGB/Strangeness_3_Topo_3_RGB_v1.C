@@ -7,50 +7,25 @@
 #include <TDatabasePDG.h>
 #include <TLorentzVector.h>
 #include <TH1.h>
-#include <TF1.h>
 #include <TH2.h>
 #include <TChain.h>
 #include <TBenchmark.h>
 #include <vector>
 
 // Macro name
-void Strangeness_Analysis_Sideband_Kaon_part1(){
-
-  //////////////////////////////////////////////////////////////////////////////
-  ////Define variables for naming and limits ///////////
-  //////////////////////////////////////////////////////////////////////////////
-
-  // Information for canvas and histogram name
-  ostringstream Data;
-  ostringstream Quantity;
-  ostringstream Date;
-  ostringstream Version;
-  ostringstream Output_File_Name;
-
-  // Setting the strings for canvas name
-  Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
-  Quantity<<"Total";
-  Date<<"19112021";
-  Version<<"02";
-
-  Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  ////Creating components to read from TTree ///////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-
-  // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/shared/storage/physhad/JLab/mn688/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_201021_01.root");
-
-  // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGA_Spring2019_Inbending_201021");
+void Strangeness_3_Topo_3_RGB_v1(){
 
   // Read file with information on vectors
-  gROOT->ProcessLine(".L ~/work/Macros/Loader.C+");
+  gROOT->ProcessLine(".L /mnt/f/PhD/Macros/Loader.C+");
 
+  // Read input root file and assign it to 'f'
+  TFile *f = new TFile("/mnt/f/PhD/Trees/Dibaryon/RGB/Strangeness_3/RGB_Fall2019_Outbending_S3_Tree_020721_01.root");
+  // Read TTree within root file and assign it to 't1'
+  TTree *t1 = (TTree*)f->Get("RGB_Fall2019_Outbending_020721");
+
+
+  // Creating components to read from TTree
+  // Set any vectors to 0 before reading from the TTree
   // Event information
   TLorentzVector *readbeam=NULL;  // Information on the beam
   TLorentzVector *readtarget=NULL; // Information on the target
@@ -61,10 +36,11 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   // Number of given particle or charge track in each event
   Int_t readchargetracks; // Number of positive or negative charge tracks
   Int_t readelno; // e^-
+  Int_t pimno,protonno,kaonpno,kaonFDno,kaonCDno; // Counts number of particles in an event
   Int_t readothertracks; // Number of particles excluding p, e^-, pions or kaons
   Int_t region; // which region the particles go in (FT, FD, CD)
 
-  // Set any vectors to 0 before reading from the TTree
+
   // Particle information
   vector<TLorentzVector> *v_p4=0;   // 4-vectors for the detected particles
   vector<TLorentzVector> *v_vertex=0;   // Vertex information for particles
@@ -77,6 +53,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   vector<double> *v_chi2PID=0;   // Chi^2 of the PID
   vector<Int_t> *v_region=0; // region particle goes in
 
+  // Delta vertex times for the K^{+}s
+  Double_t delta_vertex_time_kp_1_2, delta_vertex_time_kp_2_3, delta_vertex_time_kp_1_3;
   // Setting the branch addresses to read from
   t1->SetBranchAddress("p4",&v_p4);
   t1->SetBranchAddress("vertex",&v_vertex);
@@ -91,93 +69,67 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   t1->SetBranchAddress("chi2PID",&v_chi2PID);
   t1->SetBranchAddress("region",&v_region);
   t1->SetBranchAddress("time",&v_time);
-  t1->SetBranchAddress("elno",&readelno);
+  // t1->SetBranchAddress("elno",&readelno);
   t1->SetBranchAddress("eventno",&readeventno);
   t1->SetBranchAddress("runno",&readrunno);
   t1->SetBranchAddress("triggerno",&readtriggerno);
 
   // Path and name for the output file to save
-  TFile fileOutput1(Output_File_Name.str().c_str(),"recreate");
+  TFile fileOutput1("/mnt/f/PhD/Analysis_Output/RGB/Inclusive/Inbending/Strangeness_3/PID/Strangeness_3_Topo_3_RGB_Inc_Fall2019_Outbending_3ormorekp_05072021_01.root","recreate");
 
 
   // Getting particle database to use for masses
   auto db=TDatabasePDG::Instance();
 
-////////////////////////////////////////////////////////////////////////////////
-////Creating functions for kaon mass fit ///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+  // Create histograms here
+  auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
+  auto* hmass_kp_1=new TH1F("hmass_kp_1","Mass of K^{+} (1);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_2_sig=new TH1F("hmass_kp_2_sig","Mass of K^{+} (2);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_2_back=new TH1F("hmass_kp_2_back","Mass of K^{+} (2);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_2=new TH1F("hmass_kp_2","Mass of K^{+} (2);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_3_sig=new TH1F("hmass_kp_3_sig","Mass of K^{+} (2);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_3_back=new TH1F("hmass_kp_3_back","Mass of K^{+} (2);Mass [GeV];Counts",1000,0,1);
+  auto* hmass_kp_3=new TH1F("hmass_kp_3","Mass of K^{+} (3);Mass [GeV];Counts",1000,0,1);
+  auto* hv_kp=new TH1F("hv_kp","Number of K^{+} ;# K^{+};Counts",9,0,9);
+  auto* hpimno=new TH1F("hpimno","Number of #pi^{-} ;No. #pi^{-};Counts",9,0,9);
+  auto* hprotonno=new TH1F("hprotonno","Number of p ;No. p;Counts",9,0,9);
+  auto* hkaonpno=new TH1F("hkaonpno","Number of K^{+} with good delta beta;# K^{+};Counts",9,0,9);
+  auto* hdelta_vertex_time_kp=new TH2D("hdelta_vertex_time_kp","#Delta vertex time of K^{+};#Delta vertex time K^{+} (1,2)[ns];#Delta vertex time K^{+} (2,3)[ns]",200,-10,10,200,-10,10);
+  auto* hdelta_vertex_time_kp_a=new TH2D("hdelta_vertex_time_kp_a","#Delta vertex time of K^{+};#Delta vertex time K^{+} (1,2)[ns];#Delta vertex time K^{+} (2,3)[ns]",200,-10,10,200,-10,10);
+  auto* hangular_distribution_kp1=new TH2D("hangular_distribution_kp1","Theta vs P for K^{+} (1);P [GeV];#theta [deg]",200,0,11,200,0,200);
+  auto* hangular_distribution_kp2=new TH2D("hangular_distribution_kp2","Theta vs P for K^{+} (1);P [GeV];#theta [deg]",200,0,11,200,0,200);
+  auto* hangular_distribution_kp3=new TH2D("hangular_distribution_kp3","Theta vs P for K^{+} (1);P [GeV];#theta [deg]",200,0,11,200,0,200);
+  auto* hdelta_beta_kp1=new TH2D("hdelta_beta_kp1","#Delta#Beta K^{+} (1);P [GeV];#Delta#Beta",200,0,11,200,-1,1);
+  auto* hdelta_beta_kp2=new TH2D("hdelta_beta_kp2","#Delta#Beta K^{+} (2);P [GeV];#Delta#Beta",200,0,11,200,-1,1);
+  auto* hdelta_beta_kp3=new TH2D("hdelta_beta_kp3","#Delta#Beta K^{+} (3);P [GeV];#Delta#Beta",200,0,11,200,-1,1);
+  auto* hdelta_beta_kp1_2=new TH2D("hdelta_beta_kp1_2","#Delta#Beta K^{+} (1);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hdelta_beta_kp2_2=new TH2D("hdelta_beta_kp2_2","#Delta#Beta K^{+} (2);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hdelta_beta_kp3_2=new TH2D("hdelta_beta_kp3_2","#Delta#Beta K^{+} (3);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hdelta_beta_kp1_3=new TH2D("hdelta_beta_kp1_3","#Delta#Beta K^{+} (1);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hdelta_beta_kp2_3=new TH2D("hdelta_beta_kp2_3","#Delta#Beta K^{+} (2);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hdelta_beta_kp3_3=new TH2D("hdelta_beta_kp3_3","#Delta#Beta K^{+} (3);P [GeV];#Delta#Beta",200,0,11,200,-0.3,0.3);
+  auto* hcascade_lambda=new TH2D("hcascade_lambda","Lambda against cascade;M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-})",30,1.2,1.5,30,1,1.3);
+  auto* hcascade_lambda_2=new TH2D("hcascade_lambda_2","Lambda against cascade;M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-})",200,1,3,50,1,1.2);
+  auto* hinv_lambda=new TH1F("hinv_lambda","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,0,2);
+  auto* hinv_lambda_2=new TH1F("hinv_lambda_2","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,0,2);
+  auto* hinv_cascade=new TH1F("hinv_cascade","Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];Counts",400,1,3);
+  auto* hinv_cascade_2=new TH1F("hinv_cascade_2","Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];Counts",400,1,3);
+  auto* hmiss_5_sig=new TH1F("hmiss_5_sig","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_back=new TH1F("hmiss_5_back","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_1=new TH1F("hmiss_5_1","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_2=new TH1F("hmiss_5_2","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_3=new TH1F("hmiss_5_3","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_4=new TH1F("hmiss_5_4","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_5=new TH1F("hmiss_5_5","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_6=new TH1F("hmiss_5_6","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_7=new TH1F("hmiss_5_7","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_8=new TH1F("hmiss_5_8","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_9=new TH1F("hmiss_5_9","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmiss_5_10=new TH1F("hmiss_5_10","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
+  auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
+  auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",3,0,3);
+  auto* hregion_kp=new TH1F("hregion_kp","Regions K^{+} hit;Region;Counts",3,0,3);
 
-  // Define functions for fitting kaon calculated mass
-  // Function for strangeness 1 - kaon 1
-  TF1 *func1 = new TF1("func1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
-  TF1 *func2 = new TF1("func2","gaus(0)",0.36,0.7);
-  TF1 *func3 = new TF1("func3","pol3(0)",0.36,0.7);
-  TF1 *func4 = new TF1("func4","gaus(0)",0.36,0.7);
-  TF1 *func5 = new TF1("func5","gaus(0) + gaus(3)",0.36,0.7);
-
-  // Function for strangeness 2 - kaon 1
-  TF1 *func1_s2_kp1 = new TF1("func1_s2_kp1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
-  TF1 *func2_s2_kp1 = new TF1("func2_s2_kp1","gaus(0)",0.36,0.7);
-  TF1 *func3_s2_kp1 = new TF1("func3_s2_kp1","pol3(0)",0.36,0.7);
-  TF1 *func4_s2_kp1 = new TF1("func4_s2_kp1","gaus(0)",0.36,0.7);
-  TF1 *func5_s2_kp1 = new TF1("func5_s2_kp1","gaus(0) + gaus(3)",0.36,0.7);
-
-  // Function for strangeness 3 - kaon 1
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  ////Create histograms here ///////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-
-  // Histograms for events
-  auto* hbeam=new TH1D("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
-  auto* hkaon=new TH1D("hkaon","kaon momentum; kaon momentum [GeV];Counts",200,0,10);
-  auto* hkaons=new TH1D("hkaons","kaon numbers; Kaons in event;Counts",6,0,6);
-  auto* hproton=new TH1D("hproton","proton momentum; proton momentum [GeV];Counts",200,0,10);
-  auto* hmass_S1_kp_1=new TH1F("hmass_S1_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S2_kp_1=new TH1F("hmass_S2_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S2_kp_2=new TH1F("hmass_S2_kp_2","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_1=new TH1F("hmass_S3_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_2=new TH1F("hmass_S3_kp_2","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_3=new TH1F("hmass_S3_kp_3","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_1_a=new TH1F("hmass_S3_kp_1_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_2_a=new TH1F("hmass_S3_kp_2_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-  auto* hmass_S3_kp_3_a=new TH1F("hmass_S3_kp_3_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
-
-  // Histograms for strangeness 1 channel
-  auto* hmiss_mass_all=new TH1D("miss_all","MM^2(e' K^{+} p #pi^{-});MM^2(e' K^{+} p #pi^{-}) [GeV];Counts",200,-1,1);
-  auto* hmiss_mass_all_a=new TH1D("hmiss_mass_all_a","MM^2(e' K^{+} p #pi^{-});MM^2(e' K^{+} p #pi^{-}) [GeV];Counts",200,-1,1);
-  auto* hmiss_momentum_all=new TH1D("hmiss_momentum_all","P(B + T - e' - K^{+} - p - #pi^{-});P(B + T - e' - K^{+} - p - #pi^{-}) [GeV];Counts",200,0,2);
-  auto* hmiss_momentum_all_a=new TH1D("hmiss_momentum_all_a","P(B + T - e' - K^{+} - p - #pi^{-});P(B + T - e' - K^{+} - p - #pi^{-}) [GeV];Counts",200,0,2);
-  auto* hinv_lambda=new TH1D("hinv_lambda","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",200,0.5,2.5);
-  auto* hinv_lambda_a=new TH1D("hinv_lambda_a","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",200,0.5,2.5);
-  auto* hmiss_1=new TH1D("hmiss_1","MM(e' K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
-  auto* hmiss_1_a__S1_kp_1=new TH2D("hmiss_1_a__S1_kp_1","Kaon mass against missing mass;MM(e' K^{+}) [GeV]; M(K^{+}) [GeV]",200,0,4,100,0.2,0.8);
-  auto* hmiss_1_b=new TH1D("hmiss_1_b","MM(e' K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
-  auto* hmiss_1_c=new TH1D("hmiss_1_c","MM(e' K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
-  auto* hmiss_2=new TH1D("hmiss_2","MM^{2}(e' K^{+} p);MM^{2}(e' K^{+} p) [GeV^{2}];Counts",200,-1,3);
-  auto* hmiss_s2=new TH1D("hmiss_s2","MM(e' K^{+} K^{+});MM(e' K^{+} K^{+}) [GeV];Counts",300,0,3);
-  auto* hmiss_s2_a__S2_kp_1__S2_kp_2=new TH3D("hmiss_s2_a__S2_kp_1__S2_kp_2",
-  "MM against M(K^{+}) (1) against M(K^{+}) (2);MM(e' K^{+} K^{+}) [GeV];M(K^{+}) (1) [GeV]; M(K^{+}) (2) [GeV]",300,0,3,100,0.2,0.8,100,0.2,0.8);
-  auto* hregion=new TH1D("hregion","Regions;Region;Counts",3,1,4);
-  auto* h_delta_beta_kp_s1_1=new TH2D("h_delta_beta_kp_s1_1","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s1_1FD=new TH2D("h_delta_beta_kp_s1_1FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-
-  // Histograms for strangeness 2 channel
-  auto* h_delta_beta_kp_s2_1=new TH2D("h_delta_beta_kp_s2_1","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s2_2=new TH2D("h_delta_beta_kp_s2_2","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s2_1FD=new TH2D("h_delta_beta_kp_s2_1FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s2_2FD=new TH2D("h_delta_beta_kp_s2_2FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-
-  // Histograms for strangeness 3 channel
-  auto* hmiss_s3=new TH1D("hmiss_s3","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+} K^{+} K^{+}) [GeV];Counts",300,0,3);
-  auto* hmiss_s3_a=new TH1D("hmiss_s3_a","MM(e' K^{+} K^{+} K^{+});MM(e' K^{+} K^{+} K^{+}) [GeV];Counts",300,0,3);
-  auto* h_delta_beta_kp_s3_1=new TH2D("h_delta_beta_kp_s3_1","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s3_2=new TH2D("h_delta_beta_kp_s3_2","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s3_3=new TH2D("h_delta_beta_kp_s3_3","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s3_1FD=new TH2D("h_delta_beta_kp_s3_1FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s3_2FD=new TH2D("h_delta_beta_kp_s3_2FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-  auto* h_delta_beta_kp_s3_3FD=new TH2D("h_delta_beta_kp_s3_3FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
 
   // Create vectors of TLorentzVectors to store information of
   // all particles of a given type (important when you have more than 1
@@ -188,8 +140,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   vector<TLorentzVector> v_pr; // protons
   vector<TLorentzVector> v_kp; // K^+
   vector<TLorentzVector> v_km; // K^-
+  vector<TLorentzVector> v_neutron; // neutron
   vector<TLorentzVector> v_unidentified_neg; // Particles with a PID of 0
-  vector<TLorentzVector> v_othertracks; // Any other particles are assigned to this
 
   // TLorentzVectors for individual particles
   TLorentzVector el;
@@ -198,6 +150,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   TLorentzVector pr;
   TLorentzVector kp;
   TLorentzVector km;
+  TLorentzVector neutron;
   TLorentzVector othertracks;
   TLorentzVector unidentified_neg;
 
@@ -217,11 +170,10 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
   // These are used to define the missing masses later
   TLorentzVector beam;
+  TLorentzVector miss5;
   TLorentzVector missall;
-  TLorentzVector miss1;
-  TLorentzVector miss_s2, miss_s3;
-  TLorentzVector miss2;
   TLorentzVector lambda;
+  TLorentzVector cascade;
 
 
   // After information is read from the TTree, particles are identified using
@@ -315,10 +267,10 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Double_t vertex_time_kp;
   vector<Double_t> v_region_kp; // region hit
   Double_t region_kp;
-  vector<Double_t> v_Mass_kp; // region hit
-  Double_t mass_kp;
+  vector<Double_t> v_Mass_kp; // Calculated mass
+  Double_t Mass_kp;
 
-  // K^-
+  // K^+
   vector<Double_t> v_beta_tof_km;  // Beta measured
   Double_t beta_tof_km;
   vector<Double_t> v_P_km;  // Momentum measured
@@ -355,12 +307,12 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Double_t region_unidentified_neg;
 
   Double_t c=30;  // Speed of light used for calculating vertex time
+  Double_t Mass; // Calculated mass
 
   // Reads the total number of entries in the TTree
   Long64_t nentries = t1->GetEntries();
   // You can just run over a set number of events for fast analysis
-  // Long64_t nentries = 100000;
-  cout<<nentries<<endl; // Printing out the total number of events
+  // Long64_t nentries = 1000000;
 
   // This is used to print out the percentage of events completed so far
   Int_t Percentage = nentries/100;
@@ -374,6 +326,13 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
       fprintf (stderr, "%lld\r", i/Percentage);
       fflush (stderr);
     }
+
+    pimno = 0;
+    protonno = 0;
+    kaonpno = 0;
+    kaonFDno = 0;
+    kaonCDno = 0;
+
     // All the vectors must be cleared at the start of each event entry
     // e^-
     v_el.clear();
@@ -453,6 +412,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
     v_vertex_km.clear();
     v_region_km.clear();
 
+    // neutrons
+    v_neutron.clear();
+
     // Particles with PID = 0
     v_unidentified_neg.clear();
     v_beta_tof_unidentified_neg.clear();
@@ -466,22 +428,23 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
     // v_vertex_unidentified_neg.clear();
     v_region_unidentified_neg.clear();
 
-    // Other particles
-    // v_othertracks.clear();
-    // v_beta_tof_othertracks.clear();
-    // v_P_othertracks.clear();
-    // v_beta_calc_othertracks.clear();
-    // v_delta_beta_othertracks.clear();
 
-    // This reads the number of particles in the current entry
+    // This reads the number of particles in the current entry/event
     Int_t Nparticles = v_p4->size();
 
-    // This loops over all the particles in the current entry
+
+    // This loops over all the particles in the current entry/event
     for(Int_t j=0; j<Nparticles; j++){
 
+
+      // Calculating the mass for each particle using their beta and momentum
+      Mass = sqrt((pow(v_p4->at(j).Rho(),2) / (pow(v_beta->at(j),2))) - pow(v_p4->at(j).Rho(),2));
       // Filling histogram to show the different regions hit
       hregion->Fill(v_region->at(j));
       // Can put a selection on which regions particles are hitting
+
+      // Filling histogram showing calculated masses of particles
+      hmass->Fill(Mass);
 
       // Checking PID and assigning particles
       // e^-
@@ -647,11 +610,20 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         beta_calc_kp = kp.Rho()/(sqrt((pow(kp.Rho(),2))+(pow(kp.M(),2))));
         // Difference between calculated and measured beta
         delta_beta_kp = beta_calc_kp-beta_tof_kp;
-        vertex_time_kp = TOF_kp - path_kp / (beta_tof_kp*c); // Calculate vertex time
+        vertex_time_kp = TOF_kp - path_kp / (kp.Beta()*c); // Calculate vertex time
         // Setting the vertex information now vertex time has been calculated
         vertex_kp.SetXYZT(v_vertex->at(j).X(), v_vertex->at(j).Y(), v_vertex->at(j).Z(), vertex_time_kp);
         region_kp = v_region->at(j);
-        mass_kp = sqrt((pow(v_p4->at(j).Rho(),2) / (pow(beta_tof_kp,2))) - pow(v_p4->at(j).Rho(),2));
+        Mass_kp = sqrt((pow(v_p4->at(j).Rho(),2) / (pow(beta_tof_kp,2))) - pow(v_p4->at(j).Rho(),2));
+        // Only recording K+ with a good delta beta
+
+        if(region_kp==1)kaonFDno++;
+        else if(region_kp==2)kaonCDno++;
+        if(fabs(delta_beta_kp) < 0.02){
+
+          // Counting number of kaons with good delta beta
+          kaonpno++;
+        }
 
         // Pushing back all that iformation into the vectors
         // Again this is done so you can store information on multiple particles
@@ -666,7 +638,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         v_vertex_time_kp.push_back(vertex_time_kp);
         v_vertex_kp.push_back(vertex_kp);
         v_region_kp.push_back(region_kp);
-        v_Mass_kp.push_back(mass_kp);
+        v_Mass_kp.push_back(Mass_kp);
       }
 
       // K^-
@@ -699,212 +671,182 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         v_vertex_km.push_back(vertex_km);
         v_region_km.push_back(region_km);
       }
+
+      // Neutrons
+      else if(v_PID->at(j) == 2112){
+        neutron.SetXYZM(v_p4->at(j).Px(),v_p4->at(j).Py(),v_p4->at(j).Pz(),db->GetParticle(2112)->Mass());
+
+        v_neutron.push_back(neutron);
+      }
     }
-
-    // Setting beam energy to 10.2 GeV for RGB Spring 2020
-    beam.SetXYZM(0,0,10.2,0);
-
-    // beam = (TLorentzVector)*readbeam;
-
+    beam = (TLorentzVector)*readbeam;
+    if(readrunno < 6400) beam.SetXYZM(0,0,10.6,0);
+    else beam.SetXYZM(0,0,10.2,0);
     hbeam->Fill(beam.Rho());
 
+    pimno = v_pim.size();
+    protonno = v_pr.size();
+    hkaonpno->Fill(kaonpno);
+    if(kaonpno==3)hv_kp->Fill(v_kp.size());
+
     // Here you can apply conditions on the events you want to analyse
-    if(v_kp.size() > 0 && v_el.size() == 1 &&v_region_el.at(0) == 1){
-      miss1 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0);
+    if(v_kp.size() == 3 && v_el.size()==1){
+      // Cutting out kaons with low momentum
+      // if(v_kp.at(0).Rho()<0.2 || v_kp.at(1).Rho()<0.2 || v_kp.at(2).Rho()<0.2)continue;
+      hregion_kp->Fill(v_region_kp.at(0));
+      hregion_kp->Fill(v_region_kp.at(1));
+      hregion_kp->Fill(v_region_kp.at(2));
 
-      hkaons->Fill(v_kp.size());
+      //Checking number of different particles
+      hprotonno->Fill(protonno);
+      hpimno->Fill(pimno);
 
-      // Looking at stragneness 1 channel
-      if(v_kp.size()==1){
-        hmiss_1->Fill(miss1.M());
+      //Cutting out kaons in the CD
+      // if(kaonCDno!=0)continue;
+      // Missing mass of 3 K+, looking for the dsss
+      miss5 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
 
-        h_delta_beta_kp_s1_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+      hmass_kp_1->Fill(v_Mass_kp.at(0));
+      hmass_kp_2->Fill(v_Mass_kp.at(1));
+      hmass_kp_3->Fill(v_Mass_kp.at(2));
 
-        if(v_region_kp.at(0)!=1) continue;
-
-        h_delta_beta_kp_s1_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
-
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95)){
-          hmiss_1_a__S1_kp_1->Fill(miss1.M(),v_Mass_kp.at(0));
-
-          hmass_S1_kp_1->Fill(v_Mass_kp.at(0));
-
-
-
-
-          if(v_pr.size()==1){
-            // Select which region you want the particles to go in
-            if(v_region_pr.at(0) == 1){
-              miss2 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_pr.at(0);
-              hmiss_2->Fill(miss2.M2());
-              hkaon->Fill(v_kp.at(0).Rho());
-              hproton->Fill(v_pr.at(0).Rho());
+      // Looking at the sidebands from the mass of kaons
+      if(v_Mass_kp.at(2) > 0.477  && v_Mass_kp.at(2) < 0.517){
+        if(v_Mass_kp.at(0) > 0.447 && v_Mass_kp.at(0) < 0.547 && v_Mass_kp.at(1) > 0.469  && v_Mass_kp.at(1) < 0.525){
+          hmass_kp_2_sig->Fill(v_Mass_kp.at(2));
+          hmiss_5_sig->Fill(miss5.M());
 
 
-              // Selecting events where the pion is also detected
-              if(v_pim.size()==1){
-                lambda = v_pr.at(0) + v_pim.at(0);
-                missall = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_pr.at(0) - v_pim.at(0);
-                hmiss_mass_all->Fill(missall.M2());
-                hmiss_momentum_all->Fill(missall.Rho());
-                hinv_lambda->Fill(lambda.M());
-                hmiss_1_b->Fill(miss1.M());
+        }
+
+        else if((v_Mass_kp.at(0) > 0.572 && v_Mass_kp.at(0) < 0.622) && ((v_Mass_kp.at(1) > 0.539 && v_Mass_kp.at(1) <0.567) || (v_Mass_kp.at(1) > 0.427 && v_Mass_kp.at(1) < 0.455))){
+          hmass_kp_2_back->Fill(v_Mass_kp.at(2));
+          hmiss_5_back->Fill(miss5.M());
+        }
+
+        else if(v_Mass_kp.at(0) > 0.372 && v_Mass_kp.at(0) < 0.422 && ((v_Mass_kp.at(1) > 0.539 && v_Mass_kp.at(1) <0.567) || (v_Mass_kp.at(1) > 0.427 && v_Mass_kp.at(1) < 0.455))){
+          hmass_kp_2_back->Fill(v_Mass_kp.at(2));
+          hmiss_5_back->Fill(miss5.M());
+        }
+      }
+
+      hangular_distribution_kp1->Fill(v_kp.at(0).Rho(),v_kp.at(0).Theta()*TMath::RadToDeg());
+      hangular_distribution_kp2->Fill(v_kp.at(1).Rho(),v_kp.at(1).Theta()*TMath::RadToDeg());
+      hangular_distribution_kp3->Fill(v_kp.at(2).Rho(),v_kp.at(2).Theta()*TMath::RadToDeg());
+      hmiss_5_1->Fill(miss5.M());
+
+      // Calculating the delta vetex time between the 3 kaons
+      delta_vertex_time_kp_1_2 = v_vertex_kp.at(0).T() - v_vertex_kp.at(1).T();
+      delta_vertex_time_kp_2_3 = v_vertex_kp.at(1).T() - v_vertex_kp.at(2).T();
+      delta_vertex_time_kp_1_3 = v_vertex_kp.at(0).T() - v_vertex_kp.at(2).T();
+      // Plotting the delta vetex time between the 3 kaons
+      hdelta_vertex_time_kp->Fill(delta_vertex_time_kp_1_2,delta_vertex_time_kp_2_3);
+
+      hdelta_beta_kp1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+      hdelta_beta_kp2->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
+      hdelta_beta_kp3->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
+
+      if (v_region_kp.at(0) > 0.8 && v_region_kp.at(0) < 1.2)
+      hdelta_beta_kp1_2->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      else if (v_region_kp.at(0) > 1.8 && v_region_kp.at(0) < 2.2)
+      hdelta_beta_kp1_3->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      if (v_region_kp.at(1) > 0.8 && v_region_kp.at(1) < 1.2)
+      hdelta_beta_kp2_2->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      else if (v_region_kp.at(1) > 1.8 && v_region_kp.at(1) < 2.2)
+      hdelta_beta_kp2_3->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      if (v_region_kp.at(2) > 0.8 && v_region_kp.at(2) < 1.2)
+      hdelta_beta_kp3_2->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      else if (v_region_kp.at(2) > 1.8 && v_region_kp.at(2) < 2.2)
+      hdelta_beta_kp3_3->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+
+      if(fabs(delta_vertex_time_kp_1_2) < 1 && fabs(delta_vertex_time_kp_1_3) < 1 && fabs(delta_vertex_time_kp_2_3) < 1) hmiss_5_2->Fill(miss5.M());
 
 
-                // Cut around the missing mass of all detected particles (neutron mass)
-                if(fabs(missall.M2()) < 0.1){
-                  hinv_lambda_a->Fill(lambda.M());
-                  hmiss_1_c->Fill(miss1.M());
-                }
-                // Cutting around the invariant mass of lambda
-                if(lambda.M() <1.14){
-                  hmiss_mass_all_a->Fill(missall.M2());
-                  hmiss_momentum_all_a->Fill(missall.Rho());
+
+      if(fabs(v_delta_beta_kp.at(0)) < 0.01 && v_region_kp.at(0) == 1 )  hmiss_5_10->Fill(miss5.M());
+
+      // // Looking at the delta beta of Kaons after delta vertex time cuts
+      // if(fabs(pow(delta_vertex_time_kp_1_2,2) + pow(delta_vertex_time_kp_2_3,2)) < 1){
+      //   hdelta_beta_kp1_t1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+      //   hdelta_beta_kp2_t1->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
+      //   hdelta_beta_kp3_t1->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
+      // }
+      // else if(fabs(pow(delta_vertex_time_kp_1_2,2) + pow(delta_vertex_time_kp_2_3,2)) > 1){
+      //   hdelta_beta_kp1_t2->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+      //   hdelta_beta_kp2_t2->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
+      //   hdelta_beta_kp3_t2->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
+      // }
+      // Applying a delta beta cut on the first K^{+}
+      if(fabs(v_delta_beta_kp.at(0)) <0.02){
+        // hdelta_beta_kp2_b1->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
+        // hdelta_beta_kp3_b1->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
+
+        // Applying a delta beta cut on the second K^{+}
+        if(fabs(v_delta_beta_kp.at(1)) <0.02){
+          // hdelta_beta_kp3_b2->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
+        }
+      }
+
+
+      // Selecting events where the proton is also detected
+      if(v_pr.size() == 1){
+        hmiss_5_3->Fill(miss5.M());
+
+
+        // Selecting events where at least 2 pions are detected
+        if(v_pim.size() > 1){
+
+
+
+          hmiss_5_4->Fill(miss5.M());
+
+
+
+
+          // Testing the kaonpno is same as delta beta cut
+          if(kaonpno>2)hmiss_5_5->Fill(miss5.M());
+
+          // if(v_region_kp.at(0) != 1)continue;
+          // if(fabs(v_delta_beta_kp.at(0)) > 0.01)continue;
+          hmiss_5_6->Fill(miss5.M());
+
+
+          // Looking at all combinations of protons and pions to identify lambdas
+          // Looping over all protons in event
+          for(Int_t k=0;k<protonno;k++){
+            // Looping over all pi^{-}s in event
+            for(Int_t l=0;l<pimno;l++){
+
+              lambda = v_pr.at(k) + v_pim.at(l);
+              hinv_lambda->Fill(lambda.M());
+              if(kaonpno==3)hinv_lambda_2->Fill(lambda.M());
+              if(lambda.M() < 1.18){
+                hmiss_5_7->Fill(miss5.M());
+                if(kaonpno==3)hmiss_5_8->Fill(miss5.M());
+
+                // Looping over pions not in the lambda
+                for(Int_t n=0;n<pimno && n != l;n++){
+                  cascade = v_pr.at(k) + v_pim.at(l) + v_pim.at(n);
+                  hinv_cascade->Fill(cascade.M());
+                  hcascade_lambda->Fill(cascade.M(), lambda.M());
+                  if(cascade.M() > 1.3 && cascade.M() < 1.35)  hmiss_5_9->Fill(miss5.M());
+
+                  if(kaonpno==3){
+                    hinv_cascade_2->Fill(cascade.M());
+                    hcascade_lambda_2->Fill(cascade.M(), lambda.M());
+                  }
                 }
               }
             }
           }
         }
       }
-
-      // Looking at stragneness 2 channel
-      if(v_kp.size()==2){
-        miss_s2 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0)- v_kp.at(1);
-
-        hmiss_s2->Fill(miss_s2.M());
-        h_delta_beta_kp_s2_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
-        h_delta_beta_kp_s2_2->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
-
-        if(v_region_kp.at(0) != 1 || v_region_kp.at(1) != 1) continue;
-        h_delta_beta_kp_s2_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
-        h_delta_beta_kp_s2_2FD->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
-
-
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 &&
-          (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) &&
-          (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95)){
-          hmiss_s2_a__S2_kp_1__S2_kp_2->Fill(miss_s2.M(), v_Mass_kp.at(0), v_Mass_kp.at(1));
-          hmass_S2_kp_1->Fill(v_Mass_kp.at(0));
-          hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
-
-
-        }
-      }
-      if(v_kp.size() == 3){
-        miss_s3 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
-
-        hmiss_s3->Fill(miss_s3.M());
-        hmass_S3_kp_1->Fill(v_Mass_kp.at(0));
-        hmass_S3_kp_2->Fill(v_Mass_kp.at(1));
-        hmass_S3_kp_3->Fill(v_Mass_kp.at(2));
-
-        if(v_region_kp.at(0) != 1 || v_region_kp.at(1) != 1 || v_region_kp.at(2) != 1) continue;
-        h_delta_beta_kp_s3_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
-        h_delta_beta_kp_s3_2FD->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
-        h_delta_beta_kp_s3_3FD->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
-
-
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && fabs(v_delta_beta_kp.at(2))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) && (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95) && (v_kp.at(2).Rho() < 0.55 || v_kp.at(2).Rho() > 0.95)){
-          hmiss_s3_a->Fill(miss_s3.M());
-          hmass_S3_kp_1_a->Fill(v_Mass_kp.at(0));
-          hmass_S3_kp_2_a->Fill(v_Mass_kp.at(1));
-          hmass_S3_kp_3_a->Fill(v_Mass_kp.at(2));
-        }
-      }
     }
   }
-
-//////////////////////////////////////////////////////////////////////////////////////
-//// Fitting functions to calculated kaon mass  //////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
-  // Set parameteres for kaon mass fit
-
-  // Strangeness 1 - kaon 1
-  // Setting parameters before fitting
-  func1->SetParameters(hmass_S1_kp_1->GetMaximum(),0.493,0.02); // Amplitude, mean, sigma for firs gauss
-  func1->SetParameter(7,hmass_S1_kp_1->GetMaximum() / 2); // amplitude for second gauss
-  func1->SetParameter(8,0.493); // mean for second gauss
-  func1->SetParameter(9,0.02); // sigma for second gauss
-  // Setting parameter limits before fitting
-  func1->SetParLimits(0,hmass_S1_kp_1->GetMaximum() / 3,hmass_S1_kp_1->GetMaximum()); // amplitude for first gauss
-  func1->SetParLimits(1,0.480,0.505); // mean for first gauss
-  func1->SetParLimits(2,0.005,0.03); // sigma for first gauss
-  func1->SetParLimits(7,hmass_S1_kp_1->GetMaximum() / 3,hmass_S1_kp_1->GetMaximum()); // amplitude for second gauss
-  func1->SetParLimits(8,0.480,0.505); // mean for second gauss
-  func1->SetParLimits(9,0.005,0.05); // sigma for second gauss
-
-  // Strangeness 1 - kaon 1
-  hmass_S1_kp_1->Fit("func1","RB");
-  func2->FixParameter(0, func1->GetParameter(0));
-  func2->FixParameter(1, func1->GetParameter(1));
-  func2->FixParameter(2, func1->GetParameter(2));
-  func3->FixParameter(0, func1->GetParameter(3));
-  func3->FixParameter(1, func1->GetParameter(4));
-  func3->FixParameter(2, func1->GetParameter(5));
-  func3->FixParameter(3, func1->GetParameter(6));
-  func4->FixParameter(0, func1->GetParameter(7));
-  func4->FixParameter(1, func1->GetParameter(8));
-  func4->FixParameter(2, func1->GetParameter(9));
-  func5->FixParameter(0, func1->GetParameter(0));
-  func5->FixParameter(1, func1->GetParameter(1));
-  func5->FixParameter(2, func1->GetParameter(2));
-  func5->FixParameter(3, func1->GetParameter(7));
-  func5->FixParameter(4, func1->GetParameter(8));
-  func5->FixParameter(5, func1->GetParameter(9));
-
-
-  // Strangeness 2 - kaon 1
-  // Setting parameters before fitting
-  func1_s2_kp1->SetParameters(hmass_S2_kp_1->GetMaximum() / 2,0.493,0.02);
-  func1_s2_kp1->SetParameter(7,hmass_S2_kp_1->GetMaximum() / 2);
-  func1_s2_kp1->SetParameter(8,0.493);
-  func1_s2_kp1->SetParameter(9,0.02);
-  // Setting parameter limits before fitting
-  func1_s2_kp1->SetParLimits(0,hmass_S2_kp_1->GetMaximum() / 3,hmass_S2_kp_1->GetMaximum());
-  func1_s2_kp1->SetParLimits(1,0.480,0.505);
-  func1_s2_kp1->SetParLimits(2,0.005,0.03);
-  func1_s2_kp1->SetParLimits(7,hmass_S2_kp_1->GetMaximum() / 3,hmass_S2_kp_1->GetMaximum());
-  func1_s2_kp1->SetParLimits(8,0.480,0.505);
-  func1_s2_kp1->SetParLimits(9,0.005,0.05);
-
-  // Strangeness 2 - kaon 1
-  hmass_S2_kp_1->Fit("func1_s2_kp1","RB");
-  func2_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(0));
-  func2_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(1));
-  func2_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(2));
-  func3_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(3));
-  func3_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(4));
-  func3_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(5));
-  func3_s2_kp1->FixParameter(3, func1_s2_kp1->GetParameter(6));
-  func4_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(7));
-  func4_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(8));
-  func4_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(9));
-  func5_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(0));
-  func5_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(1));
-  func5_s2_kp1->FixParameter(2, func1_s2_kp1->GetParameter(2));
-  func5_s2_kp1->FixParameter(3, func1_s2_kp1->GetParameter(7));
-  func5_s2_kp1->FixParameter(4, func1_s2_kp1->GetParameter(8));
-  func5_s2_kp1->FixParameter(5, func1_s2_kp1->GetParameter(9));
-
-
-  // Strangeness 3 - kaon 1
-
-
-
-  // Saving the function for part 2
-  func1->Write();
-  func2->Write();
-  func3->Write();
-  func4->Write();
-  func5->Write();
-  func1_s2_kp1->Write();
-  func2_s2_kp1->Write();
-  func3_s2_kp1->Write();
-  func4_s2_kp1->Write();
-  func5_s2_kp1->Write();
-
-
   fileOutput1.Write();
-
 }

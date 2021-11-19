@@ -17,17 +17,15 @@
 using namespace clas12;
 
 
-void Tree_Maker_RGB(){
+void Tree_Maker_RGB_Exact(){
   auto start = std::chrono::high_resolution_clock::now();
   gBenchmark->Start("timer");
   int counter=0;
 
-  // Data files to process
-  TString inputFile("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/*.hipo");
+  gROOT->ProcessLine(".L ./Loader.C+"); // Uses Loader.C file, make sure Loader.C is in this file path
 
-
-  gROOT->ProcessLine(".L /home/matthewn/Documents/Macros/Loader.C+"); // Uses Loader.C file, make sure Loader.C is in this file path
-
+  // Filepath to input files, use *.hipo to analyse all hipo files in a directory
+  TString inputFile("/volatile/clas12/rg-b/production/recon/spring2019/torus-1/pass1/v0/dst/train/inc/*.hipo");
 
   // Creating a chain for the data from different files
   TChain fake("hipo");
@@ -37,24 +35,27 @@ void Tree_Maker_RGB(){
   auto files=fake.GetListOfFiles();
 
   // Create root file to save TTree in
-  TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_at_least_1eFD_1Kp_Tree_21021_04.root","recreate");
+  TFile f("/volatile/clas12/matthewn/RGB_Spring2019_Inbending_Pass1_v0_inc_1e_2pos_1neg_Tree_140920_01.root","recreate");
   // Creating TTree object
-  TTree RGB_Spring2020_Inbending_221021("RGB_Spring2020_Inbending_221021","it's a tree!");
+  TTree RGB_inc_Tree_140920_01("RGB_inc_Tree_140920_01","it's a tree!");
 
   // Access the PDG database to get information usind PID (e.g db->GetParticle(211)->Mass() for pi^{+} mass)
   auto db=TDatabasePDG::Instance();
 
-  // Creating histograms for negative particles that are not electron
-  auto* hnegatives=new TH1F("hnegatives","PID of negatives;PID;Counts",2000,-1000,1000);
-  auto* hpositives=new TH1F("hpositives","PID of positives;PID;Counts",2000,-1000,1000);
-  auto* hkaonpno=new TH1F("hkaonpno","Number of K^{+};No. of K^{+};Counts",100,0,10);
-  auto* hPID=new TH1F("hPID","PID ;PID;Counts",2000,-1000,1000);
-  auto* hmass_n=new TH1F("hmass_n","Mass of negatives;Mass [GeV];Counts",1000,-10000,10000);
-  auto* hmass_p=new TH1F("hmass_p","Mass of negatives;Mass [GeV];Counts",1000,-10000,10000);
-  auto* hbeta_n=new TH2D("hbeta_n","beta against momentum of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,1000,-100,10);
-  auto* hbeta_p=new TH2D("hbeta_n","beta against momentum of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,1000,-100,10);
-  auto* hangular_distribution_n=new TH2D("hangular_distribution_n","Angular distribution of negative PID 0 particles;Momentum [GeV]; Beta",200,0,11,200,0,200);
-  auto* hangular_distribution_p=new TH2D("hangular_distribution_p","Angular distribution of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,200,0,200);
+  // Creating diagnostic histograms
+  auto* h_invariant_lambda=new TH1F("h_invariant_lambda","Invariant mass of lambda",200,-1,3);
+  auto* h_missing_mass=new TH1F("h_missing_mass","Missing mass of lambda",200,-1,3);
+  auto* h_mass_P=new TH1F("h_mass_P","Missing mass of lambda",200,-1,3);
+  auto* h_mass_N=new TH1F("h_mass_N","Missing mass of lambda",200,-1,3);
+
+
+  // Creating TLorentzVectors of particles for diagnostics
+  TLorentzVector Positive_1,Positive_2; // Unidentified
+  TLorentzVector e_scattered,Proton,Kaon_Positive,Pion_Minus; // Identified
+  Int_t Pos_1, Pos_2;
+
+  // Creating TLorentzVectors of invariant and missing mass for diagnostics
+  TLorentzVector Invariant_Lambda,Missing_Mass_Lambda;
 
   // Information to save to the tree
   // Any information specific to an event
@@ -62,7 +63,6 @@ void Tree_Maker_RGB(){
   Int_t runno; // Records the run number
   Int_t triggerno; // Records the trigger number
   Double_t start_time; // Records the start time for the event
-  Int_t Tree_Events=0; // Records the number of events that are put in the tree
 
   // Any information specific to an individual particle
   TLorentzVector p4; // TLorentzVector for four vector of each particle (Px,Py,Pz,E)
@@ -77,7 +77,8 @@ void Tree_Maker_RGB(){
   Double_t path; // Path measured by FTCAL,FTOF or CTOF
   Double_t vertex_time; // Calculated vertex time from TOF information
   Double_t Region; // Records 0.0 for FT, 1.0 for FD and 2.0 for CD
-  Double_t Mass; // Records the calculated mass from beta and momentum
+  Double_t Mass; // Records the calculated mass
+
 
 
   // Vectors of particle measurables for when you have more than one of a type of particle (e.g 2 pi^{-})
@@ -92,6 +93,8 @@ void Tree_Maker_RGB(){
   vector<double> v_time;
   vector<double> v_path;
   vector<double> v_region;
+  vector<double> v_Mass;
+
 
   // Record the number of particles in an event
   Int_t elno; // electrons
@@ -104,8 +107,6 @@ void Tree_Maker_RGB(){
   Int_t pimno; // pi^{-}
   Int_t pi0no; // pi^{0}
   Int_t kaonpno; // K^{+}
-  Int_t kaonpFD; // K^{+} in FD
-  Int_t electronFD; // e' in FD
   Int_t kaonmno; // K^{-}
   Int_t positive_charge_tracks; // Count the number of positive charge tracks
   Int_t negative_charge_tracks; // Count the number of negative charge tracks
@@ -113,46 +114,48 @@ void Tree_Maker_RGB(){
   // Setting TLorentzVectors for beam and target, for final analysis beam energy
   // will have to be changed depending on which run/runs you are analysing. Here
   // it is just set to 10.6 GeV
-  TLorentzVector beam(0,0,0,0); // Set 4 vector four the beam, all momentum in z-direction
-  TLorentzVector target(0,0,0,0.93827); // Set 4 vector for target, stationary so no momentum
-  // TLorentzVector target(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
+  TLorentzVector beam(0,0,10.6,10.6); // Set 4 vector four the beam, all momentum in z-direction
+  TLorentzVector target(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
 
   Double_t c = 30; // Speed of light, used to calculate vertex time
 
   // Assign a branch to each measurable and name it
-  RGB_Spring2020_Inbending_221021.Branch("eventno",&eventno);
-  RGB_Spring2020_Inbending_221021.Branch("runno",&runno,"runno/I");
-  RGB_Spring2020_Inbending_221021.Branch("triggerno",&triggerno,"triggerno/I");
-  RGB_Spring2020_Inbending_221021.Branch("start_time",&start_time);
-  RGB_Spring2020_Inbending_221021.Branch("p4",&v_p4);
-  RGB_Spring2020_Inbending_221021.Branch("vertex",&v_vertex);
-  RGB_Spring2020_Inbending_221021.Branch("beta",&v_beta);
-  RGB_Spring2020_Inbending_221021.Branch("status",&v_status);
-  RGB_Spring2020_Inbending_221021.Branch("energy",&v_energy);
-  RGB_Spring2020_Inbending_221021.Branch("charge",&v_charge);
-  RGB_Spring2020_Inbending_221021.Branch("PID",&v_PID);
-  RGB_Spring2020_Inbending_221021.Branch("chi2PID",&v_chi2PID);
-  RGB_Spring2020_Inbending_221021.Branch("region",&v_region);
-  RGB_Spring2020_Inbending_221021.Branch("time",&v_time);
-  RGB_Spring2020_Inbending_221021.Branch("path",&v_path);
-  RGB_Spring2020_Inbending_221021.Branch("beam",&beam);
-  RGB_Spring2020_Inbending_221021.Branch("target",&target);
-  RGB_Spring2020_Inbending_221021.Branch("elno",&elno);
-  RGB_Spring2020_Inbending_221021.Branch("negative_charge_tracks",&negative_charge_tracks, "neg");
-  RGB_Spring2020_Inbending_221021.Branch("positive_charge_tracks",&positive_charge_tracks);
-  RGB_Spring2020_Inbending_221021.Branch("kaonpFD",&kaonpFD);
-  RGB_Spring2020_Inbending_221021.Branch("electronFD",&electronFD);
+  RGB_inc_Tree_140920_01.Branch("eventno",&eventno);
+  RGB_inc_Tree_140920_01.Branch("runno",&runno,"runno/I");
+  RGB_inc_Tree_140920_01.Branch("triggerno",&triggerno,"triggerno/I");
+  RGB_inc_Tree_140920_01.Branch("start_time",&start_time);
+  RGB_inc_Tree_140920_01.Branch("p4",&v_p4);
+  RGB_inc_Tree_140920_01.Branch("vertex",&v_vertex);
+  RGB_inc_Tree_140920_01.Branch("beta",&v_beta);
+  RGB_inc_Tree_140920_01.Branch("status",&v_status);
+  RGB_inc_Tree_140920_01.Branch("energy",&v_energy);
+  RGB_inc_Tree_140920_01.Branch("charge",&v_charge);
+  RGB_inc_Tree_140920_01.Branch("PID",&v_PID);
+  RGB_inc_Tree_140920_01.Branch("chi2PID",&v_chi2PID);
+  RGB_inc_Tree_140920_01.Branch("region",&v_region);
+  RGB_inc_Tree_140920_01.Branch("Mass",&v_Mass);
+  RGB_inc_Tree_140920_01.Branch("time",&v_time);
+  RGB_inc_Tree_140920_01.Branch("path",&v_path);
+  RGB_inc_Tree_140920_01.Branch("beam",&beam);
+  RGB_inc_Tree_140920_01.Branch("target",&target);
+  RGB_inc_Tree_140920_01.Branch("elno",&elno);
+  RGB_inc_Tree_140920_01.Branch("negative_charge_tracks",&negative_charge_tracks, "neg");
+  RGB_inc_Tree_140920_01.Branch("positive_charge_tracks",&positive_charge_tracks);
 
 
   // Going over all the input files listed above
-  for(Int_t i=30000; i<files->GetEntries(); i++){
+  for(Int_t i=0;i<files->GetEntries();i++){
 
     // Create the CLAS12 event reader
     clas12reader c12(files->At(i)->GetTitle());
 
+    // Prints out the file currently being analysed
+    cout<<"file: "<<i<<endl;
 
     // This loop goes over the events within each file
     while(c12.next()==true){
+
+
       counter++;
       // Clear the vectors from the previous event
       v_p4.clear();
@@ -166,17 +169,18 @@ void Tree_Maker_RGB(){
       v_time.clear();
       v_path.clear();
       v_region.clear();
+      v_Mass.clear();
+
+      // Setting particles to zero, will be update later once identified
+      Proton.SetXYZM(0,0,0,0);
+      Kaon_Positive.SetXYZM(0,0,0,0);
+      Pion_Minus.SetXYZM(0,0,0,0);
 
       // Define how to access the information for each event
       eventno = c12.runconfig()->getEvent(); // Getting the event number
       runno = c12.runconfig()->getRun(); // Getting the run number
       triggerno = c12.runconfig()->getTrigger(); // Getting the trigger bit
       start_time = c12.event()->getStartTime(); // Getting start time for each event
-
-      // Setting beam energy depending on which run it is
-      // if(runno < 6400) beam.SetXYZM(0,0,10.6,0);
-      // if(runno > 6400) beam.SetXYZM(0,0,10.2,0);
-      beam.SetXYZM(0,0,10.2,0);
 
       elno = 0;
       positronno = 0;
@@ -188,8 +192,6 @@ void Tree_Maker_RGB(){
       pimno = 0;
       pi0no = 0;
       kaonpno = 0;
-      kaonpFD = 0;
-      electronFD = 0;
       kaonmno = 0;
       positive_charge_tracks = 0;
       negative_charge_tracks = 0;
@@ -210,7 +212,7 @@ void Tree_Maker_RGB(){
         charge = p->par()->getCharge(); // Charge of the particle measured (FTB isn't recognised!!!)
         PID = p->par()->getPid();  // PID determined by TOF
         chi2PID = p->par()->getChi2Pid(); // Chi^2 for PID from TOF
-        Mass = sqrt((pow(p4.Rho(),2) / (pow(beta,2))) - pow(p4.Rho(),2));
+        Mass = sqrt((pow(p4.Rho(),2) / (pow(beta,2))) - pow(p4.Rho(),2)); // Calculating Mass from beta and momentum
 
         // Save the particle information in the vectors by pushing it back
         v_vertex.push_back(vertex);
@@ -222,71 +224,85 @@ void Tree_Maker_RGB(){
         v_chi2PID.push_back(chi2PID);
         v_time.push_back(time);
         v_path.push_back(path);
-        // cout<<p4.Rho()<<endl;
         v_p4.push_back(p4); // Recording the 4 vector for each neutron
+        v_Mass.push_back(Mass);
 
-        hPID->Fill(PID);
-
-        if(PID == 11) elno++; // Count number of electrons
-
-        // Looking at positive particles
-        if(charge > 0){
-          if(PID==321) kaonpno++; // Count the number of positive kaons
-          if(PID==2212)protonno++; // Count the number of protons
-          positive_charge_tracks++; // Count number of positive charges
-          hpositives->Fill(PID); // Seeing PID of positive particles
-
-          // Calculated mass for positive particles
-          hmass_p->Fill(Mass);
+        if(PID == 11){
+          elno++;
+          e_scattered.SetXYZM(p4.Px(),p4.Py(),p4.Pz(),db->GetParticle(11)->Mass());
         }
-
-        // Looking at negative particles
-        else if(charge < 0) {
-          if(PID==-211) pimno++; // Count the number of negative pions
-          if(PID==-321) kaonmno++; // Count the number of negative pions
+        else if(charge > 0){
+          h_mass_P->Fill(Mass);
+          positive_charge_tracks++;
+        }
+        else if(charge < 0){
+          h_mass_N->Fill(Mass);
           negative_charge_tracks++;
-          hnegatives->Fill(PID); // Seeing PID of negative particles
-
-          // Calculated mass for negative particles
-          hmass_n->Fill(Mass);
         }
-
-
-        // Recording the region the particles hit
         if(p->getRegion()==FT){
           Region=0.0;
         }
         else if(p->getRegion()==FD){
           Region=1.0;
-          if(PID == 321)kaonpFD++;
-          if(PID == 11)electronFD++;
         }
         else if(p->getRegion()==CD){
           Region=2.0;
         }
-        v_region.push_back(Region); // pushing back the region of all particles in the event
+        v_region.push_back(Region);
+
       }
-
-      // Checking number of kaons per event
-      hkaonpno->Fill(kaonpno);
-
 
       // Here you can apply a basic skim for events you want to save in your tree
-      // at least 2 K+
-      // cout<<" Kaon "<<kaonpno<<" electrons "<<elno<<" electronFD "<<electronFD<<endl;
-      if(kaonpno > 0 && elno > 0 && electronFD > 0){
-        RGB_Spring2020_Inbending_221021.Fill();
-        Tree_Events++;
+      if(positive_charge_tracks == 2 && elno == 1 && negative_charge_tracks == 1){
+
+        Pos_1 = -100;
+        Pos_2 = -100;
+
+        // This assigns particles based on charge and mass
+        // Loops over the 4 particles (1 e-, 1 other negative and 2 positive
+        // assumed to be proton and K+)
+        for(Int_t j=0;j<4;j++){
+          // Loop over negative particles
+
+          if(v_charge.at(j) < -0.01 && v_PID.at(j) != 11){
+            Pion_Minus.SetXYZM(v_p4.at(j).Px(),v_p4.at(j).Py(),v_p4.at(j).Pz(),db->GetParticle(211)->Mass());
+          }
+
+          // Loop over positive particles
+          else if(v_charge.at(j) > 0.01){
+            if(Pos_1<0) Pos_1 = j;
+            else Pos_2 = j;
+          }
+        }
+        // Check to see which of the positive particles is heavier and
+        // set it to be the proton
+        if(v_Mass.at(Pos_1) > v_Mass.at(Pos_2)){
+          Proton.SetXYZM(v_p4.at(Pos_1).Px(),v_p4.at(Pos_1).Py(),v_p4.at(Pos_1).Pz(),db->GetParticle(2212)->Mass());
+          Kaon_Positive.SetXYZM(v_p4.at(Pos_2).Px(),v_p4.at(Pos_2).Py(),v_p4.at(Pos_2).Pz(),db->GetParticle(321)->Mass());
+        }
+        else {
+          Proton.SetXYZM(v_p4.at(Pos_2).Px(),v_p4.at(Pos_2).Py(),v_p4.at(Pos_2).Pz(),db->GetParticle(2212)->Mass());
+          Kaon_Positive.SetXYZM(v_p4.at(Pos_1).Px(),v_p4.at(Pos_1).Py(),v_p4.at(Pos_1).Pz(),db->GetParticle(321)->Mass());
+        }
+
+
+        // Defining the invariant and missing masses
+        Invariant_Lambda = Proton + Pion_Minus;
+        Missing_Mass_Lambda = beam + target - e_scattered - Kaon_Positive;
+
+        // Filling the diagnostic histograms
+        h_invariant_lambda->Fill(Invariant_Lambda.M());
+        h_missing_mass->Fill(Missing_Mass_Lambda.M());
+
+        //Fill the TTree
+        if(Invariant_Lambda.M() < 1.2 && Missing_Mass_Lambda.M() < 2) RGB_inc_Tree_140920_01.Fill();
       }
     }
-    // Prints out the file currently analysed and how many events are in tree
-    cout<<"file: "<<i<<"events in tree "<<Tree_Events<<endl;
   }
-  RGB_Spring2020_Inbending_221021.Write(); // Write information to the TTree
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
   std::cout << "Elapsed time: " << elapsed.count()<< " events = "<<counter<< " s\n";
-  cout<<"events in tree "<<Tree_Events<<endl;
-  f.Write(); // Write information to the root file
-  f.Close(); // Close the root file at the end
+  RGB_inc_Tree_140920_01.Write();
+  f.Write();
+  f.Close();
 }
