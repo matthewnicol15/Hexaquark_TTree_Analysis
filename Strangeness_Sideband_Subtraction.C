@@ -5,19 +5,21 @@
   //////////////////////////////////////////////////////////////////////////////
 
   // Information for canvas and histogram name
-  // ostringstream Data;
-  // ostringstream Quantity;
-  // ostringstream Date;
-  // ostringstream Version;
-  // ostringstream Output_File_Name;
+  ostringstream Data;
+  ostringstream Quantity;
+  ostringstream Date;
+  ostringstream Version;
+  ostringstream Output_File_Name;
 
   // Setting the strings for canvas name
-  // Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
-  // Quantity<<"Total";
-  // Date<<"19112021";
-  // Version<<"01";
+  Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
+  Quantity<<"Total";
+  Date<<"19112021";
+  Version<<"01";
 
-  // Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/S_Weight_Strangeness_Analysis_"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
+  Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/S_Weight_Strangeness_Analysis_"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
+
+  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_04_Total_25112021_01.root","recreate");
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -25,9 +27,9 @@
   //////////////////////////////////////////////////////////////////////////////
 
   // Input file
-  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGB_Spring2020_Inbending_dst_Tree_Total_23112021_01.root");
+  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_04_Total_25112021_01.root");
 
-  TFile *f2 = new TFile("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_221121_03.root");
+  // TFile *f2 = new TFile("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_221121_03.root");
 
   // Getting the multidimensional histogram plots
   TH2D *hmiss_1_a__S1_kp_1 = (TH2D*)f1->Get("hmiss_1_a__S1_kp_1");
@@ -38,7 +40,9 @@
 
 
   // Make array for all the 1D x projections
-  TH1D *h_projectionx[100];
+  TH1D *h_projectionx_S1[100];
+  TH1D *h_projectionx_S2_sig[100];
+  TH1D *h_projectionx_S2_back[100];
 
   //////////////////////////////////////////////////////////////////////////////
   //// Take all the projections    ///////////////////////////////////////
@@ -59,9 +63,28 @@
   TH1D *S2_kp2_mass_total = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("z")->Clone("S2_kp2_mass_total");
 
 
+
+
   //////////////////////////////////////////////////////////////////////////////
   //// Creating and fitting functions    ///////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+
+  // Create sigma limits for sidebands
+  // Strangeness 1 - kaon 1
+  Double_t S1_Signal_Sigma_Limits, S1_Background_Sigma_Lower_Limit, S1_Background_Sigma_Upper_Limit;
+  // Strangeness 2 - kaon 1
+  Double_t S2_Signal_Sigma_Limits, S2_Background_Sigma_Lower_Limit, S2_Background_Sigma_Upper_Limit;
+
+  // Define sigma limits for sidebands
+  // Strangeness 1 - kaon 1
+  S1_Peak_Sigma_Limits = 2;
+  S1_Background_Sigma_Lower_Limit = 4;
+  S1_Background_Sigma_Upper_Limit = 6;
+  // Strangeness 2 - kaon 1
+  S2_Peak_Sigma_Limits = 2;
+  S2_Background_Sigma_Lower_Limit = 4;
+  S2_Background_Sigma_Upper_Limit = 6;
+
 
   // Define functions for fitting kaon calculated mass
   // Functions for strangeness 1 - kaon 1
@@ -147,43 +170,111 @@
 
 
   //////////////////////////////////////////////////////////////////////////////
+  //// Creating and define sideband limits    ///////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  // Sideband limits
+  // Strangeness 1 - kaon 1
+  Double_t S1_Peak_Lower_Limit, S1_Peak_Upper_Limit;
+  Double_t S1_Background_Left_Lower_Limit, S1_Background_Left_Upper_Limit;
+  Double_t S1_Background_Right_Lower_Limit, S1_Background_Right_Upper_Limit;
+  // Strangeness 2 - kaon 1
+  Double_t S2_Peak_Lower_Limit, S2_Peak_Upper_Limit;
+  Double_t S2_Background_Left_Lower_Limit, S2_Background_Left_Upper_Limit;
+  Double_t S2_Background_Right_Lower_Limit, S2_Background_Right_Upper_Limit;
+
+  // Define Sideband Limits
+  // Strangeness 1 - kaon 1
+
+  S1_Peak_Lower_Limit = func1->GetParameter(1) - S1_Peak_Sigma_Limits * func1->GetParameter(2);
+  S1_Peak_Upper_Limit = func1->GetParameter(1) + S1_Peak_Sigma_Limits * func1->GetParameter(2);
+  S1_Background_Left_Lower_Limit = func1->GetParameter(1) - S1_Background_Sigma_Upper_Limit * func1->GetParameter(2);
+  S1_Background_Left_Upper_Limit = func1->GetParameter(1) - S1_Background_Sigma_Lower_Limit * func1->GetParameter(2);
+  S1_Background_Right_Lower_Limit = func1->GetParameter(1) + S1_Background_Sigma_Lower_Limit * func1->GetParameter(2);
+  S1_Background_Right_Upper_Limit = func1->GetParameter(1) + S1_Background_Sigma_Upper_Limit * func1->GetParameter(2);
+
+
+  // Strangeness 2 - kaon 1
+
+  S2_Peak_Lower_Limit = func1_s2_kp1->GetParameter(1) - S2_Peak_Sigma_Limits * func1_s2_kp1->GetParameter(2);
+  S2_Peak_Upper_Limit = func1_s2_kp1->GetParameter(1) + S2_Peak_Sigma_Limits * func1_s2_kp1->GetParameter(2);
+  S2_Background_Left_Lower_Limit = func1_s2_kp1->GetParameter(1) - S2_Background_Sigma_Upper_Limit * func1_s2_kp1->GetParameter(2);
+  S2_Background_Left_Upper_Limit = func1_s2_kp1->GetParameter(1) - S2_Background_Sigma_Lower_Limit * func1_s2_kp1->GetParameter(2);
+  S2_Background_Right_Lower_Limit = func1_s2_kp1->GetParameter(1) + S2_Background_Sigma_Lower_Limit * func1_s2_kp1->GetParameter(2);
+  S2_Background_Right_Upper_Limit = func1_s2_kp1->GetParameter(1) + S2_Background_Sigma_Upper_Limit * func1_s2_kp1->GetParameter(2);
+
+  //////////////////////////////////////////////////////////////////////////////
   //// Calculating scaling factor    //////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  hmiss_1_a__S1_kp_1->ProjectionY();
+  Double_t S1_Scaling_Factor, S2_Scaling_Factor_sig, S2_Scaling_Factor_back;
+  //
+  // // Strangeness 1 - kaon 1
+  // // Loop over the x bins to determine scaling factors
+  // for(Int_t bin = 1; bin < 100; bin++){
+  //   // Get the x projection for the current bin
+  //   h_projectionx_S1[bin] = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionX("",bin,bin)->Clone("h_projectionx_S1");
+  //   cout<<bin<<endl;
+  //
+  //   // Check the values are above zero
+  //   // if(func5->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0 && func3->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0){
+  //   // Determine the scaling factor looking at the signal and background functions
+  //   S1_Scaling_Factor = (func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) - func3->Eval(S1_kp1_mass_total->GetBinCenter(bin))) /
+  //                    (func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) + func3->Eval(S1_kp1_mass_total->GetBinCenter(bin)));
+  //
+  //   h_projectionx_S1[bin]->Scale(S1_Scaling_Factor);
+  // }
+  //
+  // // Adding all the histograms together to get total continous sideband subtracted result
+  // for(Int_t bin = 2; bin < 101; bin++){
+  //   cout<<bin<<endl;
+  //   h_projectionx_S1[1]->Add(h_projectionx_S1[bin]);
+  // }
+  //
+  //
+//   Int_t bin =28;
+//
+//   h_projectionx_S2_sig[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_sig");
+//   h_projectionx_S2_back[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_back");
+//   S2_Scaling_Factor_sig = func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
+//
+// h_projectionx_S2_sig[bin]->Draw();
+// h_projectionx_S2_back[bin]->Draw("same");
 
 
- Double_t Scaling_Factor;
-
+  // Strangeness 2 - kaon 1
   // Loop over the x bins to determine scaling factors
   for(Int_t bin = 1; bin < 100; bin++){
     // Get the x projection for the current bin
-    h_projectionx[bin] = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionX("",bin,bin)->Clone("projection_x");
+    h_projectionx_S2_sig[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_sig");
+    h_projectionx_S2_back[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_back");
+    cout<<bin<<endl;
 
-  cout<<bin<<endl;
-    // Check the values are above zero
-    // if(func5->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0 && func3->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0){
-      cout<<"test1"<<endl;
-      // Determine the scaling factor looking at the signal and background functions
-      Scaling_Factor = func5->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) - func3->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin));
-      cout<<"test2"<<endl;
+    if(h_projectionx_S2_sig[bin]->Integral() > 100){
+      cout<<"integral big"<<endl;
+      // Determine the scaling factor looking at the signal function
+      S2_Scaling_Factor_sig = func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
 
-      cout<<"test3"<<endl;
-      h_projectionx[bin]->Scale(Scaling_Factor);
-      cout<<"test4"<<endl;
 
-    // }
-    // else{
-    //   cout<<"test5"<<endl;
-    //
-    //   h_projectionx[bin]->Scale(0);
-    // }
+      // Determine the scaling factor looking at the signal function
+      S2_Scaling_Factor_back = (func3_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) - func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)))/h_projectionx_S2_back[bin]->Integral();
+      if(S2_Scaling_Factor_back < 0) S2_Scaling_Factor_back = 0;
+
+      h_projectionx_S2_sig[bin]->Scale(S2_Scaling_Factor_sig);
+      h_projectionx_S2_back[bin]->Scale(S2_Scaling_Factor_back);
+    }
   }
-  // Adding all the histograms together to get total s weight subtracted result
+  // Adding all the histograms together to get total continous sideband subtracted result
   for(Int_t bin = 2; bin < 100; bin++){
     cout<<bin<<endl;
-    h_projectionx[1]->Add(h_projectionx[bin]);
+    h_projectionx_S2_sig[1]->Add(h_projectionx_S2_sig[bin]);
+    h_projectionx_S2_back[1]->Add(h_projectionx_S2_back[bin]);
   }
+  Double_t back_integral = h_projectionx_S2_back[1]->Integral(h_projectionx_S2_back[1]->FindBin(0), h_projectionx_S2_back[1]->FindBin(1));
+  Double_t sig_integral = h_projectionx_S2_sig[1]->Integral(h_projectionx_S2_sig[1]->FindBin(0), h_projectionx_S2_sig[1]->FindBin(1));
+h_projectionx_S2_back[1]->Scale(sig_integral / back_integral);
+
+  h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
 
   ////////////////////////////////
   //////////////////////////////////////////////
@@ -192,20 +283,20 @@
 
   // Defining the limits of the peak and backgroud regions
   // Strangeness 1 - kaon 1
-  Int_t Lower_end = hmiss_1_a__S1_kp_1_py->FindBin(func1->GetParameter(1) - 2 * func1->GetParameter(2));
-  Int_t Upper_end = hmiss_1_a__S1_kp_1_py->FindBin(func1->GetParameter(1) + 2 * func1->GetParameter(2));
+  Int_t Lower_end = S1_kp1_mass_total->FindBin(func1->GetParameter(1) - 2 * func1->GetParameter(2));
+  Int_t Upper_end = S1_kp1_mass_total->FindBin(func1->GetParameter(1) + 2 * func1->GetParameter(2));
 
   // Strangeness 2 - kaon 1
-  hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("y");
-  Int_t Peak_Lower_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) - 2 * func1_s2_kp1->GetParameter(2));
-  Int_t Peak_Upper_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) + 2 * func1_s2_kp1->GetParameter(2));
-  Int_t Back_Left_Lower_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) - 7 * func1_s2_kp1->GetParameter(2));
-  Int_t Back_Left_Upper_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) - 5 * func1_s2_kp1->GetParameter(2));
-  Int_t Back_Right_Lower_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) + 5 * func1_s2_kp1->GetParameter(2));
-  Int_t Back_Right_Upper_end_s2 = hmiss_s2_a__S2_kp_1__S2_kp_2->FindBin(func1_s2_kp1->GetParameter(1) + 7 * func1_s2_kp1->GetParameter(2));
+  Int_t Peak_Lower_end_s2 = S2_kp1_mass_total->FindBin(S2_Peak_Lower_Limit);
+  Int_t Peak_Upper_end_s2 = S2_kp1_mass_total->FindBin(S2_Peak_Upper_Limit);
+  Int_t Back_Left_Lower_end_s2 = S2_kp1_mass_total->FindBin(S2_Background_Left_Lower_Limit);
+  Int_t Back_Left_Upper_end_s2 = S2_kp1_mass_total->FindBin(S2_Background_Left_Upper_Limit);
+  Int_t Back_Right_Lower_end_s2 = S2_kp1_mass_total->FindBin(S2_Background_Right_Lower_Limit);
+  Int_t Back_Right_Upper_end_s2 = S2_kp1_mass_total->FindBin(S2_Background_Right_Upper_Limit);
 
   // Get the missing mass in the kaon mass peak region
-  TH1D *S2_miss_mass_peak = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("_px",Peak_Lower_end_s2, Peak_Upper_end_s2,0,zbinmax)->Clone("S2_miss_mass_peak");
+  TH1D *S2_miss_mass_peak = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
+  ("_px",Peak_Lower_end_s2, Peak_Upper_end_s2,0,zbinmax)->Clone("S2_miss_mass_peak");
 
   // Get the missing mass in the kaon mass background left region
   TH1D *S2_miss_mass_background_left = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
@@ -219,7 +310,7 @@
   TH1D *S2_miss_mass_background_Total = (TH1D*)S2_miss_mass_background_left->Clone("S2_miss_mass_background_Total");
   S2_miss_mass_background_Total->Add(S2_miss_mass_background_Right);
 
-
+  TH1D *S2_miss_mass_background_Total_continous = (TH1D*)S2_miss_mass_background_Total->Clone("S2_miss_mass_background_Total_continous");
 
 
   // Creating variables for multiplication factors
@@ -229,75 +320,257 @@
 
   // Determining the multiplication factor
   // Strangeness 2
-  Peak_Background = func1_s2_kp1->Integral(S2_miss_mass_total->FindBin(func1_s2_kp1->GetParameter(1) - 2 * func1_s2_kp1->GetParameter(2)),
-  S2_miss_mass_total->FindBin(func1_s2_kp1->GetParameter(1) + 2 * func1_s2_kp1->GetParameter(2)));
+  Peak_Background = func3_s2_kp1->Integral(S2_miss_mass_total->FindBin(S2_Peak_Lower_Limit),S2_miss_mass_total->FindBin(S2_Peak_Upper_Limit));
 
-  Left_Background = func1_s2_kp1->Integral(S2_miss_mass_total->FindBin(func1_s2_kp1->GetParameter(1) - 7 * func1_s2_kp1->GetParameter(2)),
-  S2_miss_mass_total->FindBin(func1_s2_kp1->GetParameter(1) - 5 * func1_s2_kp1->GetParameter(2)));
+  Left_Background = func3_s2_kp1->Integral(S2_miss_mass_total->FindBin(S2_Background_Left_Lower_Limit),S2_miss_mass_total->FindBin(S2_Background_Left_Upper_Limit));
 
-  Right_Background = func1_s2_kp1->Integral(S2_miss_mass_total->FindBin(func1->GetParameter(1) + 5 * func1_s2_kp1->GetParameter(2)),
-  S2_miss_mass_total->FindBin(func1_s2_kp1->GetParameter(1) + 7 * func1_s2_kp1->GetParameter(2)));
-  cout<<Peak_Background<<" "<<Left_Background<<" "<<Right_Background<<endl;
+  Right_Background = func3_s2_kp1->Integral(S2_miss_mass_total->FindBin(S2_Background_Right_Lower_Limit),S2_miss_mass_total->FindBin(S2_Background_Right_Upper_Limit));
 
   Multiplication_factor = Peak_Background / (Left_Background + Right_Background);
 
   S2_miss_mass_background_Total->Scale(Multiplication_factor);
-
+  // cout<<Peak_Background<<" "<<Left_Background<<" "<<Right_Background<<" "<<Multiplication_factor<<endl;
 
   // Producing the sideband subtracted result
   TH1D *S2_miss_mass_Result = (TH1D*)S2_miss_mass_peak->Clone("S2_miss_mass_Result");
   S2_miss_mass_Result->Add(S2_miss_mass_background_Total,-1);
+
   //////////////////////////////////////////////////////////////////////////////
-  //// Creating canvases and drawing plots    //////////////////////////////////
+  //// Continous Sideband Subtraction     /////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  // canvas for projections
-  auto *c1 = new TCanvas("c1","original and backgroud subtracted",800,800);
-  c1->cd();
-  // hmiss_1_a__S1_kp_1->ProjectionX()->Draw();
-  // h_projectionx[Lower_end]->Scale(1.3);
-  h_projectionx[1]->SetLineColor(kRed);
-  // hmiss_1_a_result->Scale(1.3);
-  // hmiss_1_a_result->SetLineColor(kGreen);
-  h_projectionx[1]->Draw("hist,same");
-  // hmiss_1_a_result->Draw("hist,same");
-  //
-  //
-  // auto *c2 = new TCanvas("c2","sideband",800,800);
-  // c2->cd();
-  // hmiss_1_a_sig->Draw("hist");
-  // hmiss_1_a_result->Draw("hist,same");
-  // h_projectionx[Lower_end]->Draw("hist,same");
-  //
-  // auto *c3 = new TCanvas("c3","pion peak",800,800);
-  // c3->cd();
-  // // hmiss_1_a__S1_kp_1->ProjectionY()->Draw();
-  // hmiss_1_a__S1_kp_1->ProjectionX();
-  // // hmiss_1_a__S1_kp_1->ProjectionY("",hmiss_1_a__S1_kp_1_px->FindBin(0.8),hmiss_1_a__S1_kp_1_px->FindBin(0.99))->Draw();
-  // hmiss_1_a__S1_kp_1->ProjectionY()->Draw();
-  // func1->Draw("same");
-  // func2->Draw("same");
-  // func3->Draw("same");
-  // func4->Draw("same");
-  // func5->Draw("same");
-  //
-  auto *c4 = new TCanvas("c4","strangeness 2 peak",800,800);
-  c4->cd();
-  // S2_miss_mass_peak->Rebin(2);
-  S2_miss_mass_peak->Draw();
+  // Get the missing mass from limits of sidebands
+  TH1D *S2_miss_mass_total_continous = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
+  ("",S2_Background_Left_Lower_Limit, S2_Background_Right_Upper_Limit,0,zbinmax)->Clone("S2_miss_mass_total_continous");
+  // Get the missing mass from limitis of sidebands for result plot
+  TH1D *S2_miss_mass_total_continous_result = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
+  ("",S2_Background_Left_Lower_Limit, S2_Background_Right_Upper_Limit,0,zbinmax)->Clone("S2_miss_mass_total_continous_result");
 
-  auto *c5 = new TCanvas("c5","strangeness 2 background",800,800);
-  c5->cd();
-  // S2_miss_mass_background_Total->Rebin(2);
-  S2_miss_mass_background_Total->Draw("hist");
+  // Determine integral of sidebands
+  Double_t Sideband_Left_Integral = func1_s2_kp1->Integral(S2_Background_Left_Lower_Limit, S2_Background_Left_Upper_Limit);
+  Double_t Sideband_Right_Integral = func1_s2_kp1->Integral(S2_Background_Right_Lower_Limit, S2_Background_Right_Upper_Limit);
+  Double_t Sideband_Integral = Sideband_Left_Integral + Sideband_Right_Integral;
+  // Determine integral of background function from sideband limits
+  Double_t Background_Total_Integral = func3_s2_kp1->Integral
+  (S2_Background_Left_Lower_Limit,
+    S2_Background_Right_Upper_Limit);
+    // Double_t Background_Total_Integral = func3_s2_kp1->Integral
+    // (S2_miss_mass_total->FindBin(S2_Background_Left_Lower_Limit),
+    // S2_miss_mass_total->FindBin(S2_Background_Right_Upper_Limit));
+
+
+    // Scale background distribution to entire background function
+    S2_miss_mass_background_Total_continous->Scale(Background_Total_Integral / Sideband_Integral);
+    S2_miss_mass_background_Total_continous->Scale(1.5);
+
+    // Fit total background histogram
+    TF1 *S2_back_total_func1 = new TF1("S2_back_total_func1","pol5(0)");
+    S2_miss_mass_background_Total_continous->Fit("S2_back_total_func1");
+    TH1F *hbackground_total_function = new TH1F("hbackground_total_function","total background function",300,0,3);
+    hbackground_total_function->FillRandom("S2_back_total_func1",1000000);
+    hbackground_total_function->Scale(0.06);
+
+    // Take away background from total distribution
+    S2_miss_mass_total_continous_result->Add(hbackground_total_function, -1);
+    // S2_miss_mass_total_continous_result->Add(S2_miss_mass_background_Total_continous, -1);
 
 
 
-  auto *c6 = new TCanvas("c6","strangeness 2 after sideband subtraction",800,800);
-  c6->cd();
-  // S2_miss_mass_peak->Draw();
-  S2_miss_mass_Result->SetLineColor(kRed);
-  // S2_miss_mass_Result->Rebin(2);
-  // S2_miss_mass_Result->Scale(1.8);
-  S2_miss_mass_Result->Draw("hist,same");
-}
+
+    //////////////////////////////////////////////////////////////////////////////
+    //// Styling histograms and plots    //////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+
+    // Matching gstyle stuff for CAA
+    gROOT->Reset();
+    TStyle *plain  = new TStyle("Plain","Plain Style (no colors/fill areas)");
+
+    plain->SetCanvasBorderMode(0);
+    plain->SetPadBorderMode(0);
+    plain->SetPadColor(0);
+    plain->SetCanvasColor(0);
+    plain->SetTitleColor(0);
+    plain->SetStatColor(0);
+    plain->SetPalette(1);
+    gROOT->SetStyle("Plain");
+    gStyle->SetPalette(1);
+    gStyle->SetPalette(1);
+    gStyle->SetPadLeftMargin(0.15);
+    gStyle->SetPadBottomMargin(0.15);
+    //gStyle->SetTitleFontSize(0.15);
+    gStyle->SetOptStat(0);
+    gStyle->SetLineStyleString(13,"10 30");  // dotted
+    gStyle->SetLineStyleString(12,"40 40"); // dashed
+    gStyle->SetLineStyleString(14,"50 25 10 25");
+
+    // Set colour for the total backgroud histogram
+    hbackground_total_function->SetLineColor(kRed);
+
+    // Matching style of other plots in CAA for the continous sideband subtraction
+    // result with my method
+    S2_miss_mass_total_continous_result->SetTitle("Background Subtracted Missing Mass");
+    S2_miss_mass_total_continous_result->Rebin(4);
+    S2_miss_mass_total_continous_result->SetLineWidth(3);
+    S2_miss_mass_total_continous_result->SetLineColor(4);
+    S2_miss_mass_total_continous_result->SetMarkerStyle(8);
+    S2_miss_mass_total_continous_result->SetMarkerSize(1);
+    S2_miss_mass_total_continous_result->SetMarkerColor(4);
+    S2_miss_mass_total_continous_result->GetXaxis()->SetTitleOffset(1.2);
+    // S2_miss_mass_total_continous_result->GetYaxis()->SetTitle("Counts");
+    // S2_miss_mass_total_continous_result->GetXaxis()->SetTitle("P_{n} [GeV/c]");
+
+
+    h_projectionx_S2_sig[1]->SetTitle("Background Subtracted Missing Mass");
+    h_projectionx_S2_sig[1]->Rebin(2);
+    h_projectionx_S2_sig[1]->SetLineWidth(3);
+    h_projectionx_S2_sig[1]->SetLineColor(4);
+    h_projectionx_S2_sig[1]->SetMarkerStyle(8);
+    h_projectionx_S2_sig[1]->SetMarkerSize(1);
+    h_projectionx_S2_sig[1]->SetMarkerColor(4);
+    h_projectionx_S2_sig[1]->GetXaxis()->SetTitleOffset(1.2);
+    h_projectionx_S2_sig[1]->GetYaxis()->SetTitle("Counts");
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    //// Creating lines to show sidebands and resonances    /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+    // Signal lower end
+    auto *l1 = new TLine(S2_Peak_Lower_Limit, 0,S2_Peak_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // Signal upper end
+    auto *l2 = new TLine(S2_Peak_Upper_Limit, 0,S2_Peak_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    // background left lower end
+    auto *l3 = new TLine(S2_Background_Left_Lower_Limit, 0,S2_Background_Left_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // background left upper end
+    auto *l4 = new TLine(S2_Background_Left_Upper_Limit, 0,S2_Background_Left_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    // background right lower end
+    auto *l5 = new TLine(S2_Background_Right_Lower_Limit, 0,S2_Background_Right_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // background right upper end
+    auto *l6 = new TLine(S2_Background_Right_Upper_Limit, 0,S2_Background_Right_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+
+    // line at 0 to highlight background subtraction
+    auto *l7 = new TLine(0, 0, 3, 0);
+    l7->SetLineColor(kRed);
+
+    // Lines for strangeness 2
+    // cascade ground state
+    auto *l8 = new TLine(1.321, 0, 1.321, h_projectionx_S2_sig[1]->GetMaximum());
+    auto *l9 = new TLine(1.535, 0, 1.535, h_projectionx_S2_sig[1]->GetMaximum());
+    auto *l10 = new TLine(1.614, 0, 1.614, h_projectionx_S2_sig[1]->GetMaximum() * 0.8);
+
+    // l8->SetLineWidth(2);
+    // l9->SetLineWidth(2);
+    l8->SetLineStyle(9);
+    l9->SetLineStyle(9);
+    l10->SetLineStyle(9);
+    l8->SetLineColor(15);
+    l9->SetLineColor(15);
+    l10->SetLineColor(15);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //// Creating text boxes and arrows    /////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+
+    TPaveLabel *Cascade_ground_state = new TPaveLabel(1.25,250,1.35,280,"#Xi^{-}");
+    Cascade_ground_state->SetFillColor(0);
+    Cascade_ground_state->SetTextSize(0.8);
+
+    TPaveLabel *Cascade_1530 = new TPaveLabel(1.5,280,1.6,310,"#Xi(1530)^{-}");
+    Cascade_1530->SetFillColor(0);
+    Cascade_1530->SetTextSize(0.8);
+
+    TPaveLabel *Threshold = new TPaveLabel(1.62,10,2.4,40,"K^{+}#Lambda K^{+} K^{-}");
+    Threshold->SetFillColor(0);
+    Threshold->SetTextSize(0.6);
+
+    TArrow *threshold_arrow = new TArrow(1.614,5,2.2,5,0.05,">");
+    threshold_arrow->SetAngle(40);
+    threshold_arrow->SetLineWidth(2);
+    //////////////////////////////////////////////////////////////////////////////
+    //// Creating canvases and drawing plots    //////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+
+    // canvas for projections
+    // auto *c1 = new TCanvas("c1","original and backgroud subtracted",800,800);
+    // c1->cd();
+    // S2_miss_mass_total->Draw();
+    // hbackground_total_function->Draw("hist,same");
+    // S2_kp1_mass_total->Draw();
+    // // func1_s2_kp1->Draw("same");
+    // func2_s2_kp1->Draw("same");
+    // func3_s2_kp1->Draw("same");
+    // func4_s2_kp1->Draw("same");
+    // // func5_s2_kp1->Draw("same");
+    // l1->Draw("same");
+    // l2->Draw("same");
+    // l3->Draw("same");
+    // l4->Draw("same");
+    // l5->Draw("same");
+    // l6->Draw("same");
+    //
+    //
+    //
+    // auto *c2 = new TCanvas("c2","sideband",800,800);
+    // c2->cd();
+    //
+    // S2_miss_mass_total_continous_result->Draw("E1");
+    // // S2_miss_mass_total_continous_result->Draw("hist");
+    // l7->Draw("same");
+    // S2_miss_mass_total_continous->Draw();
+    // S2_miss_mass_background_Total_continous->SetLineColor(kRed);
+    // S2_miss_mass_background_Total_continous->Draw("hist,same");
+    //
+    //
+    // auto *c3 = new TCanvas("c3","pion peak",800,800);
+    // c3->cd();
+    // // S2_miss_mass_total->Draw();
+    // S2_miss_mass_total_continous_result->Draw("hist");
+    // // hmiss_1_a__S1_kp_1->ProjectionY()->Draw();
+    // hmiss_1_a__S1_kp_1->ProjectionX();
+    // // hmiss_1_a__S1_kp_1->ProjectionY("",hmiss_1_a__S1_kp_1_px->FindBin(0.8),hmiss_1_a__S1_kp_1_px->FindBin(0.99))->Draw();
+    // hmiss_1_a__S1_kp_1->ProjectionY()->Draw();
+    // func1->Draw("same");
+    // func2->Draw("same");
+    // func3->Draw("same");
+    // func4->Draw("same");
+    // func5->Draw("same");
+    //
+    auto *c4 = new TCanvas("c4","strangeness 2 peak",800,800);
+    c4->cd();
+    // S2_miss_mass_total->Draw();
+    //
+    // h_projectionx_S2_back[1]->Draw("hist");
+    h_projectionx_S2_sig[1]->Draw("E1");
+    l7->Draw("same");
+    l8->Draw("same");
+    l9->Draw("same");
+    l10->Draw("same");
+    Cascade_ground_state->Draw("same");
+    Cascade_1530->Draw("same");
+    Threshold->Draw("same");
+    threshold_arrow->Draw();
+    // // S2_miss_mass_peak->Rebin(2);
+    // S2_miss_mass_peak->Draw();
+    //
+
+
+    // // S2_miss_mass_background_Total->Rebin(2);
+    // S2_miss_mass_background_Total->Draw("hist");
+    //
+    // // S2_miss_mass_Result->Scale(1.6);
+    // // S2_miss_mass_Result->Rebin(4);
+    // TH1D *S2_miss_mass_Result_clone = (TH1D*)S2_miss_mass_Result->Clone("S2_miss_mass_Result_clone");
+    //
+    // auto *c6 = new TCanvas("c6","strangeness 2 after sideband subtraction",800,800);
+    // c6->cd();
+    // // S2_miss_mass_peak->Rebin(4);
+    // S2_miss_mass_peak->Draw();
+    // S2_miss_mass_Result->SetLineColor(kRed);
+    // S2_miss_mass_Result_clone->SetLineColor(kRed);
+    // // S2_miss_mass_Result->Rebin(2);
+    // S2_miss_mass_background_Total->Draw("hist,same");
+    // // S2_miss_mass_Result->Scale(1.8);
+    // // S2_miss_mass_Result->Draw("e,same");
+    // S2_miss_mass_Result_clone->Draw("c,hist,same");
+
+
+  }
