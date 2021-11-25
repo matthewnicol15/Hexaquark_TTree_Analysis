@@ -3,3 +3,7 @@
 *.d
 *.so
 *.pcm
+Q_Weight/
+S_Weight/
+*.pdf
+*.png
