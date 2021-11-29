@@ -1,10 +1,11 @@
 {
 
   //////////////////////////////////////////////////////////////////////////////
-  ////Define variables for naming and limits ///////////
+  ////Define variables for naming    ///////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
   // Information for canvas and histogram name
+  ostringstream File_Path;
   ostringstream Data;
   ostringstream Quantity;
   ostringstream Date;
@@ -12,37 +13,41 @@
   ostringstream Output_File_Name;
 
   // Setting the strings for canvas name
-  Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
-  Quantity<<"Total";
-  Date<<"19112021";
+  File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Sideband_Subtracted/";
+  Data<<"RGB_Spring2020_Inbending_dst_Tree_Total";
+  Quantity<<"";
+  Date<<"29112021";
   Version<<"01";
 
-  Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/S_Weight_Strangeness_Analysis_"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
-
-  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_04_Total_25112021_01.root","recreate");
+  // Setting the output file name
+  Output_File_Name<<File_Path.str().c_str()<<"Sideband_Strangeness_Analysis_"<<Data.str().c_str()<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
 
   //////////////////////////////////////////////////////////////////////////////
-  //// Getting input file and histograms    ////////////////////////////////////
+  //// Setting up files and histograms    ////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
   // Input file
-  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_04_Total_25112021_01.root");
+  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGB_Spring2020_Inbending_dst_Tree_Total_23112021_01.root");
 
   // TFile *f2 = new TFile("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_221121_03.root");
 
   // Getting the multidimensional histogram plots
   TH2D *hmiss_1_a__S1_kp_1 = (TH2D*)f1->Get("hmiss_1_a__S1_kp_1");
-  // Get the number of x bins
-  Int_t maxbin = hmiss_1_a__S1_kp_1->GetNbinsY();
   TH3F *hmiss_s2_a__S2_kp_1__S2_kp_2 = (TH3F*)f1->Get("hmiss_s2_a__S2_kp_1__S2_kp_2");
+  // Get the number of bins
+  Int_t maxbin = hmiss_1_a__S1_kp_1->GetNbinsY();
   Int_t zbinmax = hmiss_s2_a__S2_kp_1__S2_kp_2->GetNbinsZ();
 
 
-  // Make array for all the 1D x projections
+  // Make array for all the 1D projections
   TH1D *h_projectionx_S1[100];
   TH1D *h_projectionx_S2_sig[100];
   TH1D *h_projectionx_S2_back[100];
+
+  // Creating output file
+  TFile *output_file=new TFile(Output_File_Name.str().c_str(),"recreate");
+
 
   //////////////////////////////////////////////////////////////////////////////
   //// Take all the projections    ///////////////////////////////////////
@@ -61,8 +66,6 @@
   TH1D *S2_kp1_mass_total = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("y")->Clone("S2_kp1_mass_total");
   // Mass of kaon 2
   TH1D *S2_kp2_mass_total = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("z")->Clone("S2_kp2_mass_total");
-
-
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -185,7 +188,6 @@
 
   // Define Sideband Limits
   // Strangeness 1 - kaon 1
-
   S1_Peak_Lower_Limit = func1->GetParameter(1) - S1_Peak_Sigma_Limits * func1->GetParameter(2);
   S1_Peak_Upper_Limit = func1->GetParameter(1) + S1_Peak_Sigma_Limits * func1->GetParameter(2);
   S1_Background_Left_Lower_Limit = func1->GetParameter(1) - S1_Background_Sigma_Upper_Limit * func1->GetParameter(2);
@@ -195,7 +197,6 @@
 
 
   // Strangeness 2 - kaon 1
-
   S2_Peak_Lower_Limit = func1_s2_kp1->GetParameter(1) - S2_Peak_Sigma_Limits * func1_s2_kp1->GetParameter(2);
   S2_Peak_Upper_Limit = func1_s2_kp1->GetParameter(1) + S2_Peak_Sigma_Limits * func1_s2_kp1->GetParameter(2);
   S2_Background_Left_Lower_Limit = func1_s2_kp1->GetParameter(1) - S2_Background_Sigma_Upper_Limit * func1_s2_kp1->GetParameter(2);
@@ -572,5 +573,5 @@ h_projectionx_S2_back[1]->Scale(sig_integral / back_integral);
     // // S2_miss_mass_Result->Draw("e,same");
     // S2_miss_mass_Result_clone->Draw("c,hist,same");
 
-
+    output_file->Write();
   }

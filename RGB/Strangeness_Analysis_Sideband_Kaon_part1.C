@@ -9,6 +9,10 @@
 #include <TH1.h>
 #include <TF1.h>
 #include <TH2.h>
+#include <TH3.h>
+#include <TMath.h>
+#include <TRandom.h>
+#include <TRandom3.h>
 #include <TChain.h>
 #include <TBenchmark.h>
 #include <vector>
@@ -21,6 +25,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   //////////////////////////////////////////////////////////////////////////////
 
   // Information for canvas and histogram name
+  ostringstream Additional_information;
   ostringstream Data;
   ostringstream Quantity;
   ostringstream Date;
@@ -28,18 +33,13 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   ostringstream Output_File_Name;
 
   // Setting the strings for canvas name
-  Data<<"RGA_Spring2019_Inbending_dst_Tree_04";
-  Quantity<<"Total";
-  Date<<"19112021";
-<<<<<<< HEAD
-  Version<<"03";
-=======
-  Version<<"02";
->>>>>>> 02cc287ed3d0f93e00c622b22830dd9113079bdf
+  Additional_information<<"_proton_smear_";
+  Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
+  Quantity<<"";
+  Date<<"25112021";
+  Version<<"01";
 
-  Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/"<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
-
-
+  Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_"<<Additional_information.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   //////////////////////////////////////////////////////////////////////////////
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/shared/storage/physhad/JLab/mn688/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_201021_01.root");
+  TFile *f = new TFile("/shared/storage/physhad/JLab/mn688/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_Total_201021.root");
 
   // Read TTree within root file and assign it to 't1'
   TTree *t1 = (TTree*)f->Get("RGA_Spring2019_Inbending_201021");
@@ -58,6 +58,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   // Event information
   TLorentzVector *readbeam=NULL;  // Information on the beam
   TLorentzVector *readtarget=NULL; // Information on the target
+  TLorentzVector target; // Information on the target
   Double_t start_time; // Event start time
   Int_t readrunno;
   Int_t readeventno;
@@ -107,9 +108,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   // Getting particle database to use for masses
   auto db=TDatabasePDG::Instance();
 
-////////////////////////////////////////////////////////////////////////////////
-////Creating functions for kaon mass fit ///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Creating functions for kaon mass fit ///////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
 
   // Define functions for fitting kaon calculated mass
   // Function for strangeness 1 - kaon 1
@@ -128,6 +129,23 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
   // Function for strangeness 3 - kaon 1
 
+  //////////////////////////////////////////////////////////////////////////////
+  ////Creating functions for proton smearing on RGA data   /////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  // Random number for phi distribution
+
+  // Sin distribution for theta
+  TF1 *theta_function = new TF1("theta_function","sin(x)",0,TMath::Pi());
+  // Momentum distribution for implementing fermi motion
+  TF1 *fermi_momentum_function = new TF1("fermi_momentum_function",
+  "pow((x*(pow(0.26,2)-pow(0.0456,2))/(pow(x,2)+pow(0.0456,2))/(pow(x,2)+pow(0.26,2))),2)",0.0,2.0);
+
+  TRandom *phi_function = new TRandom3(); // Random number generator to produce mass of dsss
+
+  Double_t generated_theta, generated_phi, generated_momentum;
+  Double_t generated_Px, generated_Py, generated_Pz;
+  Double_t generated_mass;
 
   //////////////////////////////////////////////////////////////////////////////
   ////Create histograms here ///////////////////////////////////
@@ -161,7 +179,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hmiss_1_c=new TH1D("hmiss_1_c","MM(e' K^{+});MM(e' K^{+}) [GeV];Counts",200,0,4);
   auto* hmiss_2=new TH1D("hmiss_2","MM^{2}(e' K^{+} p);MM^{2}(e' K^{+} p) [GeV^{2}];Counts",200,-1,3);
   auto* hmiss_s2=new TH1D("hmiss_s2","MM(e' K^{+} K^{+});MM(e' K^{+} K^{+}) [GeV];Counts",300,0,3);
-  auto* hmiss_s2_a__S2_kp_1__S2_kp_2=new TH3D("hmiss_s2_a__S2_kp_1__S2_kp_2",
+  auto* hmiss_s2_a__S2_kp_1__S2_kp_2=new TH3F("hmiss_s2_a__S2_kp_1__S2_kp_2",
   "MM against M(K^{+}) (1) against M(K^{+}) (2);MM(e' K^{+} K^{+}) [GeV];M(K^{+}) (1) [GeV]; M(K^{+}) (2) [GeV]",300,0,3,100,0.2,0.8,100,0.2,0.8);
   auto* hregion=new TH1D("hregion","Regions;Region;Counts",3,1,4);
   auto* h_delta_beta_kp_s1_1=new TH2D("h_delta_beta_kp_s1_1","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
@@ -714,6 +732,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
     // Here you can apply conditions on the events you want to analyse
     if(v_kp.size() > 0 && v_el.size() == 1 &&v_region_el.at(0) == 1){
+      target = (TLorentzVector)*readtarget;
+
       miss1 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0);
 
       hkaons->Fill(v_kp.size());
@@ -773,7 +793,31 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
       // Looking at stragneness 2 channel
       if(v_kp.size()==2){
-        miss_s2 = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0)- v_kp.at(1);
+
+        ////////////////////////////////////////////////////////////////////////
+        //// Implementing fermi motion    //////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
+
+        generated_theta = theta_function -> GetRandom(0,TMath::Pi());
+        generated_phi = phi_function -> Uniform(-TMath::Pi(),TMath::Pi());
+        generated_momentum = fermi_momentum_function -> GetRandom();
+        // cout<<"phi "<<generated_phi<<" theta "<<generated_theta<<" P "<<generated_momentum<<endl;
+
+        generated_Px = generated_momentum * TMath::Sin(generated_theta) * TMath::Cos(generated_phi);
+        generated_Py = generated_momentum * TMath::Sin(generated_theta) * TMath::Sin(generated_phi);
+        generated_Pz = generated_momentum * TMath::Cos(generated_theta);
+
+        generated_mass = sqrt((pow(1.876,2) / 4) - pow(generated_momentum,2));
+
+        target.SetXYZM(generated_Px, generated_Py, generated_Pz, generated_mass);
+        // cout<<generated_Px<<" "<<target.Px()<<
+        // " "<<generated_Py<<" "<<target.Py()<<
+        // " "<<generated_Pz<<" "<<target.Pz()<<
+        // " "<<generated_mass<<" "<<target.M()<<endl;
+        ////////////////////////////////////////////////////////////////////////
+
+
+        miss_s2 = beam + target - v_el.at(0) - v_kp.at(0)- v_kp.at(1);
 
         hmiss_s2->Fill(miss_s2.M());
         h_delta_beta_kp_s2_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
@@ -785,11 +829,13 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
 
         if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 &&
-          (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) &&
-          (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95)){
+        (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) &&
+        (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95)){
           hmiss_s2_a__S2_kp_1__S2_kp_2->Fill(miss_s2.M(), v_Mass_kp.at(0), v_Mass_kp.at(1));
           hmass_S2_kp_1->Fill(v_Mass_kp.at(0));
           hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
+
+
 
 
         }
@@ -818,9 +864,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
     }
   }
 
-//////////////////////////////////////////////////////////////////////////////////////
-//// Fitting functions to calculated kaon mass  //////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////
+  //// Fitting functions to calculated kaon mass  //////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////
 
   // Set parameteres for kaon mass fit
 

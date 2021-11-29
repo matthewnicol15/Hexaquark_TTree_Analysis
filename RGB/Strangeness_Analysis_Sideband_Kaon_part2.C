@@ -20,7 +20,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   gROOT->ProcessLine(".L ~/work/Macros/Loader.C+");
 
   // Grabbing part 1 file for the kaon mass fit function
-  TFile *fin1 = new TFile("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_01_141121_part1.root");
+  TFile *fin1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_04_Total_22112021_01.root");
   // Getting the kaon mass fit functions from part 1
   // Strangeness 1 - kaon 1
   // Total function
@@ -89,7 +89,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   t1->SetBranchAddress("triggerno",&readtriggerno);
 
   // Path and name for the output file to save
-  TFile fileOutput1("/shared/storage/physhad/JLab/mn688/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_01_part2_Total_181121_01.root","recreate");
+  TFile fileOutput1("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_231121_01.root","recreate");
 
 
   // Getting particle database to use for masses
@@ -283,7 +283,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   // Reads the total number of entries in the TTree
   Long64_t nentries = t1->GetEntries();
   // You can just run over a set number of events for fast analysis
-  // Long64_t nentries = 5000000;
+  // Long64_t nentries = 90000;
   cout<<nentries<<endl; // Printing out the total number of events
 
   // This is used to print out the percentage of events completed so far
@@ -596,7 +596,9 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
       if(v_kp.size()==1){
 
         // Selecting events where kaon is in the FD
-        if(v_region_kp.at(0)!=1) continue;
+        if(v_region_kp.at(0)!=1){
+          continue;
+        }
 
         // Cutting on delta beta and momentum of kaons
         if(fabs(v_delta_beta_kp.at(0))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95)){
@@ -605,11 +607,15 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
           // Grabbing the missing mass of e'K^+ for the signal part of the
           if(v_Mass_kp.at(0) > func1->GetParameter(1) - 2*func1->GetParameter(2) && v_Mass_kp.at(0) < func1->GetParameter(1) + 2*func1->GetParameter(2)){
             hmiss_1_a_sig->Fill(miss1.M());
+
           }
+
           // Grabbing the missing mass of e'K^+ for the signal part of the
           else if((v_Mass_kp.at(0) > func1->GetParameter(1) - 7 * func1->GetParameter(2) && v_Mass_kp.at(0) < func1->GetParameter(1) - 5 * func1->GetParameter(2))
           || (v_Mass_kp.at(0) > func1->GetParameter(1) + 5 * func1->GetParameter(2) && v_Mass_kp.at(0) < func1->GetParameter(1) + 7 * func1->GetParameter(2))){
+
             hmiss_1_a_back->Fill(miss1.M());
+
           }
         }
       }
@@ -662,7 +668,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
 
   // Creating variables for multiplication factors
   // Strangeness 1 - kaon 1
-  Int_t Peak_Background, Left_Background, Right_Background;
+  Double_t Peak_Background, Left_Background, Right_Background;
   Double_t Multiplication_factor;
 
   // Determining the multiplication factor
@@ -675,6 +681,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
 
   Right_Background = func1->Integral(hmiss_1_a->FindBin(func1->GetParameter(1) + 5 * func1->GetParameter(2)),
   hmiss_1_a->FindBin(func1->GetParameter(1) + 7 * func1->GetParameter(2)));
+  cout<<Peak_Background<<" "<<Left_Background<<" "<<Right_Background<<endl;
 
   Multiplication_factor = Peak_Background / (Left_Background + Right_Background);
 
