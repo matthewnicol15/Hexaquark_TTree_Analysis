@@ -261,6 +261,7 @@
       S2_Scaling_Factor_back = (func3_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) - func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)))/h_projectionx_S2_back[bin]->Integral();
       if(S2_Scaling_Factor_back < 0) S2_Scaling_Factor_back = 0;
 
+      // Scale the signal and background histograms accordingly
       h_projectionx_S2_sig[bin]->Scale(S2_Scaling_Factor_sig);
       h_projectionx_S2_back[bin]->Scale(S2_Scaling_Factor_back);
     }
