@@ -458,18 +458,34 @@
     //// Creating lines to show sidebands and resonances    /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
 
+    // Lines marking sidebands
+    // Strangeness 1 - kaon 1
     // Signal lower end
-    auto *l1 = new TLine(S2_Peak_Lower_Limit, 0,S2_Peak_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Peak_Lower_Limit_Line = new TLine(S1_Peak_Lower_Limit, 0,S1_Peak_Lower_Limit, S1_kp1_mass_total->GetMaximum());
     // Signal upper end
-    auto *l2 = new TLine(S2_Peak_Upper_Limit, 0,S2_Peak_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Peak_Upper_Limit_Line = new TLine(S1_Peak_Upper_Limit, 0,S1_Peak_Upper_Limit, S1_kp1_mass_total->GetMaximum());
     // background left lower end
-    auto *l3 = new TLine(S2_Background_Left_Lower_Limit, 0,S2_Background_Left_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Back_Left_Lower_Limit_Line = new TLine(S1_Background_Left_Lower_Limit, 0,S1_Background_Left_Lower_Limit, S1_kp1_mass_total->GetMaximum());
     // background left upper end
-    auto *l4 = new TLine(S2_Background_Left_Upper_Limit, 0,S2_Background_Left_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Back_Left_Upper_Limit_Line = new TLine(S1_Background_Left_Upper_Limit, 0,S1_Background_Left_Upper_Limit, S1_kp1_mass_total->GetMaximum());
     // background right lower end
-    auto *l5 = new TLine(S2_Background_Right_Lower_Limit, 0,S2_Background_Right_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Back_Right_Lower_Limit_Line = new TLine(S1_Background_Right_Lower_Limit, 0,S1_Background_Right_Lower_Limit, S1_kp1_mass_total->GetMaximum());
     // background right upper end
-    auto *l6 = new TLine(S2_Background_Right_Upper_Limit, 0,S2_Background_Right_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    auto *S1_Back_Right_Upper_Limit_Line = new TLine(S1_Background_Right_Upper_Limit, 0,S1_Background_Right_Upper_Limit, S1_kp1_mass_total->GetMaximum());
+
+    // Strangeness 2 - kaon 1
+    // Signal lower end
+    auto *S2_Peak_Lower_Limit_Line = new TLine(S2_Peak_Lower_Limit, 0,S2_Peak_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // Signal upper end
+    auto *S2_Peak_Upper_Limit_Line = new TLine(S2_Peak_Upper_Limit, 0,S2_Peak_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    // background left lower end
+    auto *S2_Back_Left_Lower_Limit_Line = new TLine(S2_Background_Left_Lower_Limit, 0,S2_Background_Left_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // background left upper end
+    auto *S2_Back_Left_Upper_Limit_Line = new TLine(S2_Background_Left_Upper_Limit, 0,S2_Background_Left_Upper_Limit, S2_kp1_mass_total->GetMaximum());
+    // background right lower end
+    auto *S2_Back_Right_Lower_Limit_Line = new TLine(S2_Background_Right_Lower_Limit, 0,S2_Background_Right_Lower_Limit, S2_kp1_mass_total->GetMaximum());
+    // background right upper end
+    auto *S2_Back_Right_Upper_Limit_Line = new TLine(S2_Background_Right_Upper_Limit, 0,S2_Background_Right_Upper_Limit, S2_kp1_mass_total->GetMaximum());
 
     // line at 0 to highlight background subtraction
     auto *l7 = new TLine(0, 0, 3, 0);
@@ -520,28 +536,46 @@
     S2_miss_mass_total_continous_result->Draw("hist,L");
     h_projectionx_S2_sig[1]->Draw("same,hist,L");
 
-    // S2_miss_mass_total->Draw();
-    // hbackground_total_function->Draw("hist,same");
-    // S2_kp1_mass_total->Draw();
-    // // func1_s2_kp1->Draw("same");
-    // func2_s2_kp1->Draw("same");
-    // func3_s2_kp1->Draw("same");
-    // func4_s2_kp1->Draw("same");
-    // // func5_s2_kp1->Draw("same");
-    // l1->Draw("same");
-    // l2->Draw("same");
-    // l3->Draw("same");
-    // l4->Draw("same");
-    // l5->Draw("same");
-    // l6->Draw("same");
-
     auto *c2 = new TCanvas("c2","original and backgroud subtracted",800,800);
     c2->cd();
+    h_projectionx_S1_sig[1]->Draw("E1");
     h_projectionx_S1_sig[1]->Draw("same,hist,L");
 
+    auto *c3 = new TCanvas("c3","Strangeness 1 kaon 1 mass",800,800);
+    c3->cd();
+    S1_kp1_mass_total->Draw();
+    func1->Draw("same");
+    func2->Draw("same");
+    func3->Draw("same");
+    func4->Draw("same");
+    func5->Draw("same");
+    S1_Peak_Lower_Limit_Line->Draw("same");
+    S1_Peak_Upper_Limit_Line->Draw("same");
+    S1_Back_Left_Lower_Limit_Line->Draw("same");
+    S1_Back_Left_Upper_Limit_Line->Draw("same");
+    S1_Back_Right_Lower_Limit_Line->Draw("same");
+    S1_Back_Right_Upper_Limit_Line->Draw("same");
 
-    auto *c4 = new TCanvas("c4","strangeness 2 peak",800,800);
+    auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
     c4->cd();
+    S2_kp1_mass_total->Draw();
+    func1_s2_kp1->Draw("same");
+    func2_s2_kp1->Draw("same");
+    func3_s2_kp1->Draw("same");
+    func4_s2_kp1->Draw("same");
+    func5_s2_kp1->Draw("same");
+    S2_Peak_Lower_Limit_Line->Draw("same");
+    S2_Peak_Upper_Limit_Line->Draw("same");
+    S2_Back_Left_Lower_Limit_Line->Draw("same");
+    S2_Back_Left_Upper_Limit_Line->Draw("same");
+    S2_Back_Right_Lower_Limit_Line->Draw("same");
+    S2_Back_Right_Upper_Limit_Line->Draw("same");
+
+
+
+
+    auto *c5 = new TCanvas("c5","strangeness 2 peak",800,800);
+    c5->cd();
     // h_projectionx_S2_back[1]->Draw("hist");
     h_projectionx_S2_sig[1]->Draw("same,hist,L");
     l7->Draw("same");
