@@ -28,22 +28,25 @@
   //////////////////////////////////////////////////////////////////////////////
 
   // Input file
+  // RGA data
   // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_Total_22112021_01.root");
+  // RGB data
   // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGB_Spring2020_Inbending_dst_Tree_Total_23112021_01.root");
+  // RGA data with proton smearing
   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_Total__25112021_01.root");
 
 
   // Getting the multidimensional histogram plots
   TH2D *hmiss_1_a__S1_kp_1 = (TH2D*)f1->Get("hmiss_1_a__S1_kp_1");
   TH3F *hmiss_s2_a__S2_kp_1__S2_kp_2 = (TH3F*)f1->Get("hmiss_s2_a__S2_kp_1__S2_kp_2");
-  // TH3F *hmiss_s2_a__S2_kp_1__S2_kp_2_f2 = (TH3F*)f2->Get("hmiss_s2_a__S2_kp_1__S2_kp_2");
   // Get the number of bins
   Int_t maxbin = hmiss_1_a__S1_kp_1->GetNbinsY();
   Int_t zbinmax = hmiss_s2_a__S2_kp_1__S2_kp_2->GetNbinsZ();
 
 
   // Make array for all the 1D projections
-  TH1D *h_projectionx_S1[100];
+  TH1D *h_projectionx_S1_sig[100];
+  TH1D *h_projectionx_S1_back[100];
   TH1D *h_projectionx_S2_sig[100];
   TH1D *h_projectionx_S2_back[100];
 
@@ -213,39 +216,47 @@
   //// Calculating scaling factor    //////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  Double_t S1_Scaling_Factor, S2_Scaling_Factor_sig, S2_Scaling_Factor_back/*, S2_Scaling_Factor_sig_f2, S2_Scaling_Factor_back_f2*/;
+  Double_t S1_Scaling_Factor_sig, S1_Scaling_Factor_back, S2_Scaling_Factor_sig, S2_Scaling_Factor_back;
   //
   // // Strangeness 1 - kaon 1
   // // Loop over the x bins to determine scaling factors
-  // for(Int_t bin = 1; bin < 100; bin++){
-  //   // Get the x projection for the current bin
-  //   h_projectionx_S1[bin] = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionX("",bin,bin)->Clone("h_projectionx_S1");
-  //   cout<<bin<<endl;
-  //
-  //   // Check the values are above zero
-  //   // if(func5->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0 && func3->Eval(hmiss_1_a__S1_kp_1_py->GetBinCenter(bin)) > 0){
-  //   // Determine the scaling factor looking at the signal and background functions
-  //   S1_Scaling_Factor = (func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) - func3->Eval(S1_kp1_mass_total->GetBinCenter(bin))) /
-  //                    (func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) + func3->Eval(S1_kp1_mass_total->GetBinCenter(bin)));
-  //
-  //   h_projectionx_S1[bin]->Scale(S1_Scaling_Factor);
-  // }
-  //
-  // // Adding all the histograms together to get total continous sideband subtracted result
-  // for(Int_t bin = 2; bin < 101; bin++){
-  //   cout<<bin<<endl;
-  //   h_projectionx_S1[1]->Add(h_projectionx_S1[bin]);
-  // }
-  //
-  //
-  //   Int_t bin =28;
-  //
-  //   h_projectionx_S2_sig[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_sig");
-  //   h_projectionx_S2_back[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_back");
-  //   S2_Scaling_Factor_sig = func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
-  //
-  // h_projectionx_S2_sig[bin]->Draw();
-  // h_projectionx_S2_back[bin]->Draw("same");
+  for(Int_t bin = 1; bin < 100; bin++){
+    ostringstream h_projectionx_S1_sig_name;
+     h_projectionx_S1_sig_name << "h_projectionx_S1_sig_" << bin;
+    // Get the x projection for the current bin
+    h_projectionx_S1_sig[bin] = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionX("",bin,bin)->Clone(h_projectionx_S1_sig_name.str().c_str());
+    h_projectionx_S1_back[bin] = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionX("",bin,bin)->Clone("h_projectionx_S1_back");
+    cout<<bin<<endl;
+
+    if(h_projectionx_S1_sig[bin]->Integral() > 100){
+      cout<<"integral big"<<endl;
+      // Determine the scaling factor looking at the signal function
+      S1_Scaling_Factor_sig = func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S1_sig[bin]->Integral() ;
+
+
+      // Determine the scaling factor looking at the signal function
+      S1_Scaling_Factor_back = (func3->Eval(S1_kp1_mass_total->GetBinCenter(bin)) - func5->Eval(S1_kp1_mass_total->GetBinCenter(bin))) /
+      h_projectionx_S1_back[bin]->Integral();
+
+      if(S1_Scaling_Factor_back < 0) S1_Scaling_Factor_back = 0;
+
+      // Scale the signal and background histograms accordingly
+      h_projectionx_S1_sig[bin]->Scale(S1_Scaling_Factor_sig);
+      h_projectionx_S1_back[bin]->Scale(S1_Scaling_Factor_back);
+    }
+  }
+  // Adding all the histograms together to get total continous sideband subtracted result
+  for(Int_t bin = 2; bin < 100; bin++){
+    cout<<bin<<endl;
+    h_projectionx_S1_sig[1]->Add(h_projectionx_S1_sig[bin]);
+    h_projectionx_S1_back[1]->Add(h_projectionx_S1_back[bin]);
+  }
+  Double_t back_integral_S1 = h_projectionx_S1_back[1]->Integral(h_projectionx_S1_back[1]->FindBin(0), h_projectionx_S1_back[1]->FindBin(1));
+  Double_t sig_integral_S1 = h_projectionx_S1_sig[1]->Integral(h_projectionx_S1_sig[1]->FindBin(0), h_projectionx_S1_sig[1]->FindBin(1));
+  h_projectionx_S1_back[1]->Scale(sig_integral_S1 / back_integral_S1);
+
+  h_projectionx_S1_sig[1]->Add(h_projectionx_S1_back[1], -1);
+
 
 
   // Strangeness 2 - kaon 1 file 1
@@ -253,6 +264,7 @@
   for(Int_t bin = 1; bin < 100; bin++){
     ostringstream h_projectionx_S2_sig_name;
      h_projectionx_S2_sig_name << "h_projectionx_S2_sig_" << bin;
+
     // Get the x projection for the current bin
     h_projectionx_S2_sig[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone(h_projectionx_S2_sig_name.str().c_str());
     h_projectionx_S2_back[bin] = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX("",bin,bin,0,zbinmax)->Clone("h_projectionx_S2_back");
@@ -279,9 +291,9 @@
     h_projectionx_S2_sig[1]->Add(h_projectionx_S2_sig[bin]);
     h_projectionx_S2_back[1]->Add(h_projectionx_S2_back[bin]);
   }
-  Double_t back_integral = h_projectionx_S2_back[1]->Integral(h_projectionx_S2_back[1]->FindBin(0), h_projectionx_S2_back[1]->FindBin(1));
-  Double_t sig_integral = h_projectionx_S2_sig[1]->Integral(h_projectionx_S2_sig[1]->FindBin(0), h_projectionx_S2_sig[1]->FindBin(1));
-  h_projectionx_S2_back[1]->Scale(sig_integral / back_integral);
+  Double_t back_integral_S2 = h_projectionx_S2_back[1]->Integral(h_projectionx_S2_back[1]->FindBin(0), h_projectionx_S2_back[1]->FindBin(1));
+  Double_t sig_integral_S2 = h_projectionx_S2_sig[1]->Integral(h_projectionx_S2_sig[1]->FindBin(0), h_projectionx_S2_sig[1]->FindBin(1));
+  h_projectionx_S2_back[1]->Scale(sig_integral_S2 / back_integral_S2);
 
   h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
 
@@ -522,6 +534,10 @@
     // l4->Draw("same");
     // l5->Draw("same");
     // l6->Draw("same");
+
+    auto *c2 = new TCanvas("c2","original and backgroud subtracted",800,800);
+    c2->cd();
+    h_projectionx_S1_sig[1]->Draw("same,hist,L");
 
 
     auto *c4 = new TCanvas("c4","strangeness 2 peak",800,800);
