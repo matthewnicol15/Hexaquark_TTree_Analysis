@@ -17,13 +17,14 @@ Double_t RGA_RGA_smeared = RGA_smeared_missing_mass->Integral() / RGA_missing_ma
 RGB_missing_mass->Scale(RGA_RGB_Scale);
 RGA_missing_mass->Scale(RGA_RGA_smeared);
 
-// RGB_missing_mass->SetLineColor(kRed);
-// RGB_missing_mass->SetMarkerColor(kRed);
+gStyle->SetOptStat(0);
+RGB_missing_mass->SetLineColor(kRed);
+RGB_missing_mass->SetMarkerColor(kRed);
 
 auto *c1 = new TCanvas("c1","RGB and smeared RGA",800,800);
 c1->cd();
 RGB_missing_mass->SetTitle("RGB and smeared RGA");
-RGB_missing_mass->Draw("hist,L");
+RGB_missing_mass->Draw();
 RGA_smeared_missing_mass->Draw("same");
 
 auto *c2 = new TCanvas("c2","RGA and smeared RGA",800,800);
