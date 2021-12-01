@@ -67,7 +67,7 @@ void Tree_Event_Selection_Test(){
   Int_t kaonmno; // K^{-}
   Int_t positive_charge_tracks; // Count the number of positive charge tracks
   Int_t negative_charge_tracks; // Count the number of negative charge tracks
-  Int_t eFD_Events; // Count the number of negative charge tracks
+  Int_t eFD_Events = 0; // Count the number of negative charge tracks
   Int_t topology_1 = 0, topology_2 = 0, topology_3 = 0; // Count the number of negative charge tracks
 
 
@@ -92,7 +92,6 @@ void Tree_Event_Selection_Test(){
       kaonmno = 0;
       positive_charge_tracks = 0;
       negative_charge_tracks = 0;
-      eFD_Events = 0;
 
       // This loop goes over each particle within the current event
       // This loop goes over each particle within the current event
