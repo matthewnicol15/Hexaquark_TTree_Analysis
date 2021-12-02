@@ -46,16 +46,10 @@ void Tree_Maker(){
   auto db=TDatabasePDG::Instance();
 
   // Creating histograms for negative particles that are not electron
-  auto* hnegatives=new TH1F("hnegatives","PID of negatives;PID;Counts",2000,-1000,1000);
-  auto* hpositives=new TH1F("hpositives","PID of positives;PID;Counts",2000,-1000,1000);
   auto* hkaonpno=new TH1F("hkaonpno","Number of K^{+};No. of K^{+};Counts",100,0,10);
   auto* hPID=new TH1F("hPID","PID ;PID;Counts",2000,-1000,1000);
   auto* hmass_n=new TH1F("hmass_n","Mass of negatives;Mass [GeV];Counts",1000,-10000,10000);
   auto* hmass_p=new TH1F("hmass_p","Mass of negatives;Mass [GeV];Counts",1000,-10000,10000);
-  auto* hbeta_n=new TH2D("hbeta_n","beta against momentum of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,1000,-100,10);
-  auto* hbeta_p=new TH2D("hbeta_n","beta against momentum of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,1000,-100,10);
-  auto* hangular_distribution_n=new TH2D("hangular_distribution_n","Angular distribution of negative PID 0 particles;Momentum [GeV]; Beta",200,0,11,200,0,200);
-  auto* hangular_distribution_p=new TH2D("hangular_distribution_p","Angular distribution of positive PID 0 particles;Momentum [GeV]; Beta",200,0,11,200,0,200);
 
   // Information to save to the tree
   // Any information specific to an event
@@ -235,7 +229,6 @@ void Tree_Maker(){
           if(PID==321) kaonpno++; // Count the number of positive kaons
           if(PID==2212)protonno++; // Count the number of protons
           positive_charge_tracks++; // Count number of positive charges
-          hpositives->Fill(PID); // Seeing PID of positive particles
 
           // Calculated mass for positive particles
           hmass_p->Fill(Mass);
@@ -246,7 +239,6 @@ void Tree_Maker(){
           if(PID==-211) pimno++; // Count the number of negative pions
           if(PID==-321) kaonmno++; // Count the number of negative pions
           negative_charge_tracks++;
-          hnegatives->Fill(PID); // Seeing PID of negative particles
 
           // Calculated mass for negative particles
           hmass_n->Fill(Mass);
