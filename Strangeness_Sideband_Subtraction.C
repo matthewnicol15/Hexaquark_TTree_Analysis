@@ -14,8 +14,8 @@
 
   // Setting the strings for canvas name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Sideband_Subtracted/";
-  Data<<"RGA_Spring2019_Inbending_dst_Tree_Total_Proton_Smear";
-  Quantity<<"";
+  Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
+  Quantity<<"";\
   Date<<"30112021";
   Version<<"01";
 
@@ -29,11 +29,11 @@
 
   // Input file
   // RGA data
-  // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_Total_22112021_01.root");
+  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_Total_22112021_01.root");
   // RGB data
   // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGB_Spring2020_Inbending_dst_Tree_Total_23112021_01.root");
   // RGA data with proton smearing
-  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_Total__25112021_01.root");
+  // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis__proton_smear_RGA_Spring2019_Inbending_dst_Tree_Total__25112021_01.root");
 
 
   // Getting the multidimensional histogram plots
@@ -87,8 +87,8 @@
   // Define sigma limits for sidebands
   // Strangeness 1 - kaon 1
   S1_Peak_Sigma_Limits = 2;
-  S1_Background_Sigma_Lower_Limit = 4;
-  S1_Background_Sigma_Upper_Limit = 6;
+  S1_Background_Sigma_Lower_Limit = 6;
+  S1_Background_Sigma_Upper_Limit = 8;
   // Strangeness 2 - kaon 1
   S2_Peak_Sigma_Limits = 2;
   S2_Background_Sigma_Lower_Limit = 4;
@@ -454,6 +454,9 @@
     h_projectionx_S2_sig[1]->GetXaxis()->SetTitleOffset(1.2);
     h_projectionx_S2_sig[1]->GetYaxis()->SetTitle("Counts");
 
+    S2_miss_mass_total->Rebin(4);
+
+
     //////////////////////////////////////////////////////////////////////////////
     //// Creating lines to show sidebands and resonances    /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
@@ -506,6 +509,18 @@
     l9->SetLineColor(15);
     l10->SetLineColor(15);
 
+    func1->SetLineColor(kRed);
+    func2->SetLineColor(kBlue);
+    func3->SetLineColor(kGreen);
+    func4->SetLineColor(kBlue);
+    func5->SetLineColor(kBlack);
+
+    func1_s2_kp1->SetLineColor(kRed);
+    func2_s2_kp1->SetLineColor(kBlue);
+    func3_s2_kp1->SetLineColor(kGreen);
+    func4_s2_kp1->SetLineColor(kBlue);
+    func5_s2_kp1->SetLineColor(kBlack);
+
     ////////////////////////////////////////////////////////////////////////////
     //// Creating text boxes and arrows    /////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -530,16 +545,20 @@
     //// Creating canvases and drawing plots    //////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
 
-    // canvas for projections
-    auto *c1 = new TCanvas("c1","original and backgroud subtracted",800,800);
-    c1->cd();
-    S2_miss_mass_total_continous_result->Draw("hist,L");
-    h_projectionx_S2_sig[1]->Draw("same,hist,L");
 
-    auto *c2 = new TCanvas("c2","original and backgroud subtracted",800,800);
+    // canvas for projections
+    auto *c1 = new TCanvas("c1","Comparing two methods",800,800);
+    c1->cd();
+    // S2_miss_mass_total_continous_result->Draw();
+    // S2_miss_mass_background_Total_continous->Draw("same,hist,L");
+    S2_miss_mass_total_continous_result->Draw("hist,L");
+    h_projectionx_S2_sig[1]->Draw("hist,L, same");
+    auto *c2 = new TCanvas("c2","Strageness 1 After Sideband Subtraction",800,800);
     c2->cd();
-    h_projectionx_S1_sig[1]->Draw("E1");
-    h_projectionx_S1_sig[1]->Draw("same,hist,L");
+    S1_miss_mass_total->Draw();
+    // h_projectionx_S1_sig[1]->Draw("same,E1");
+    h_projectionx_S1_sig[1]->Draw("same,hist");
+    l7->Draw("same");
 
     auto *c3 = new TCanvas("c3","Strangeness 1 kaon 1 mass",800,800);
     c3->cd();
@@ -574,10 +593,11 @@
 
 
 
-    auto *c5 = new TCanvas("c5","strangeness 2 peak",800,800);
+    auto *c5 = new TCanvas("c5","strangeness 2 After Sideband Subtraction",800,800);
     c5->cd();
     // h_projectionx_S2_back[1]->Draw("hist");
-    h_projectionx_S2_sig[1]->Draw("same,hist,L");
+    S2_miss_mass_total->Draw();
+    h_projectionx_S2_sig[1]->Draw("same,hist");
     l7->Draw("same");
     l8->Draw("same");
     l9->Draw("same");
