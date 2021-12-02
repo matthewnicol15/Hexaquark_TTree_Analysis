@@ -14,10 +14,11 @@
 #include <TBenchmark.h>
 #include "clas12reader.h"
 #include <vector>
+
 using namespace clas12;
 
 
-void Tree_Maker_RGB(){
+void Tree_Maker(){
   auto start = std::chrono::high_resolution_clock::now();
   gBenchmark->Start("timer");
   int counter=0;
@@ -37,9 +38,9 @@ void Tree_Maker_RGB(){
   auto files=fake.GetListOfFiles();
 
   // Create root file to save TTree in
-  TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_at_least_1eFD_1Kp_Tree_21021_04.root","recreate");
+  TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root","recreate");
   // Creating TTree object
-  TTree RGB_Spring2020_Inbending_221021("RGB_Spring2020_Inbending_221021","it's a tree!");
+  TTree RGB_Spring2020_Inbending_221021("RGB_Spring2020_Inbending_02122021","it's a tree!");
 
   // Access the PDG database to get information usind PID (e.g db->GetParticle(211)->Mass() for pi^{+} mass)
   auto db=TDatabasePDG::Instance();
@@ -272,9 +273,7 @@ void Tree_Maker_RGB(){
 
 
       // Here you can apply a basic skim for events you want to save in your tree
-      // at least 2 K+
-      // cout<<" Kaon "<<kaonpno<<" electrons "<<elno<<" electronFD "<<electronFD<<endl;
-      if(kaonpno > 0 && elno > 0 && electronFD > 0){
+      if(protonno > 0 && pimno > 1 && elno == 1 && electronFD == 1){
         RGB_Spring2020_Inbending_221021.Fill();
         Tree_Events++;
       }
