@@ -123,6 +123,10 @@ void Tree_Reader_S3_At_Least_1p2pim(){
   auto* hinv_cascade=new TH1F("hinv_cascade","Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];Counts",600,1,3);
 
 
+  //////////////////////////////////////////////////////////////////////////////
+  //// Making variables    ///////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
   // Create vectors of TLorentzVectors to store information of
   // all particles of a given type (important when you have more than 1
   // of any particle in the same event)
@@ -155,11 +159,6 @@ void Tree_Reader_S3_At_Least_1p2pim(){
   TLorentzVector vertex_pr;
   TLorentzVector vertex_kp;
   TLorentzVector vertex_neutron;
-
-  // These are used to define the missing masses later
-  TLorentzVector beam;
-  TLorentzVector proton_pion_1, proton_pion_2, proton_pion_3;
-  TLorentzVector cascade_12, cascade_13, cascade_23;
 
 
   // After information is read from the TTree, particles are identified using
@@ -274,9 +273,24 @@ void Tree_Reader_S3_At_Least_1p2pim(){
   vector<Double_t> v_region_neutron; // region hit
   Double_t region_neutron;
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Other variables
+
+  // These are used to define the missing masses later
+  TLorentzVector beam;
+  TLorentzVector proton_pion_1, proton_pion_2, proton_pion_3;
+  TLorentzVector cascade_12, cascade_13, cascade_23;
+
+  // Count the number of good combinations per event
+  Int_t Good_Combinations;
 
   Double_t c=30;  // Speed of light used for calculating vertex time
   Double_t Mass; // Calculated mass
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Looping over events in the tree    //////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
 
   // Reads the total number of entries in the TTree
   Long64_t nentries = t1->GetEntries();
@@ -374,6 +388,10 @@ void Tree_Reader_S3_At_Least_1p2pim(){
     v_vertex_neutron.clear();
     v_region_neutron.clear();
 
+
+    //////////////////////////////////////////////////////////////////////////////
+    //// Looping over particles in the current event    //////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
 
     // This reads the number of particles in the current entry/event
     Int_t Nparticles = v_p4->size();
@@ -618,6 +636,9 @@ void Tree_Reader_S3_At_Least_1p2pim(){
       //// Checking possible invariant mass combinations    ////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
+      // Resetting number of good combinations for each event
+      Good_Combinations = 0;
+
       //////////////////////////////////////////////////////////////////////////////
       // Check if pion 1 is from lambda
       if(proton_pion_1 < 1.18){
@@ -627,10 +648,9 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 3 is from sigma
           if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-
+            Good_Combinations++;
 
           }
-
         }
 
         // Check if pion 1 and 3 are from cascade
@@ -638,7 +658,7 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 2 is from sigma
           if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-
+            Good_Combinations++;
 
           }
         }
@@ -653,10 +673,9 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 3 is from sigma
           if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-
+            Good_Combinations++;
 
           }
-
         }
 
         // Check if pion 2 and 3 are from cascade
@@ -664,7 +683,7 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 1 is from sigma
           if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-
+            Good_Combinations++;
 
           }
         }
@@ -679,10 +698,9 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 2 is from sigma
           if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-
+            Good_Combinations++;
 
           }
-
         }
 
         // Check if pion 2 and 3 are from cascade
@@ -690,15 +708,12 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
           // Check if pion 1 is from sigma
           if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-
+            Good_Combinations++;
 
           }
         }
       }
-
-
     }
-
   }
   fileOutput1.Write();
 }
