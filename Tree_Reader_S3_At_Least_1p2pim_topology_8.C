@@ -25,16 +25,18 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   ostringstream Quantity;
   ostringstream Date;
   ostringstream Version;
+  ostringstream Topology;
   ostringstream Output_File_Name;
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
   Quantity<<"Total";
+  Topology<<"Topology_7";
   Date<<"03122021";
   Version<<"01";
 
-  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str();
+  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str();
 
   //////////////////////////////////////////////////////////////////////////////
   //// Setting up input tree and variables    //////////////////////////////////
@@ -621,7 +623,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
       //// Calculating invariant mass combinations    //////////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
-      // Lambdas or sigmas
+      // Lambdas
       proton_pion_1 = v_pr.at(0) + v_pim.at(0); // First pion
       proton_pion_2 = v_pr.at(0) + v_pim.at(1); // Second pion
       proton_pion_3 = v_pr.at(0) + v_pim.at(2); // Third pion
@@ -630,6 +632,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
       cascade_12 = v_pr.at(0) + v_pim.at(0) + v_pim.at(1); // First and second pion
       cascade_13 = v_pr.at(0) + v_pim.at(0) + v_pim.at(2); // First and third pion
       cascade_23 = v_pr.at(0) + v_pim.at(1) + v_pim.at(2); // Second and third pion
+
+      // Sigmas
+      neutron_pion_1 = v_neutron.at(0) + v_pim.at(0); // First pion
+      neutron_pion_2 = v_neutron.at(0) + v_pim.at(1); // Second pion
+      neutron_pion_3 = v_neutron.at(0) + v_pim.at(2); // Third pion
 
       //////////////////////////////////////////////////////////////////////////////
       //// Checking possible invariant mass combinations    ////////////////////////
@@ -650,7 +657,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         if(cascade_12 < 1.4){
 
           // Check if pion 3 is from sigma
-          if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
+          if(neutron_pion_3 > 1.18 && neutron_pion_3 < 1.27){
             Good_Combinations++;
 
           }
@@ -660,7 +667,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         else if(cascade_13 < 1.4){
 
           // Check if pion 2 is from sigma
-          if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
+          if(neutron_pion_2 > 1.18 && neutron_pion_2 < 1.27){
             Good_Combinations++;
 
           }
@@ -675,7 +682,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         if(cascade_12 < 1.4){
 
           // Check if pion 3 is from sigma
-          if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
+          if(neutron_pion_3 > 1.18 && neutron_pion_3 < 1.27){
             Good_Combinations++;
 
           }
@@ -685,7 +692,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         else if(cascade_23 < 1.4){
 
           // Check if pion 1 is from sigma
-          if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
+          if(neutron_pion_1 > 1.18 && neutron_pion_1 < 1.27){
             Good_Combinations++;
 
           }
@@ -700,7 +707,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         if(cascade_13 < 1.4){
 
           // Check if pion 2 is from sigma
-          if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
+          if(neutron_pion_2 > 1.18 && neutron_pion_2 < 1.27){
             Good_Combinations++;
 
           }
@@ -710,7 +717,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         else if(cascade_23 < 1.4){
 
           // Check if pion 1 is from sigma
-          if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
+          if(neutron_pion_1 > 1.18 && neutron_pion_1 < 1.27){
             Good_Combinations++;
 
           }
