@@ -108,7 +108,7 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
   // Event Information
   auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
-  auto* hkaonpno=new TH1F("hkaonpno", "Number of K^{+};# of K^{+}; Counts",10,0,10);
+  auto* hkaonpno = new TH1F("hkaonpno", "Number of K^{+};# of K^{+}; Counts",10,0,10);
   auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",5,0,4);
 
   // Particle Information
@@ -611,10 +611,10 @@ void Tree_Reader_S3_At_Least_1p2pim(){
 
 
     // Here you can apply conditions on the events you want to analyse
-    // Requiring exact topology 3
+    // Requiring exact topology 8
     if(v_el.size() != 1 || v_pr.size() < 1 || v_pim.size() < 3 || v_neutron.size() < 1) continue;
     {
-      hkaonpno->Fill(v_kp.size());
+      hkaonpn0->Fill(v_kp.size());
 
       //////////////////////////////////////////////////////////////////////////////
       //// Calculating invariant mass combinations    //////////////////////////////
