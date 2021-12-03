@@ -115,12 +115,10 @@ void Tree_Reader_S3_At_Least_1p2pim(){
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
 
   // Analysis Plots
-  auto* hlambdas=new TH2D("hlambdas", "Invariant mass of #Lambda (2) against #Lambda (1);M(p #pi^{-}) [GeV];M(p #pi^{-}) [GeV]",600,1,3,600,1,3);
-  auto* hinv_lambda=new TH1F("hinv_lambda","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,1,3);
-  auto* hinv_lambda_1=new TH1F("hinv_lambda_1","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,1,3);
-  auto* hinv_lambda_2=new TH1F("hinv_lambda_2","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,1,3);
-  auto* hinv_lambda_3=new TH1F("hinv_lambda_3","Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts",400,1,3);
-  auto* hinv_cascade=new TH1F("hinv_cascade","Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];Counts",600,1,3);
+  auto* h_proton_pion_pairs = new TH3F("h_proton_pion_pairs",
+  "Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];M(p #pi^{-}) [GeV]; M(p #pi^{-}) [GeV]",400,1,3,400,1,3,400,1,3);
+  auto* h_inv_cascades = new TH1F("h_inv_cascades",
+  "Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]",400,1,3,400,1,3,400,1,3);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -636,6 +634,10 @@ void Tree_Reader_S3_At_Least_1p2pim(){
       //// Checking possible invariant mass combinations    ////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
+      // Filling histogram with all proton pion invariant masses
+      h_proton_pion_pairs->Fill(proton_pion_1.M(), proton_pion_2.M(), proton_pion_3.M());
+      h_inv_cascades->Fill(cascade_12.M(), cascade_13.M(), cascade_23.M());
+
       // Resetting number of good combinations for each event
       Good_Combinations = 0;
 
@@ -713,6 +715,8 @@ void Tree_Reader_S3_At_Least_1p2pim(){
           }
         }
       }
+
+      if(Good_Combinations > 0) cout<<"Combinations "<<Good_Combinations<<endl;
     }
   }
   fileOutput1.Write();
