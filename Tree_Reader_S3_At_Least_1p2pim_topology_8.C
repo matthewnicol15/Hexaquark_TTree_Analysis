@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <TFile.h>
 #include <TTree.h>
 #include <TApplication.h>
@@ -8,6 +9,7 @@
 #include <TLorentzVector.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TChain.h>
 #include <TBenchmark.h>
 #include <vector>
@@ -26,17 +28,20 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   ostringstream Date;
   ostringstream Version;
   ostringstream Topology;
+  ostringstream Additional_Info;
   ostringstream Output_File_Name;
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
   Quantity<<"Total";
-  Topology<<"Topology_7";
-  Date<<"03122021";
-  Version<<"01";
+  Topology<<"Topology_8";
+  Additional_Info<<"";
+  Date<<"05122021";
+  Version<<"05";
 
-  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str();
+  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
+  Topology.str().c_str()<<Additional_Info.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
   //////////////////////////////////////////////////////////////////////////////
   //// Setting up input tree and variables    //////////////////////////////////
@@ -46,7 +51,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/Strangeness_3/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
   // Read TTree within root file and assign it to 't1'
   TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_02122021");
 
@@ -110,19 +115,38 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
   // Event Information
   auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
-  auto* hkaonpno_topology_3 = new TH1F("hkaonpno_topology_3", "Number of K^{+};# of K^{+}; Counts",10,0,10);
   auto* hkaonpno_topology_8 = new TH1F("hkaonpno_topology_8", "Number of K^{+};# of K^{+}; Counts",10,0,10);
   auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",5,0,4);
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
+  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,-1,1,200,0,12);
+  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,-1,1,200,0,12);
+  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
+  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
+  auto* h_delta_beta_neutron = new TH2F("h_delta_beta_neutron","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
 
   // Analysis Plots
   auto* h_proton_pion_pairs = new TH3F("h_proton_pion_pairs",
   "Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];M(p #pi^{-}) [GeV]; M(p #pi^{-}) [GeV]",400,1,3,400,1,3,400,1,3);
-  auto* h_inv_cascades = new TH1F("h_inv_cascades",
+  auto* h_neutron_pion_pairs = new TH3F("h_neutron_pion_pairs",
+  "Invariant mass of n #pi^{-};M(n #pi^{-}) [GeV];M(n #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",400,1,3,400,1,3,400,1,3);
+  auto* h_inv_cascades = new TH3F("h_inv_cascades",
   "Invariant mass of p #pi^{-} #pi^{-};M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]",400,1,3,400,1,3,400,1,3);
 
+  // "Good" invariant mass plots
+  auto* h_invariant_mass_123 = new TH3F("h_invariant_mass_123",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
+  auto* h_invariant_mass_132 = new TH3F("h_invariant_mass_132",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
+  auto* h_invariant_mass_213 = new TH3F("h_invariant_mass_213",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
+  auto* h_invariant_mass_231 = new TH3F("h_invariant_mass_231",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
+  auto* h_invariant_mass_312 = new TH3F("h_invariant_mass_312",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
+  auto* h_invariant_mass_321 = new TH3F("h_invariant_mass_321",
+  "Invariant masses;M(p #pi^{-}) [GeV];M(p #pi^{-} #pi^{-}) [GeV]; M(n #pi^{-}) [GeV]",100,1,1.2,225,1,1.45,225,1,1.45);
 
   //////////////////////////////////////////////////////////////////////////////
   //// Making variables    ///////////////////////////////////////////////
@@ -280,6 +304,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   // These are used to define the missing masses later
   TLorentzVector beam;
   TLorentzVector proton_pion_1, proton_pion_2, proton_pion_3;
+  TLorentzVector neutron_pion_1, neutron_pion_2, neutron_pion_3;
   TLorentzVector cascade_12, cascade_13, cascade_23;
 
   // Count the number of good combinations per event
@@ -401,7 +426,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
     for(Int_t j=0; j<Nparticles; j++){
 
       // Calculating the mass for each particle using their beta and momentum
-      Mass = sqrt((pow(v_p4->at(j).Rho(),2) / (pow(v_beta.at(j),2))) - pow(v_p4->at(j).Rho(),2));
+      Mass = sqrt((pow(v_p4->at(j).Rho(),2) / (pow(v_beta->at(j),2))) - pow(v_p4->at(j).Rho(),2));
 
       // Filling histogram to show the different regions hit
       hregion->Fill(v_region->at(j));
@@ -619,6 +644,17 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
     {
       hkaonpno_topology_8->Fill(v_kp.size());
 
+      h_delta_beta_neutron->Fill(v_delta_beta_neutron.at(0),v_neutron.at(0).Rho());
+      h_delta_beta_proton->Fill(v_delta_beta_pr.at(0),v_pr.at(0).Rho());
+      h_delta_beta_pim_1->Fill(v_delta_beta_pim.at(0),v_pim.at(0).Rho());
+      h_delta_beta_pim_2->Fill(v_delta_beta_pim.at(1),v_pim.at(0).Rho());
+      h_delta_beta_pim_3->Fill(v_delta_beta_pim.at(2),v_pim.at(0).Rho());
+
+      // Cutting on the delta beta of the charged particles
+      if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
+      fabs(v_delta_beta_pim.at(2)) > 0.02 || fabs(v_delta_beta_pr.at(0)) > 0.02) continue;
+
+
       //////////////////////////////////////////////////////////////////////////////
       //// Calculating invariant mass combinations    //////////////////////////////
       //////////////////////////////////////////////////////////////////////////////
@@ -642,8 +678,12 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
       //// Checking possible invariant mass combinations    ////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
+      // Checking that at least one produces a reaonable lambda
+      if(proton_pion_1.M() > 1.16 && proton_pion_2.M() > 1.16 && proton_pion_3.M() > 1.16) continue;
+
       // Filling histogram with all proton pion invariant masses
       h_proton_pion_pairs->Fill(proton_pion_1.M(), proton_pion_2.M(), proton_pion_3.M());
+      h_neutron_pion_pairs->Fill(neutron_pion_1.M(), neutron_pion_2.M(), neutron_pion_3.M());
       h_inv_cascades->Fill(cascade_12.M(), cascade_13.M(), cascade_23.M());
 
       // Resetting number of good combinations for each event
@@ -651,24 +691,23 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
       //////////////////////////////////////////////////////////////////////////////
       // Check if pion 1 is from lambda
-      if(proton_pion_1 < 1.18){
+      if(proton_pion_1.M() < 1.16){
 
         // Check if pion 1 and 2 are from cascade
-        if(cascade_12 < 1.4){
+        if(cascade_12.M() < 1.45){
 
           // Check if pion 3 is from sigma
-          if(neutron_pion_3 > 1.18 && neutron_pion_3 < 1.27){
-            Good_Combinations++;
-
+          if(neutron_pion_3.M() > 1.16 && neutron_pion_3.M() < 1.27){
+            h_invariant_mass_123->Fill(proton_pion_1.M(), cascade_12.M(), neutron_pion_3.M());
           }
         }
 
         // Check if pion 1 and 3 are from cascade
-        else if(cascade_13 < 1.4){
+        else if(cascade_13.M() < 1.45){
 
           // Check if pion 2 is from sigma
-          if(neutron_pion_2 > 1.18 && neutron_pion_2 < 1.27){
-            Good_Combinations++;
+          if(neutron_pion_2.M() > 1.16 && neutron_pion_2.M() < 1.27){
+            h_invariant_mass_132->Fill(proton_pion_1.M(), cascade_13.M(), neutron_pion_2.M());
 
           }
         }
@@ -676,24 +715,24 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
       //////////////////////////////////////////////////////////////////////////////
       // Check if pion 2 is from lambda
-      if(proton_pion_2 < 1.18){
+      if(proton_pion_2.M() < 1.16){
 
         // Check if pion 1 and 2 are from cascade
-        if(cascade_12 < 1.4){
+        if(cascade_12.M() < 1.45){
 
           // Check if pion 3 is from sigma
-          if(neutron_pion_3 > 1.18 && neutron_pion_3 < 1.27){
-            Good_Combinations++;
+          if(neutron_pion_3.M() > 1.16 && neutron_pion_3.M() < 1.27){
+            h_invariant_mass_213->Fill(proton_pion_2.M(), cascade_12.M(), neutron_pion_3.M());
 
           }
         }
 
         // Check if pion 2 and 3 are from cascade
-        else if(cascade_23 < 1.4){
+        else if(cascade_23.M() < 1.45){
 
           // Check if pion 1 is from sigma
-          if(neutron_pion_1 > 1.18 && neutron_pion_1 < 1.27){
-            Good_Combinations++;
+          if(neutron_pion_1.M() > 1.16 && neutron_pion_1.M() < 1.27){
+            h_invariant_mass_231->Fill(proton_pion_2.M(), cascade_23.M(), neutron_pion_1.M());
 
           }
         }
@@ -701,30 +740,27 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
       //////////////////////////////////////////////////////////////////////////////
       // Check if pion 3 is from lambda
-      if(proton_pion_3 < 1.18){
+      if(proton_pion_3.M() < 1.16){
 
         // Check if pion 1 and 3 are from cascade
-        if(cascade_13 < 1.4){
+        if(cascade_13.M() < 1.45){
 
           // Check if pion 2 is from sigma
-          if(neutron_pion_2 > 1.18 && neutron_pion_2 < 1.27){
-            Good_Combinations++;
+          if(neutron_pion_2.M() > 1.16 && neutron_pion_2.M() < 1.27){
+            h_invariant_mass_312->Fill(proton_pion_3.M(), cascade_13.M(), neutron_pion_2.M());
 
           }
         }
 
         // Check if pion 2 and 3 are from cascade
-        else if(cascade_23 < 1.4){
+        else if(cascade_23.M() < 1.45){
 
           // Check if pion 1 is from sigma
-          if(neutron_pion_1 > 1.18 && neutron_pion_1 < 1.27){
-            Good_Combinations++;
-
+          if(neutron_pion_1.M() > 1.16 && neutron_pion_1.M() < 1.27){
+            h_invariant_mass_321->Fill(proton_pion_3.M(), cascade_23.M(), neutron_pion_1.M());
           }
         }
       }
-
-      if(Good_Combinations > 0) cout<<"Combinations "<<Good_Combinations<<endl;
     }
   }
   fileOutput1.Write();
