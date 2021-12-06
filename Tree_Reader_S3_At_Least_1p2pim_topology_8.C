@@ -36,9 +36,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
   Quantity<<"Total";
   Topology<<"Topology_8";
-  Additional_Info<<"";
-  Date<<"05122021";
-  Version<<"05";
+  Additional_Info<<"_good_pions_";
+  Date<<"06122021";
+  Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
   Topology.str().c_str()<<Additional_Info.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -120,11 +120,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
-  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,-1,1,200,0,12);
-  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,-1,1,200,0,12);
-  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
-  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
-  auto* h_delta_beta_neutron = new TH2F("h_delta_beta_neutron","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
+  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,0,12,200,-1,1);
+  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,0,12,200,-1,1);
+  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
+  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
+  auto* h_delta_beta_neutron = new TH2F("h_delta_beta_neutron","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
 
   // Analysis Plots
   auto* h_proton_pion_pairs = new TH3F("h_proton_pion_pairs",
@@ -514,19 +514,23 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         vertex_pim.SetXYZT(v_vertex->at(j).X(), v_vertex->at(j).Y(), v_vertex->at(j).Z(), vertex_time_pim);
         region_pim = v_region->at(j);
 
-        // Pushing back all that iformation into the vectors
-        // Again this is done so you can store information on multiple particles
-        // of the same type in one place
-        v_pim.push_back(pim);
-        v_beta_tof_pim.push_back(beta_tof_pim);
-        v_P_pim.push_back(P_pim);
-        v_path_pim.push_back(path_pim);
-        v_TOF_pim.push_back(TOF_pim);
-        v_beta_calc_pim.push_back(beta_calc_pim);
-        v_delta_beta_pim.push_back(delta_beta_pim);
-        v_vertex_time_pim.push_back(vertex_time_pim);
-        v_vertex_pim.push_back(vertex_pim);
-        v_region_pim.push_back(region_pim);
+        // Only looking at pions with good delta beta values
+        if(fabs(delta_beta_pim) < 0.02){
+
+          // Pushing back all that iformation into the vectors
+          // Again this is done so you can store information on multiple particles
+          // of the same type in one place
+          v_pim.push_back(pim);
+          v_beta_tof_pim.push_back(beta_tof_pim);
+          v_P_pim.push_back(P_pim);
+          v_path_pim.push_back(path_pim);
+          v_TOF_pim.push_back(TOF_pim);
+          v_beta_calc_pim.push_back(beta_calc_pim);
+          v_delta_beta_pim.push_back(delta_beta_pim);
+          v_vertex_time_pim.push_back(vertex_time_pim);
+          v_vertex_pim.push_back(vertex_pim);
+          v_region_pim.push_back(region_pim);
+        }
       }
 
       // protons
