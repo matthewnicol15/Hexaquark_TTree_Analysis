@@ -644,11 +644,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
     {
       hkaonpno_topology_8->Fill(v_kp.size());
 
-      h_delta_beta_neutron->Fill(v_delta_beta_neutron.at(0),v_neutron.at(0).Rho());
-      h_delta_beta_proton->Fill(v_delta_beta_pr.at(0),v_pr.at(0).Rho());
-      h_delta_beta_pim_1->Fill(v_delta_beta_pim.at(0),v_pim.at(0).Rho());
-      h_delta_beta_pim_2->Fill(v_delta_beta_pim.at(1),v_pim.at(0).Rho());
-      h_delta_beta_pim_3->Fill(v_delta_beta_pim.at(2),v_pim.at(0).Rho());
+      h_delta_beta_neutron->Fill(v_neutron.at(0).Rho(),v_delta_beta_neutron.at(0));
+      h_delta_beta_proton->Fill(v_pr.at(0).Rho(),v_delta_beta_pr.at(0));
+      h_delta_beta_pim_1->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(0));
+      h_delta_beta_pim_2->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(1));
+      h_delta_beta_pim_3->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(2));
 
       // Cutting on the delta beta of the charged particles
       if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
