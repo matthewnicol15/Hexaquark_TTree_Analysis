@@ -36,7 +36,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Additional_information<<"_proton_smear_";
   Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
   Quantity<<"";
-  Date<<"25112021";
+  Date<<"08122021";
   Version<<"01";
 
   Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_"<<Additional_information.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -748,7 +748,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
         h_delta_beta_kp_s1_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
 
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95)){
+        if(fabs(v_delta_beta_kp.at(0))<0.02){
           hmiss_1_a__S1_kp_1->Fill(miss1.M(),v_Mass_kp.at(0));
 
           hmass_S1_kp_1->Fill(v_Mass_kp.at(0));
@@ -828,9 +828,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s2_2FD->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
 
 
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 &&
-        (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) &&
-        (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95)){
+        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02){
           hmiss_s2_a__S2_kp_1__S2_kp_2->Fill(miss_s2.M(), v_Mass_kp.at(0), v_Mass_kp.at(1));
           hmass_S2_kp_1->Fill(v_Mass_kp.at(0));
           hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
@@ -854,7 +852,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s3_3FD->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
 
 
-        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && fabs(v_delta_beta_kp.at(2))<0.02 && (v_kp.at(0).Rho() < 0.55 || v_kp.at(0).Rho() > 0.95) && (v_kp.at(1).Rho() < 0.55 || v_kp.at(1).Rho() > 0.95) && (v_kp.at(2).Rho() < 0.55 || v_kp.at(2).Rho() > 0.95)){
+        if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && fabs(v_delta_beta_kp.at(2))<0.02){
           hmiss_s3_a->Fill(miss_s3.M());
           hmass_S3_kp_1_a->Fill(v_Mass_kp.at(0));
           hmass_S3_kp_2_a->Fill(v_Mass_kp.at(1));
