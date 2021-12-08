@@ -33,11 +33,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_5(){
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
-  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
+  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_5";
   Additional_Info<<"";
-  Date<<"06122021";
+  Date<<"08122021";
   Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
@@ -51,9 +51,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_5(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_Total_06122021_01.root");
   // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_02122021");
+  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_06122021");
 
 
   // Creating components to read from TTree
@@ -120,10 +120,10 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_5(){
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
-  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,-1,1,200,0,12);
-  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,-1,1,200,0,12);
-  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
-  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,-1,1,200,0,12);
+  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,0,12,200,-1,1);
+  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,0,12,200,-1,1);
+  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
+  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
 
   // Analysis Plots
   auto* h_proton_pion_pairs = new TH3F("h_proton_pion_pairs",
@@ -617,9 +617,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_5(){
 
     beam = (TLorentzVector)*readbeam;
     // Setting the beam momentum based on run
-    beam.SetXYZM(0,0,10.4,0);
-    // if(readrunno < 6400) beam.SetXYZM(0,0,10.6,0);
-    // else beam.SetXYZM(0,0,10.2,0);
+    if(readrunno < 11394)beam.SetXYZM(0,0,10.2129,0);
+    else beam.SetXYZM(0,0,10.3894,0);
     hbeam->Fill(beam.Rho());
 
     //////////////////////////////////////////////////////////////////////////////
@@ -639,8 +638,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_5(){
       h_delta_beta_pim_3->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(2));
 
       // Cutting on the delta beta of the charged particles
-      if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
-      fabs(v_delta_beta_pim.at(2)) > 0.02 || fabs(v_delta_beta_pr.at(0)) > 0.02) continue;
+      // if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
+      // fabs(v_delta_beta_pim.at(2)) > 0.02 || fabs(v_delta_beta_pr.at(0)) > 0.02) continue;
 
 
       //////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
   Quantity<<"Total";
   Topology<<"Topology_7";
   Date<<"08122021";
-  Version<<"01";
+  Version<<"02";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -677,9 +677,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
 
     beam = (TLorentzVector)*readbeam;
     // Setting the beam momentum based on run
-    beam.SetXYZM(0,0,10.4,0);
-    // if(readrunno < 6400) beam.SetXYZM(0,0,10.6,0);
-    // else beam.SetXYZM(0,0,10.2,0);
+    if(readrunno < 11394)beam.SetXYZM(0,0,10.2129,0);
+    else beam.SetXYZM(0,0,10.3894,0);
     hbeam->Fill(beam.Rho());
 
     //////////////////////////////////////////////////////////////////////////////

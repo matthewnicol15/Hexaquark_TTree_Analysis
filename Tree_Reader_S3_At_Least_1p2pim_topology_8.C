@@ -33,11 +33,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
-  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
+  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_8";
   Additional_Info<<"_good_pions_";
-  Date<<"06122021";
+  Date<<"08122021";
   Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
@@ -51,9 +51,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_Total_06122021_01.root");
   // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_02122021");
+  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_06122021");
 
 
   // Creating components to read from TTree
@@ -120,11 +120,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
-  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,0,12,200,-1,1);
-  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,0,12,200,-1,1);
-  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
-  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
-  auto* h_delta_beta_neutron = new TH2F("h_delta_beta_neutron","#Delta#Beta of #pi^{-} (3)",200,0,12,200,-1,1);
+  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1)",200,0,12,100,-0.2,0.2);
+  auto* h_delta_beta_pim_2 = new TH2F("h_delta_beta_pim_2","#Delta#Beta of #pi^{-} (2)",200,0,12,100,-0.2,0.2);
+  auto* h_delta_beta_pim_3 = new TH2F("h_delta_beta_pim_3","#Delta#Beta of #pi^{-} (3)",200,0,12,100,-0.2,0.2);
+  auto* h_delta_beta_proton = new TH2F("h_delta_beta_proton","#Delta#Beta of p",200,0,12,100,-0.2,0.2);
+  auto* h_delta_beta_neutron = new TH2F("h_delta_beta_neutron","#Delta#Beta of n",200,0,12,100,-0.2,0.2);
 
   // Analysis Plots
   auto* h_proton_pion_pairs = new TH3F("h_proton_pion_pairs",
@@ -515,7 +515,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         region_pim = v_region->at(j);
 
         // Only looking at pions with good delta beta values
-        if(fabs(delta_beta_pim) < 0.02){
+        if(fabs(delta_beta_pim) < 0.04){
 
           // Pushing back all that iformation into the vectors
           // Again this is done so you can store information on multiple particles
@@ -599,7 +599,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
 
       // neutron
-      else if(v_PID->at(j)==2112){
+      // Looking at all neutrals instead of PID
+      else if(v_charge->at(j)==0){
+        // else if(v_PID->at(j)==2112){
         // Setting the 4-vector and assigning mass from PDG
         neutron.SetXYZM(v_p4->at(j).Px(),v_p4->at(j).Py(),v_p4->at(j).Pz(),db->GetParticle(2112)->Mass());
         TOF_neutron = v_time->at(j); // Measured time
@@ -614,27 +616,30 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         vertex_neutron.SetXYZT(v_vertex->at(j).X(), v_vertex->at(j).Y(), v_vertex->at(j).Z(), vertex_time_neutron);
         region_neutron = v_region->at(j);
 
-        // Pushing back all that iformation into the vectors
-        // Again this is done so you can store information on multiple particles
-        // of the same type in one place
-        v_neutron.push_back(neutron);
-        v_beta_tof_neutron.push_back(beta_tof_neutron);
-        v_P_neutron.push_back(P_neutron);
-        v_path_neutron.push_back(path_neutron);
-        v_TOF_neutron.push_back(TOF_neutron);
-        v_beta_calc_neutron.push_back(beta_calc_neutron);
-        v_delta_beta_neutron.push_back(delta_beta_neutron);
-        v_vertex_time_neutron.push_back(vertex_time_neutron);
-        v_vertex_neutron.push_back(vertex_neutron);
-        v_region_neutron.push_back(region_neutron);
+        // Checking it is not a photon
+        if(beta_tof_neutron < 0.95){
+
+          // Pushing back all that iformation into the vectors
+          // Again this is done so you can store information on multiple particles
+          // of the same type in one place
+          v_neutron.push_back(neutron);
+          v_beta_tof_neutron.push_back(beta_tof_neutron);
+          v_P_neutron.push_back(P_neutron);
+          v_path_neutron.push_back(path_neutron);
+          v_TOF_neutron.push_back(TOF_neutron);
+          v_beta_calc_neutron.push_back(beta_calc_neutron);
+          v_delta_beta_neutron.push_back(delta_beta_neutron);
+          v_vertex_time_neutron.push_back(vertex_time_neutron);
+          v_vertex_neutron.push_back(vertex_neutron);
+          v_region_neutron.push_back(region_neutron);
+        }
       }
     }
 
     beam = (TLorentzVector)*readbeam;
     // Setting the beam momentum based on run
-    beam.SetXYZM(0,0,10.4,0);
-    // if(readrunno < 6400) beam.SetXYZM(0,0,10.6,0);
-    // else beam.SetXYZM(0,0,10.2,0);
+    if(readrunno < 11394)beam.SetXYZM(0,0,10.2129,0);
+    else beam.SetXYZM(0,0,10.3894,0);
     hbeam->Fill(beam.Rho());
 
     //////////////////////////////////////////////////////////////////////////////
@@ -655,8 +660,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
       h_delta_beta_pim_3->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(2));
 
       // Cutting on the delta beta of the charged particles
-      if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
-      fabs(v_delta_beta_pim.at(2)) > 0.02 || fabs(v_delta_beta_pr.at(0)) > 0.02) continue;
+      if(fabs(v_delta_beta_pim.at(0)) > 0.04 || fabs(v_delta_beta_pim.at(1)) > 0.04 ||
+      fabs(v_delta_beta_pim.at(2)) > 0.04 || fabs(v_delta_beta_pr.at(0)) > 0.04) continue;
 
 
       //////////////////////////////////////////////////////////////////////////////

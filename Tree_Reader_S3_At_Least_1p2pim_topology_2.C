@@ -31,11 +31,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
-  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
+  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_2";
-  Date<<"06122021";
-  Version<<"02";
+  Date<<"08122021";
+  Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -48,9 +48,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_Total_06122021_01.root");
   // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_02122021");
+  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_06122021");
 
 
   // Creating components to read from TTree
@@ -681,9 +681,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
 
     beam = (TLorentzVector)*readbeam;
     // Setting the beam momentum based on run
-    beam.SetXYZM(0,0,10.4,0);
-    // if(readrunno < 6400) beam.SetXYZM(0,0,10.6,0);
-    // else beam.SetXYZM(0,0,10.2,0);
+    if(readrunno < 11394)beam.SetXYZM(0,0,10.2129,0);
+    else beam.SetXYZM(0,0,10.3894,0);
     hbeam->Fill(beam.Rho());
 
     //////////////////////////////////////////////////////////////////////////////
@@ -701,7 +700,6 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
       h_delta_beta_proton->Fill(v_pr.at(0).Rho(),v_delta_beta_pr.at(0));
       h_delta_beta_pim_1->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(0));
       h_delta_beta_pim_2->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(1));
-      h_delta_beta_km->Fill(v_km.at(0).Rho(),v_delta_beta_km.at(0));
 
       //////////////////////////////////////////////////////////////////////////////
       //// Calculating invariant mass combinations    //////////////////////////////
@@ -721,83 +719,14 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
       //////////////////////////////////////////////////////////////////////////////
 
       // Cutting on the delta beta of certain particles
-      if(fabs(v_delta_beta_km.at(0)) > 0.02) continue;
+      if(fabs(v_delta_beta_km.at(0)) > 0.02 || v_km.at(0).Rho() < 0.9) continue;
+      h_delta_beta_km->Fill(v_km.at(0).Rho(),v_delta_beta_km.at(0));
 
       // Filling histogram with all proton pion invariant masses
       h_proton_pion_pairs->Fill(proton_pion_1.M(), proton_pion_2.M());
       h_inv_omegas->Fill(omega_1.M(), omega_2.M());
       h_invariant_mass_1->Fill(proton_pion_1.M(),omega_1.M());
       h_invariant_mass_2->Fill(proton_pion_2.M(),omega_2.M());
-
-
-      //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 1 is from lambda
-      // if(proton_pion_1 < 1.18){
-      //
-      //   // Check if pion 1 and 2 are from cascade
-      //   if(omega_1 < 1.4){
-      //
-      //     // Check if pion 3 is from sigma
-      //     if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 1 and 3 are from cascade
-      //   else if(omega_2 < 1.4){
-      //
-      //     // Check if pion 2 is from sigma
-      //     if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-      //
-      //     }
-      //   }
-      // }
-      //
-      // //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 2 is from lambda
-      // if(proton_pion_2 < 1.18){
-      //
-      //   // Check if pion 1 and 2 are from cascade
-      //   if(omega_1 < 1.4){
-      //
-      //     // Check if pion 3 is from sigma
-      //     if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 2 and 3 are from cascade
-      //   else if(cascade_23 < 1.4){
-      //
-      //     // Check if pion 1 is from sigma
-      //     if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-      //
-      //     }
-      //   }
-      // }
-      //
-      // //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 3 is from lambda
-      // if(proton_pion_3 < 1.18){
-      //
-      //   // Check if pion 1 and 3 are from cascade
-      //   if(omega_2 < 1.4){
-      //
-      //     // Check if pion 2 is from sigma
-      //     if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 2 and 3 are from cascade
-      //   else if(cascade_23 < 1.4){
-      //
-      //     // Check if pion 1 is from sigma
-      //     if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-      //
-      //     }
-      //   }
-      // }
 
     }
   }
