@@ -31,10 +31,10 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
-  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_030821_01";
+  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_7";
-  Date<<"06122021";
+  Date<<"08122021";
   Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
@@ -48,9 +48,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_02122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_Total_06122021_01.root");
   // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_02122021");
+  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_06122021");
 
 
   // Creating components to read from TTree
@@ -124,9 +124,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
   auto* h_inv_omegas = new TH2F("h_inv_omegas",
   "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV]",400,1,3,400,1,3);
   auto* h_invariant_mass_1 = new TH3F("h_invariant_mass_1",
-  "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV];M(n #pi^{-}) [GeV]",400,1,1.8,400,1,1.8,400,1,1.8);
+  "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV];M(n #pi^{-}) [GeV]",200,1,1.8,200,1.5,2.3,200,1,1.8);
   auto* h_invariant_mass_2 = new TH3F("h_invariant_mass_2",
-  "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV];M(n #pi^{-}) [GeV]",400,1,1.8,400,1,1.8,400,1,1.8);
+  "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV];M(n #pi^{-}) [GeV]",200,1,1.8,200,1.5,2.3,200,1,1.8);
 
   //////////////////////////////////////////////////////////////////////////////
   //// Making variables    ///////////////////////////////////////////////
@@ -713,85 +713,23 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
       //// Checking possible invariant mass combinations    ////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
-      // Checking that at least one produces a reaonable lambda
-      if(proton_pion_1.M() > 1.16 && proton_pion_2.M() > 1.16) continue;
+
 
       // Filling histogram with all proton pion invariant masses
       h_proton_pion_pairs->Fill(proton_pion_1.M(), proton_pion_2.M());
       h_inv_omegas->Fill(omega_1.M(), omega_2.M());
 
-      h_invariant_mass_1->Fill(proton_pion_1.M(),omega_1.M(),delta_2.M());
-      h_invariant_mass_2->Fill(proton_pion_2.M(),omega_2.M(),delta_1.M());
+      // Checking if pion 1 produces a reasonable lambda
+      if(proton_pion_1.M() < 1.16){
 
-      //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 1 is from lambda
-      // if(proton_pion_1 < 1.18){
-      //
-      //   // Check if pion 1 and 2 are from cascade
-      //   if(omega_1 < 1.4){
-      //
-      //     // Check if pion 3 is from sigma
-      //     if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 1 and 3 are from cascade
-      //   else if(omega_2 < 1.4){
-      //
-      //     // Check if pion 2 is from sigma
-      //     if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-      //
-      //     }
-      //   }
-      // }
-      //
-      // //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 2 is from lambda
-      // if(proton_pion_2 < 1.18){
-      //
-      //   // Check if pion 1 and 2 are from cascade
-      //   if(omega_1 < 1.4){
-      //
-      //     // Check if pion 3 is from sigma
-      //     if(proton_pion_3 > 1.18 && proton_pion_3 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 2 and 3 are from cascade
-      //   else if(cascade_23 < 1.4){
-      //
-      //     // Check if pion 1 is from sigma
-      //     if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-      //
-      //     }
-      //   }
-      // }
-      //
-      // //////////////////////////////////////////////////////////////////////////////
-      // // Check if pion 3 is from lambda
-      // if(proton_pion_3 < 1.18){
-      //
-      //   // Check if pion 1 and 3 are from cascade
-      //   if(omega_2 < 1.4){
-      //
-      //     // Check if pion 2 is from sigma
-      //     if(proton_pion_2 > 1.18 && proton_pion_2 < 1.27){
-      //
-      //     }
-      //   }
-      //
-      //   // Check if pion 2 and 3 are from cascade
-      //   else if(cascade_23 < 1.4){
-      //
-      //     // Check if pion 1 is from sigma
-      //     if(proton_pion_1 > 1.18 && proton_pion_1 < 1.27){
-      //
-      //     }
-      //   }
-      // }
+        h_invariant_mass_1->Fill(proton_pion_1.M(),omega_1.M(),delta_2.M());
+      }
 
+      // Checking if pion 2 produces a reasonable lambda
+      if(proton_pion_2.M() < 1.16){
+
+        h_invariant_mass_2->Fill(proton_pion_2.M(),omega_2.M(),delta_1.M());
+      }
     }
   }
   fileOutput1.Write();
