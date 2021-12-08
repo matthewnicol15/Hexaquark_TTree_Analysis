@@ -35,7 +35,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
   Quantity<<"Total";
   Topology<<"Topology_2";
   Date<<"08122021";
-  Version<<"01";
+  Version<<"02";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -719,7 +719,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_2(){
       //////////////////////////////////////////////////////////////////////////////
 
       // Cutting on the delta beta of certain particles
-      if(fabs(v_delta_beta_km.at(0)) > 0.02 || v_km.at(0).Rho() < 0.9) continue;
+      if(fabs(v_delta_beta_km.at(0)) > 0.02) continue;
       h_delta_beta_km->Fill(v_km.at(0).Rho(),v_delta_beta_km.at(0));
 
       // Filling histogram with all proton pion invariant masses
