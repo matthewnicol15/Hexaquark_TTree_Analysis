@@ -37,7 +37,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
   Quantity<<"";
   Date<<"08122021";
-  Version<<"01";
+  Version<<"02";
 
   Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_"<<Additional_information.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
@@ -156,6 +156,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hkaon=new TH1D("hkaon","kaon momentum; kaon momentum [GeV];Counts",200,0,10);
   auto* hkaons=new TH1D("hkaons","kaon numbers; Kaons in event;Counts",6,0,6);
   auto* hproton=new TH1D("hproton","proton momentum; proton momentum [GeV];Counts",200,0,10);
+
+  // Histograms looking at kaon properties
   auto* hmass_S1_kp_1=new TH1F("hmass_S1_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
   auto* hmass_S2_kp_1=new TH1F("hmass_S2_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
   auto* hmass_S2_kp_2=new TH1F("hmass_S2_kp_2","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
@@ -165,6 +167,12 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hmass_S3_kp_1_a=new TH1F("hmass_S3_kp_1_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
   auto* hmass_S3_kp_2_a=new TH1F("hmass_S3_kp_2_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
   auto* hmass_S3_kp_3_a=new TH1F("hmass_S3_kp_3_a","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
+  auto* h_theta_s1_kp = new TH1F("h_theta_s1_kp","K^{+} #Theta distribution",180,0,180);
+  auto* h_theta_s2_kp1 = new TH1F("h_theta_s2_kp1","K^{+} #Theta distribution",180,0,180);
+  auto* h_theta_s2_kp2 = new TH1F("h_theta_s2_kp2","K^{+} #Theta distribution",180,0,180);
+  auto* h_theta_s3_kp1 = new TH1F("h_theta_s3_kp1","K^{+} #Theta distribution",180,0,180);
+  auto* h_theta_s3_kp2 = new TH1F("h_theta_s3_kp2","K^{+} #Theta distribution",180,0,180);
+  auto* h_theta_s3_kp3 = new TH1F("h_theta_s3_kp3","K^{+} #Theta distribution",180,0,180);
 
   // Histograms for strangeness 1 channel
   auto* hmiss_mass_all=new TH1D("miss_all","MM^2(e' K^{+} p #pi^{-});MM^2(e' K^{+} p #pi^{-}) [GeV];Counts",200,-1,1);
@@ -745,7 +753,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s1_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
 
         if(v_region_kp.at(0)!=1) continue;
-
+        // Looking at the angular distribution for forward going kaons
+        h_theta_s1_kp->Fill(v_kp.at(0).Theta() * TMath::RadToDeg());
+        // Looking at delta beta vs momentum for the kaon
         h_delta_beta_kp_s1_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
 
         if(fabs(v_delta_beta_kp.at(0))<0.02){
@@ -827,6 +837,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s2_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
         h_delta_beta_kp_s2_2FD->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
 
+        // Looking at the angular distribution for forward going kaons
+        h_theta_s2_kp1->Fill(v_kp.at(0).Theta() * TMath::RadToDeg());
+        h_theta_s2_kp2->Fill(v_kp.at(1).Theta() * TMath::RadToDeg());
 
         if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02){
           hmiss_s2_a__S2_kp_1__S2_kp_2->Fill(miss_s2.M(), v_Mass_kp.at(0), v_Mass_kp.at(1));
@@ -851,6 +864,10 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s3_2FD->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
         h_delta_beta_kp_s3_3FD->Fill(v_kp.at(2).Rho(),v_delta_beta_kp.at(2));
 
+        // Looking at the angular distribution for forward going kaons
+        h_theta_s3_kp1->Fill(v_kp.at(0).Theta() * TMath::RadToDeg());
+        h_theta_s3_kp2->Fill(v_kp.at(1).Theta() * TMath::RadToDeg());
+        h_theta_s3_kp3->Fill(v_kp.at(2).Theta() * TMath::RadToDeg());
 
         if(fabs(v_delta_beta_kp.at(0))<0.02 && fabs(v_delta_beta_kp.at(1))<0.02 && fabs(v_delta_beta_kp.at(2))<0.02){
           hmiss_s3_a->Fill(miss_s3.M());
