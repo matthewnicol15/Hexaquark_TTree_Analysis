@@ -23,7 +23,23 @@ void Tree_Event_Selection_Test(){
   int counter=0;
 
   // Data files to process
-  TString inputFile("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/*.hipo");
+  // TString inputFile("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_005032.hipo");
+  TString inputFile("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011324*.hipo");
+  TString inputFile2("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011331*.hipo");
+  // TString inputFile3("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011347*.hipo");
+  TString inputFile4("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011362*.hipo");
+  TString inputFile5("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011383*.hipo");
+  TString inputFile6("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011397*.hipo");
+  // TString inputFile7("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011412*.hipo");
+  TString inputFile8("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011420*.hipo");
+  TString inputFile9("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011434*.hipo");
+  // TString inputFile10("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011442*.hipo");
+  TString inputFile11("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011451*.hipo");
+  TString inputFile12("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011468*.hipo");
+  // TString inputFile13("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011476*.hipo");
+  // TString inputFile14("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011486*.hipo");
+  TString inputFile15("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011496*.hipo");
+  // TString inputFile16("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/rec_clas_011506*.hipo");
 
 
   gROOT->ProcessLine(".L /home/matthewn/Documents/Macros/Loader.C+"); // Uses Loader.C file, make sure Loader.C is in this file path
@@ -32,6 +48,21 @@ void Tree_Event_Selection_Test(){
   // Creating a chain for the data from different files
   TChain fake("hipo");
   fake.Add(inputFile.Data());
+  fake.Add(inputFile2.Data());
+  // fake.Add(inputFile3.Data());
+  fake.Add(inputFile4.Data());
+  fake.Add(inputFile5.Data());
+  fake.Add(inputFile6.Data());
+  // fake.Add(inputFile7.Data());
+  fake.Add(inputFile8.Data());
+  fake.Add(inputFile9.Data());
+  // fake.Add(inputFile10.Data());
+  fake.Add(inputFile11.Data());
+  fake.Add(inputFile12.Data());
+  // fake.Add(inputFile13.Data());
+  // fake.Add(inputFile14.Data());
+  fake.Add(inputFile15.Data());
+  // fake.Add(inputFile16.Data());
 
   // Shortcut to a list of all the input file names
   auto files=fake.GetListOfFiles();
@@ -68,11 +99,11 @@ void Tree_Event_Selection_Test(){
   Int_t positive_charge_tracks; // Count the number of positive charge tracks
   Int_t negative_charge_tracks; // Count the number of negative charge tracks
   Int_t eFD_Events = 0; // Count the number of negative charge tracks
-  Int_t topology_1 = 0, topology_2 = 0, topology_3 = 0; // Count the number of negative charge tracks
+  Int_t topology_1 = 0, topology_2 = 0, topology_3 = 0, topology_4 = 0, topology_5 = 0; // Count the number of negative charge tracks
 
 
   // Going over all the input files listed above
-  for(Int_t i=0; i<10; i++){
+  for(Int_t i = 0 ; i < files->GetEntries(); i++){
 
     // Create the CLAS12 event reader
     clas12reader c12(files->At(i)->GetTitle());
@@ -125,6 +156,7 @@ void Tree_Event_Selection_Test(){
           negative_charge_tracks++;
         }
 
+        else if(PID == 2112) neutronno++;
 
         // Recording the region the particles hit
         if(p->getRegion()==FT){
@@ -142,16 +174,19 @@ void Tree_Event_Selection_Test(){
 
 
       // Count the number of events in each topology
-      if(electronFD == 1){
+      if(elno == 1 && electronFD == 1){
         eFD_Events++;
         if(kaonpno > 2) topology_1++;
         if(protonno > 0 && pimno > 1) topology_2++;
         if(positive_charge_tracks > 0 && negative_charge_tracks > 2) topology_3++;
+        if(neutronno > 0 && protonno > 0 && pimno > 1) topology_4++;
+        if(kaonpno > 0 && protonno > 0 && pimno > 0) topology_5++;
       }
     }
+    cout<<"eFD "<<eFD_Events<<" topology 1 "<<topology_1<<" topology 2 "<<topology_2<<
+        " topology 3 "<<topology_3<<" topology 4 "<<topology_4<<" topology 5 "<<topology_5<<endl;
   }
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
   std::cout << "Elapsed time: " << elapsed.count()<< " events = "<<counter<< " s\n";
-  cout<<"eFD "<<eFD_Events<<" topology 1 "<<topology_1<<" topology 2 "<<topology_2<<" topology 3 "<<topology_3<<endl;
 }
