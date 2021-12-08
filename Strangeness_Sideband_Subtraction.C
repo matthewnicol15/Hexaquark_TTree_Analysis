@@ -15,8 +15,8 @@
   // Setting the strings for canvas name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Sideband_Subtracted/";
   Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
-  Quantity<<"";\
-  Date<<"30112021";
+  Quantity<<"";
+  Date<<"03122021";
   Version<<"01";
 
   // Setting the output file name
@@ -229,7 +229,7 @@
     cout<<bin<<endl;
 
     if(h_projectionx_S1_sig[bin]->Integral() > 100){
-      cout<<"integral big"<<endl;
+
       // Determine the scaling factor looking at the signal function
       S1_Scaling_Factor_sig = func5->Eval(S1_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S1_sig[bin]->Integral() ;
 
@@ -271,13 +271,13 @@
     cout<<bin<<endl;
 
     if(h_projectionx_S2_sig[bin]->Integral() > 100){
-      cout<<"integral big"<<endl;
+
       // Determine the scaling factor looking at the signal function
       S2_Scaling_Factor_sig = func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
 
 
       // Determine the scaling factor looking at the signal function
-      S2_Scaling_Factor_back = (func3_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) - func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)))/h_projectionx_S2_back[bin]->Integral();
+      S2_Scaling_Factor_back = (func3_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin)) - func5_s2_kp1->Eval(S2_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S2_back[bin]->Integral();
       if(S2_Scaling_Factor_back < 0) S2_Scaling_Factor_back = 0;
 
       // Scale the signal and background histograms accordingly
@@ -298,8 +298,7 @@
   h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
 
 
-  ////////////////////////////////
-  //////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   //// Sideband Subtraction       //////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
@@ -396,6 +395,11 @@
         S2_back_total_func1->Eval(hbackground_total_function->GetBinCenter(back_bin)));
     }
 
+    hbackground_total_function->Scale(S2_miss_mass_total_continous_result->Integral(S2_miss_mass_total_continous_result->FindBin(0.8),
+                                      S2_miss_mass_total_continous_result->FindBin(1.2)) / hbackground_total_function->Integral(
+                                        hbackground_total_function->FindBin(0.8), hbackground_total_function->FindBin(1.2)));
+
+
     // Take away background from total distribution
     S2_miss_mass_total_continous_result->Add(hbackground_total_function, -1);
     // S2_miss_mass_total_continous_result->Add(S2_miss_mass_background_Total_continous, -1);
@@ -456,7 +460,7 @@
 
     S2_miss_mass_total->Rebin(4);
 
-
+S2_miss_mass_Result->Rebin(4);
     //////////////////////////////////////////////////////////////////////////////
     //// Creating lines to show sidebands and resonances    /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
@@ -549,13 +553,14 @@
     // canvas for projections
     auto *c1 = new TCanvas("c1","Comparing two methods",800,800);
     c1->cd();
-    // S2_miss_mass_total_continous_result->Draw();
-    // S2_miss_mass_background_Total_continous->Draw("same,hist,L");
-    S2_miss_mass_total_continous_result->Draw("hist,L");
-    h_projectionx_S2_sig[1]->Draw("hist,L, same");
+    hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
+    ("",S2_Background_Left_Lower_Limit, S2_Background_Right_Upper_Limit,0,zbinmax)->Draw();
+    hbackground_total_function->Draw("same,hist,L");
+    S2_miss_mass_total_continous_result->Draw("same,hist,L");
+    // h_projectionx_S2_sig[1]->Draw("hist,L, same");
     auto *c2 = new TCanvas("c2","Strageness 1 After Sideband Subtraction",800,800);
     c2->cd();
-    S1_miss_mass_total->Draw();
+    // S1_miss_mass_total->Draw();
     // h_projectionx_S1_sig[1]->Draw("same,E1");
     h_projectionx_S1_sig[1]->Draw("same,hist");
     l7->Draw("same");
@@ -583,12 +588,12 @@
     func3_s2_kp1->Draw("same");
     func4_s2_kp1->Draw("same");
     func5_s2_kp1->Draw("same");
-    S2_Peak_Lower_Limit_Line->Draw("same");
-    S2_Peak_Upper_Limit_Line->Draw("same");
-    S2_Back_Left_Lower_Limit_Line->Draw("same");
-    S2_Back_Left_Upper_Limit_Line->Draw("same");
-    S2_Back_Right_Lower_Limit_Line->Draw("same");
-    S2_Back_Right_Upper_Limit_Line->Draw("same");
+    // S2_Peak_Lower_Limit_Line->Draw("same");
+    // S2_Peak_Upper_Limit_Line->Draw("same");
+    // S2_Back_Left_Lower_Limit_Line->Draw("same");
+    // S2_Back_Left_Upper_Limit_Line->Draw("same");
+    // S2_Back_Right_Lower_Limit_Line->Draw("same");
+    // S2_Back_Right_Upper_Limit_Line->Draw("same");
 
 
 
@@ -596,8 +601,9 @@
     auto *c5 = new TCanvas("c5","strangeness 2 After Sideband Subtraction",800,800);
     c5->cd();
     // h_projectionx_S2_back[1]->Draw("hist");
-    S2_miss_mass_total->Draw();
-    h_projectionx_S2_sig[1]->Draw("same,hist");
+    // S2_miss_mass_total->Draw();
+    h_projectionx_S2_sig[1]->Draw("same,hist,L");
+    S2_miss_mass_Result->Draw("same,hist,L");
     l7->Draw("same");
     l8->Draw("same");
     l9->Draw("same");

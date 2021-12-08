@@ -36,9 +36,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_8";
-  Additional_Info<<"_good_pions_";
+  Additional_Info<<"";
   Date<<"08122021";
-  Version<<"01";
+  Version<<"02";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
   Topology.str().c_str()<<Additional_Info.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -515,7 +515,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
         region_pim = v_region->at(j);
 
         // Only looking at pions with good delta beta values
-        if(fabs(delta_beta_pim) < 0.04){
+        // if(fabs(delta_beta_pim) < 0.04){
 
           // Pushing back all that iformation into the vectors
           // Again this is done so you can store information on multiple particles
@@ -530,7 +530,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
           v_vertex_time_pim.push_back(vertex_time_pim);
           v_vertex_pim.push_back(vertex_pim);
           v_region_pim.push_back(region_pim);
-        }
+        // }
       }
 
       // protons
@@ -660,8 +660,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
       h_delta_beta_pim_3->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(2));
 
       // Cutting on the delta beta of the charged particles
-      if(fabs(v_delta_beta_pim.at(0)) > 0.04 || fabs(v_delta_beta_pim.at(1)) > 0.04 ||
-      fabs(v_delta_beta_pim.at(2)) > 0.04 || fabs(v_delta_beta_pr.at(0)) > 0.04) continue;
+      if(fabs(v_delta_beta_pim.at(0)) > 0.02 || fabs(v_delta_beta_pim.at(1)) > 0.02 ||
+      fabs(v_delta_beta_pim.at(2)) > 0.02 || fabs(v_delta_beta_pr.at(0)) > 0.02) continue;
 
 
       //////////////////////////////////////////////////////////////////////////////
