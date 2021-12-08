@@ -38,9 +38,10 @@ void Tree_Maker(){
   auto files=fake.GetListOfFiles();
 
   // Create root file to save TTree in
-  TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_1eFD_at_least_3kp_Tree_06122021_01.root","recreate");
+  TFile f("/volatile/clas12/matthewn/RGB_Spring2020_Inbending_1eFD_at_least_1kp1p1pim_Tree_08122021_05.root","recreate");
+  // TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_06122021_04.root","recreate");
   // Creating TTree object
-  TTree RGB_Spring2020_Inbending_06122021("RGB_Spring2020_Inbending_06122021","it's a tree!");
+  TTree RGB_Spring2019_Inbending_08122021("RGB_Spring2019_Inbending_08122021","it's a tree!");
 
   // Access the PDG database to get information usind PID (e.g db->GetParticle(211)->Mass() for pi^{+} mass)
   auto db=TDatabasePDG::Instance();
@@ -115,32 +116,32 @@ void Tree_Maker(){
   Double_t c = 30; // Speed of light, used to calculate vertex time
 
   // Assign a branch to each measurable and name it
-  RGB_Spring2020_Inbending_06122021.Branch("eventno",&eventno);
-  RGB_Spring2020_Inbending_06122021.Branch("runno",&runno,"runno/I");
-  RGB_Spring2020_Inbending_06122021.Branch("triggerno",&triggerno,"triggerno/I");
-  RGB_Spring2020_Inbending_06122021.Branch("start_time",&start_time);
-  RGB_Spring2020_Inbending_06122021.Branch("p4",&v_p4);
-  RGB_Spring2020_Inbending_06122021.Branch("vertex",&v_vertex);
-  RGB_Spring2020_Inbending_06122021.Branch("beta",&v_beta);
-  RGB_Spring2020_Inbending_06122021.Branch("status",&v_status);
-  RGB_Spring2020_Inbending_06122021.Branch("energy",&v_energy);
-  RGB_Spring2020_Inbending_06122021.Branch("charge",&v_charge);
-  RGB_Spring2020_Inbending_06122021.Branch("PID",&v_PID);
-  RGB_Spring2020_Inbending_06122021.Branch("chi2PID",&v_chi2PID);
-  RGB_Spring2020_Inbending_06122021.Branch("region",&v_region);
-  RGB_Spring2020_Inbending_06122021.Branch("time",&v_time);
-  RGB_Spring2020_Inbending_06122021.Branch("path",&v_path);
-  RGB_Spring2020_Inbending_06122021.Branch("beam",&beam);
-  RGB_Spring2020_Inbending_06122021.Branch("target",&target);
-  RGB_Spring2020_Inbending_06122021.Branch("elno",&elno);
-  RGB_Spring2020_Inbending_06122021.Branch("negative_charge_tracks",&negative_charge_tracks, "neg");
-  RGB_Spring2020_Inbending_06122021.Branch("positive_charge_tracks",&positive_charge_tracks);
-  RGB_Spring2020_Inbending_06122021.Branch("kaonpFD",&kaonpFD);
-  RGB_Spring2020_Inbending_06122021.Branch("electronFD",&electronFD);
+  RGB_Spring2019_Inbending_08122021.Branch("eventno",&eventno);
+  RGB_Spring2019_Inbending_08122021.Branch("runno",&runno,"runno/I");
+  RGB_Spring2019_Inbending_08122021.Branch("triggerno",&triggerno,"triggerno/I");
+  RGB_Spring2019_Inbending_08122021.Branch("start_time",&start_time);
+  RGB_Spring2019_Inbending_08122021.Branch("p4",&v_p4);
+  RGB_Spring2019_Inbending_08122021.Branch("vertex",&v_vertex);
+  RGB_Spring2019_Inbending_08122021.Branch("beta",&v_beta);
+  RGB_Spring2019_Inbending_08122021.Branch("status",&v_status);
+  RGB_Spring2019_Inbending_08122021.Branch("energy",&v_energy);
+  RGB_Spring2019_Inbending_08122021.Branch("charge",&v_charge);
+  RGB_Spring2019_Inbending_08122021.Branch("PID",&v_PID);
+  RGB_Spring2019_Inbending_08122021.Branch("chi2PID",&v_chi2PID);
+  RGB_Spring2019_Inbending_08122021.Branch("region",&v_region);
+  RGB_Spring2019_Inbending_08122021.Branch("time",&v_time);
+  RGB_Spring2019_Inbending_08122021.Branch("path",&v_path);
+  RGB_Spring2019_Inbending_08122021.Branch("beam",&beam);
+  RGB_Spring2019_Inbending_08122021.Branch("target",&target);
+  RGB_Spring2019_Inbending_08122021.Branch("elno",&elno);
+  RGB_Spring2019_Inbending_08122021.Branch("negative_charge_tracks",&negative_charge_tracks, "neg");
+  RGB_Spring2019_Inbending_08122021.Branch("positive_charge_tracks",&positive_charge_tracks);
+  RGB_Spring2019_Inbending_08122021.Branch("kaonpFD",&kaonpFD);
+  RGB_Spring2019_Inbending_08122021.Branch("electronFD",&electronFD);
 
 
   // Going over all the input files listed above
-  for(Int_t i=30000; i<files->GetEntries(); i++){
+  for(Int_t i=28000; i < files->GetEntries(); i++){
 
     // Create the CLAS12 event reader
     clas12reader c12(files->At(i)->GetTitle());
@@ -265,15 +266,15 @@ void Tree_Maker(){
 
 
       // Here you can apply a basic skim for events you want to save in your tree
-      if(kaonpno > 2 && elno == 1 && electronFD == 1){
-        RGB_Spring2020_Inbending_06122021.Fill();
+      if(kaonpno > 0 && protonno > 0 && pimno > 0 && elno == 1 && electronFD == 1){
+        RGB_Spring2019_Inbending_08122021.Fill();
         Tree_Events++;
       }
     }
     // Prints out the file currently analysed and how many events are in tree
     cout<<"file: "<<i<<"events in tree "<<Tree_Events<<endl;
   }
-  RGB_Spring2020_Inbending_06122021.Write(); // Write information to the TTree
+  RGB_Spring2019_Inbending_08122021.Write(); // Write information to the TTree
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
   std::cout << "Elapsed time: " << elapsed.count()<< " events = "<<counter<< " s\n";
