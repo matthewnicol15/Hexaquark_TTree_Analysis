@@ -21,6 +21,16 @@
 // Macro name
 void Strangeness_Analysis_Sideband_Kaon_part1(){
 
+  // Beam energies
+  // RGA Fall 2018
+  // Double_t beam_energy = 10.604;
+  // RGA Spring 2019
+  Double_t beam_energy = 10.199;
+  // RGB Spring 2020, for runno less than 11394
+  // Double_t beam_energy = 10.2129;
+  // RGB Spring 2020, for runno 11394 and above
+  // Double_t beam_energy = 10.3894;
+
   //////////////////////////////////////////////////////////////////////////////
   ////Define variables for naming and limits ///////////
   //////////////////////////////////////////////////////////////////////////////
@@ -741,8 +751,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
       }
     }
 
-    // Setting beam energy to 10.2 GeV for RGB Spring 2020
-    beam.SetXYZM(0,0,10.2,0);
+    // Setting beam energy to value given at top of macro
+    beam.SetXYZM(0,0,beam_energy,0);
 
     // beam = (TLorentzVector)*readbeam;
 
