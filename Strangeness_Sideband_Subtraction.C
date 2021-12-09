@@ -16,7 +16,7 @@
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Sideband_Subtracted/";
   Data<<"RGA_Spring2019_Inbending_dst_Tree_Total";
   Quantity<<"";
-  Date<<"03122021";
+  Date<<"09122021";
   Version<<"01";
 
   // Setting the output file name
@@ -29,7 +29,7 @@
 
   // Input file
   // RGA data
-  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_Total_22112021_01.root");
+  TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_Total_201021__09122021_01.root");
   // RGB data
   // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis/Strangeness_Analysis_RGB_Spring2020_Inbending_dst_Tree_Total_23112021_01.root");
   // RGA data with proton smearing
@@ -39,8 +39,8 @@
   // Getting the multidimensional histogram plots
   TH2D *hmiss_1_a__S1_kp_1 = (TH2D*)f1->Get("hmiss_1_a__S1_kp_1");
   TH3F *hmiss_s2_a__S2_kp_1__S2_kp_2 = (TH3F*)f1->Get("hmiss_s2_a__S2_kp_1__S2_kp_2");
+  TH2F *hmiss_s3_a__S3_kp_1 = (TH2F*)f1->Get("hmiss_s3_a__S3_kp_1");
   // Get the number of bins
-  Int_t maxbin = hmiss_1_a__S1_kp_1->GetNbinsY();
   Int_t zbinmax = hmiss_s2_a__S2_kp_1__S2_kp_2->GetNbinsZ();
 
 
@@ -49,7 +49,8 @@
   TH1D *h_projectionx_S1_back[100];
   TH1D *h_projectionx_S2_sig[100];
   TH1D *h_projectionx_S2_back[100];
-
+  TH1D *h_projectionx_S3_sig[100];
+  TH1D *h_projectionx_S3_back[100];
 
   // Creating output file
   TFile *output_file=new TFile(Output_File_Name.str().c_str(),"recreate");
@@ -65,7 +66,7 @@
   // Mass of kaon 1
   TH1D *S1_kp1_mass_total = (TH1D*)hmiss_1_a__S1_kp_1->ProjectionY()->Clone("S1_kp1_mass_total");
 
-  // Strangeness 2 file 1
+  // Strangeness 2
   // missing mass of electron and 2 kaons
   TH1D *S2_miss_mass_total = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("x")->Clone("S2_miss_mass_total");
   // Mass of kaon 1
@@ -73,6 +74,11 @@
   // Mass of kaon 2
   TH1D *S2_kp2_mass_total = (TH1D*)hmiss_s2_a__S2_kp_1__S2_kp_2->Project3D("z")->Clone("S2_kp2_mass_total");
 
+  // Strangeness 3
+  // missing mass of electron and 3 kaons
+  TH1D *S3_miss_mass_total = (TH1D*)hmiss_s3_a__S3_kp_1->ProjectionX()->Clone("S3_miss_mass_total");
+  // Mass of kaon 1
+  TH1D *S3_kp1_mass_total = (TH1D*)hmiss_s3_a__S3_kp_1->ProjectionY()->Clone("S3_kp1_mass_total");
 
   //////////////////////////////////////////////////////////////////////////////
   //// Creating and fitting functions    ///////////////////////////////////////
@@ -103,13 +109,19 @@
   TF1 *func4 = new TF1("func4","gaus(0)",0.36,0.7);
   TF1 *func5 = new TF1("func5","gaus(0) + gaus(3)",0.36,0.7);
 
-  // Functions for strangeness 2 - kaon 1 file 1
+  // Functions for strangeness 2 - kaon 1
   TF1 *func1_s2_kp1 = new TF1("func1_s2_kp1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
   TF1 *func2_s2_kp1 = new TF1("func2_s2_kp1","gaus(0)",0.36,0.7);
   TF1 *func3_s2_kp1 = new TF1("func3_s2_kp1","pol3(0)",0.36,0.7);
   TF1 *func4_s2_kp1 = new TF1("func4_s2_kp1","gaus(0)",0.36,0.7);
   TF1 *func5_s2_kp1 = new TF1("func5_s2_kp1","gaus(0) + gaus(3)",0.36,0.7);
 
+  // Functions for strangeness 3 - kaon 1
+  TF1 *func1_s3_kp1 = new TF1("func1_s3_kp1","gaus(0) + pol3(3) + gaus(7)",0.36,0.7);
+  TF1 *func2_s3_kp1 = new TF1("func2_s3_kp1","gaus(0)",0.36,0.7);
+  TF1 *func3_s3_kp1 = new TF1("func3_s3_kp1","pol3(0)",0.36,0.7);
+  TF1 *func4_s3_kp1 = new TF1("func4_s3_kp1","gaus(0)",0.36,0.7);
+  TF1 *func5_s3_kp1 = new TF1("func5_s3_kp1","gaus(0) + gaus(3)",0.36,0.7);
 
   // Setting parameters before fitting
   // Strangeness 1 - kaon 1
@@ -125,7 +137,7 @@
   func1->SetParLimits(8,0.480,0.505); // mean for second gauss
   func1->SetParLimits(9,0.005,0.05); // sigma for second gauss
 
-  // Strangeness 2 - kaon 1 file 1
+  // Strangeness 2 - kaon 1
   func1_s2_kp1->SetParameters(S2_kp1_mass_total->GetMaximum() / 2,0.493,0.02);
   func1_s2_kp1->SetParameter(7,S2_kp1_mass_total->GetMaximum() / 2);
   func1_s2_kp1->SetParameter(8,0.493);
@@ -138,6 +150,18 @@
   func1_s2_kp1->SetParLimits(8,0.480,0.505);
   func1_s2_kp1->SetParLimits(9,0.005,0.05);
 
+  // Strangeness 3 - kaon 1
+  func1_s3_kp1->SetParameters(S3_kp1_mass_total->GetMaximum() / 2,0.493,0.02);
+  func1_s3_kp1->SetParameter(7,S3_kp1_mass_total->GetMaximum() / 2);
+  func1_s3_kp1->SetParameter(8,0.493);
+  func1_s3_kp1->SetParameter(9,0.02);
+  // Setting parameter limits before fitting
+  func1_s3_kp1->SetParLimits(0,S3_kp1_mass_total->GetMaximum() / 3,S3_kp1_mass_total->GetMaximum());
+  func1_s3_kp1->SetParLimits(1,0.480,0.505);
+  func1_s3_kp1->SetParLimits(2,0.005,0.03);
+  func1_s3_kp1->SetParLimits(7,S3_kp1_mass_total->GetMaximum() / 3,S3_kp1_mass_total->GetMaximum());
+  func1_s3_kp1->SetParLimits(8,0.480,0.505);
+  func1_s3_kp1->SetParLimits(9,0.005,0.05);
 
   // Fitting functions and getting parameters
   // Strangeness 1 - kaon 1
@@ -159,7 +183,7 @@
   func5->FixParameter(4, func1->GetParameter(8));
   func5->FixParameter(5, func1->GetParameter(9));
 
-  // Strangeness 2 - kaon 1 file 1
+  // Strangeness 2 - kaon 1
   S2_kp1_mass_total->Fit("func1_s2_kp1","RB");
   func2_s2_kp1->FixParameter(0, func1_s2_kp1->GetParameter(0));
   func2_s2_kp1->FixParameter(1, func1_s2_kp1->GetParameter(1));
@@ -178,6 +202,24 @@
   func5_s2_kp1->FixParameter(4, func1_s2_kp1->GetParameter(8));
   func5_s2_kp1->FixParameter(5, func1_s2_kp1->GetParameter(9));
 
+  // Strangeness 3 - kaon 1
+  S3_kp1_mass_total->Fit("func1_s3_kp1","RB");
+  func2_s3_kp1->FixParameter(0, func1_s3_kp1->GetParameter(0));
+  func2_s3_kp1->FixParameter(1, func1_s3_kp1->GetParameter(1));
+  func2_s3_kp1->FixParameter(2, func1_s3_kp1->GetParameter(2));
+  func3_s3_kp1->FixParameter(0, func1_s3_kp1->GetParameter(3));
+  func3_s3_kp1->FixParameter(1, func1_s3_kp1->GetParameter(4));
+  func3_s3_kp1->FixParameter(2, func1_s3_kp1->GetParameter(5));
+  func3_s3_kp1->FixParameter(3, func1_s3_kp1->GetParameter(6));
+  func4_s3_kp1->FixParameter(0, func1_s3_kp1->GetParameter(7));
+  func4_s3_kp1->FixParameter(1, func1_s3_kp1->GetParameter(8));
+  func4_s3_kp1->FixParameter(2, func1_s3_kp1->GetParameter(9));
+  func5_s3_kp1->FixParameter(0, func1_s3_kp1->GetParameter(0));
+  func5_s3_kp1->FixParameter(1, func1_s3_kp1->GetParameter(1));
+  func5_s3_kp1->FixParameter(2, func1_s3_kp1->GetParameter(2));
+  func5_s3_kp1->FixParameter(3, func1_s3_kp1->GetParameter(7));
+  func5_s3_kp1->FixParameter(4, func1_s3_kp1->GetParameter(8));
+  func5_s3_kp1->FixParameter(5, func1_s3_kp1->GetParameter(9));
 
   //////////////////////////////////////////////////////////////////////////////
   //// Creating and define sideband limits    ///////////////////////////////////////
@@ -216,7 +258,9 @@
   //// Calculating scaling factor    //////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  Double_t S1_Scaling_Factor_sig, S1_Scaling_Factor_back, S2_Scaling_Factor_sig, S2_Scaling_Factor_back;
+  Double_t S1_Scaling_Factor_sig, S1_Scaling_Factor_back;
+  Double_t S2_Scaling_Factor_sig, S2_Scaling_Factor_back;
+  Double_t S3_Scaling_Factor_sig, S3_Scaling_Factor_back;
   //
   // // Strangeness 1 - kaon 1
   // // Loop over the x bins to determine scaling factors
@@ -259,7 +303,7 @@
 
 
 
-  // Strangeness 2 - kaon 1 file 1
+  // Strangeness 2 - kaon 1
   // Loop over the x bins to determine scaling factors
   for(Int_t bin = 1; bin < 100; bin++){
     ostringstream h_projectionx_S2_sig_name;
@@ -297,6 +341,45 @@
 
   h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
 
+
+  // Strangeness 3 - kaon 1
+  // Loop over the x bins to determine scaling factors
+  for(Int_t bin = 1; bin < 100; bin++){
+    ostringstream h_projectionx_S3_sig_name;
+     h_projectionx_S3_sig_name << "h_projectionx_S3_sig_" << bin;
+
+    // Get the x projection for the current bin
+    h_projectionx_S3_sig[bin] = (TH1D*)hmiss_s3_a__S3_kp_1->ProjectionX("",bin,bin)->Clone(h_projectionx_S3_sig_name.str().c_str());
+    h_projectionx_S3_back[bin] = (TH1D*)hmiss_s3_a__S3_kp_1->ProjectionX("",bin,bin)->Clone("h_projectionx_S3_back");
+    cout<<bin<<endl;
+
+    if(h_projectionx_S3_sig[bin]->Integral() > 0){
+
+      // Determine the scaling factor looking at the signal function
+      S3_Scaling_Factor_sig = func5_s3_kp1->Eval(S3_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S3_sig[bin]->Integral() ;
+
+
+      // Determine the scaling factor looking at the signal function
+      S3_Scaling_Factor_back = (func3_s3_kp1->Eval(S3_kp1_mass_total->GetBinCenter(bin)) - func5_s3_kp1->Eval(S3_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S3_back[bin]->Integral();
+      if(S3_Scaling_Factor_back < 0) S3_Scaling_Factor_back = 0;
+
+      // Scale the signal and background histograms accordingly
+      h_projectionx_S3_sig[bin]->Scale(S3_Scaling_Factor_sig);
+      h_projectionx_S3_back[bin]->Scale(S3_Scaling_Factor_back);
+      cout<<"scaling_factor "<<S3_Scaling_Factor_sig<<endl;
+    }
+  }
+  // Adding all the histograms together to get total continous sideband subtracted result
+  for(Int_t bin = 2; bin < 100; bin++){
+    cout<<bin<<endl;
+    h_projectionx_S3_sig[1]->Add(h_projectionx_S3_sig[bin]);
+    h_projectionx_S3_back[1]->Add(h_projectionx_S3_back[bin]);
+  }
+  Double_t back_integral_S3 = h_projectionx_S3_back[1]->Integral(h_projectionx_S3_back[1]->FindBin(0), h_projectionx_S3_back[1]->FindBin(1));
+  Double_t sig_integral_S3 = h_projectionx_S3_sig[1]->Integral(h_projectionx_S3_sig[1]->FindBin(0), h_projectionx_S3_sig[1]->FindBin(1));
+  // h_projectionx_S3_back[1]->Scale(sig_integral_S3 / back_integral_S3);
+
+  h_projectionx_S3_sig[1]->Add(h_projectionx_S3_back[1], -1);
 
   //////////////////////////////////////////////////////////////////////////////
   //// Sideband Subtraction       //////////////////////////////////////////////
@@ -458,7 +541,20 @@
     h_projectionx_S2_sig[1]->GetXaxis()->SetTitleOffset(1.2);
     h_projectionx_S2_sig[1]->GetYaxis()->SetTitle("Counts");
 
+    h_projectionx_S3_sig[1]->SetTitle("Background Subtracted Missing Mass");
+    h_projectionx_S3_sig[1]->Rebin(4);
+    h_projectionx_S3_back[1]->Rebin(4);
+    h_projectionx_S3_sig[1]->SetLineWidth(3);
+    h_projectionx_S3_sig[1]->SetLineColor(kRed);
+    h_projectionx_S3_sig[1]->SetMarkerStyle(8);
+    h_projectionx_S3_sig[1]->SetMarkerSize(1);
+    h_projectionx_S3_sig[1]->SetMarkerColor(4);
+    h_projectionx_S3_sig[1]->GetXaxis()->SetTitleOffset(1.2);
+    h_projectionx_S3_sig[1]->GetYaxis()->SetTitle("Counts");
+    h_projectionx_S3_back[1]->SetLineColor(kGreen);
+
     S2_miss_mass_total->Rebin(4);
+    S3_miss_mass_total->Rebin(4);
 
 S2_miss_mass_Result->Rebin(4);
     //////////////////////////////////////////////////////////////////////////////
@@ -525,6 +621,12 @@ S2_miss_mass_Result->Rebin(4);
     func4_s2_kp1->SetLineColor(kBlue);
     func5_s2_kp1->SetLineColor(kBlack);
 
+    func1_s3_kp1->SetLineColor(kRed);
+    func2_s3_kp1->SetLineColor(kBlue);
+    func3_s3_kp1->SetLineColor(kGreen);
+    func4_s3_kp1->SetLineColor(kBlue);
+    func5_s3_kp1->SetLineColor(kBlack);
+
     ////////////////////////////////////////////////////////////////////////////
     //// Creating text boxes and arrows    /////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -551,43 +653,43 @@ S2_miss_mass_Result->Rebin(4);
 
 
     // canvas for projections
-    auto *c1 = new TCanvas("c1","Comparing two methods",800,800);
-    c1->cd();
-    hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
-    ("",S2_Background_Left_Lower_Limit, S2_Background_Right_Upper_Limit,0,zbinmax)->Draw();
-    hbackground_total_function->Draw("same,hist,L");
-    S2_miss_mass_total_continous_result->Draw("same,hist,L");
-    // h_projectionx_S2_sig[1]->Draw("hist,L, same");
-    auto *c2 = new TCanvas("c2","Strageness 1 After Sideband Subtraction",800,800);
-    c2->cd();
-    // S1_miss_mass_total->Draw();
-    // h_projectionx_S1_sig[1]->Draw("same,E1");
-    h_projectionx_S1_sig[1]->Draw("same,hist");
-    l7->Draw("same");
+    // auto *c1 = new TCanvas("c1","Comparing two methods",800,800);
+    // c1->cd();
+    // hmiss_s2_a__S2_kp_1__S2_kp_2->ProjectionX
+    // ("",S2_Background_Left_Lower_Limit, S2_Background_Right_Upper_Limit,0,zbinmax)->Draw();
+    // hbackground_total_function->Draw("same,hist,L");
+    // S2_miss_mass_total_continous_result->Draw("same,hist,L");
+    // // h_projectionx_S2_sig[1]->Draw("hist,L, same");
+    // auto *c2 = new TCanvas("c2","Strageness 1 After Sideband Subtraction",800,800);
+    // c2->cd();
+    // // S1_miss_mass_total->Draw();
+    // // h_projectionx_S1_sig[1]->Draw("same,E1");
+    // h_projectionx_S1_sig[1]->Draw("same,hist");
+    // l7->Draw("same");
 
-    auto *c3 = new TCanvas("c3","Strangeness 1 kaon 1 mass",800,800);
-    c3->cd();
-    S1_kp1_mass_total->Draw();
-    func1->Draw("same");
-    func2->Draw("same");
-    func3->Draw("same");
-    func4->Draw("same");
-    func5->Draw("same");
-    S1_Peak_Lower_Limit_Line->Draw("same");
-    S1_Peak_Upper_Limit_Line->Draw("same");
-    S1_Back_Left_Lower_Limit_Line->Draw("same");
-    S1_Back_Left_Upper_Limit_Line->Draw("same");
-    S1_Back_Right_Lower_Limit_Line->Draw("same");
-    S1_Back_Right_Upper_Limit_Line->Draw("same");
+    // auto *c3 = new TCanvas("c3","Strangeness 1 kaon 1 mass",800,800);
+    // c3->cd();
+    // S1_kp1_mass_total->Draw();
+    // func1->Draw("same");
+    // func2->Draw("same");
+    // func3->Draw("same");
+    // func4->Draw("same");
+    // func5->Draw("same");
+    // S1_Peak_Lower_Limit_Line->Draw("same");
+    // S1_Peak_Upper_Limit_Line->Draw("same");
+    // S1_Back_Left_Lower_Limit_Line->Draw("same");
+    // S1_Back_Left_Upper_Limit_Line->Draw("same");
+    // S1_Back_Right_Lower_Limit_Line->Draw("same");
+    // S1_Back_Right_Upper_Limit_Line->Draw("same");
 
-    auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
-    c4->cd();
-    S2_kp1_mass_total->Draw();
-    func1_s2_kp1->Draw("same");
-    func2_s2_kp1->Draw("same");
-    func3_s2_kp1->Draw("same");
-    func4_s2_kp1->Draw("same");
-    func5_s2_kp1->Draw("same");
+    // auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
+    // c4->cd();
+    // S2_kp1_mass_total->Draw();
+    // func1_s2_kp1->Draw("same");
+    // func2_s2_kp1->Draw("same");
+    // func3_s2_kp1->Draw("same");
+    // func4_s2_kp1->Draw("same");
+    // func5_s2_kp1->Draw("same");
     // S2_Peak_Lower_Limit_Line->Draw("same");
     // S2_Peak_Upper_Limit_Line->Draw("same");
     // S2_Back_Left_Lower_Limit_Line->Draw("same");
@@ -598,20 +700,32 @@ S2_miss_mass_Result->Rebin(4);
 
 
 
-    auto *c5 = new TCanvas("c5","strangeness 2 After Sideband Subtraction",800,800);
-    c5->cd();
-    // h_projectionx_S2_back[1]->Draw("hist");
-    // S2_miss_mass_total->Draw();
-    h_projectionx_S2_sig[1]->Draw("same,hist,L");
-    S2_miss_mass_Result->Draw("same,hist,L");
-    l7->Draw("same");
-    l8->Draw("same");
-    l9->Draw("same");
-    l10->Draw("same");
-    Cascade_ground_state->Draw("same");
-    Cascade_1530->Draw("same");
-    Threshold->Draw("same");
-    threshold_arrow->Draw();
+    // auto *c5 = new TCanvas("c5","strangeness 2 After Sideband Subtraction",800,800);
+    // c5->cd();
+    // // h_projectionx_S2_back[1]->Draw("hist");
+    // // S2_miss_mass_total->Draw();
+    // h_projectionx_S2_sig[1]->Draw("same,hist,L");
+    // S2_miss_mass_Result->Draw("same,hist,L");
+    // l7->Draw("same");
+    // l8->Draw("same");
+    // l9->Draw("same");
+    // l10->Draw("same");
+    // Cascade_ground_state->Draw("same");
+    // Cascade_1530->Draw("same");
+    // Threshold->Draw("same");
+    // threshold_arrow->Draw();
+
+    auto *c6 = new TCanvas("c6","Strageness 3 After Sideband Subtraction",800,800);
+    c6->cd();
+    // S3_kp1_mass_total->Draw();
+    // func1_s3_kp1->Draw("same");
+    // func2_s3_kp1->Draw("same");
+    // func3_s3_kp1->Draw("same");
+    // func4_s3_kp1->Draw("same");
+    // func5_s3_kp1->Draw("same");
+    S3_miss_mass_total->Draw();
+    h_projectionx_S3_sig[1]->Draw("same,hist");
+    h_projectionx_S3_back[1]->Draw("same,hist");
 
     output_file->Write();
   }
