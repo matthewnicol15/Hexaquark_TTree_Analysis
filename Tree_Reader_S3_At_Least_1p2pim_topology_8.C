@@ -17,6 +17,16 @@
 // Macro name
 void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
+  // Beam energies
+  // RGA Fall 2018
+  // Double_t beam_energy = 10.604;
+  // RGA Spring 2019
+  // Double_t beam_energy = 10.199;
+  // RGB Spring 2020, for runno less than 11394
+  Double_t beam_energy_low = 10.2129;
+  // RGB Spring 2020, for runno 11394 and above
+  Double_t beam_energy_high = 10.3894;
+
   //////////////////////////////////////////////////////////////////////////////
   ////Define variables for naming    ///////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -638,8 +648,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
 
     beam = (TLorentzVector)*readbeam;
     // Setting the beam momentum based on run
-    if(readrunno < 11394)beam.SetXYZM(0,0,10.2129,0);
-    else beam.SetXYZM(0,0,10.3894,0);
+    if(readrunno < 11394)beam.SetXYZM(0,0,beam_energy_low,0);
+    else beam.SetXYZM(0,0,beam_energy_high,0);
     hbeam->Fill(beam.Rho());
 
     //////////////////////////////////////////////////////////////////////////////
