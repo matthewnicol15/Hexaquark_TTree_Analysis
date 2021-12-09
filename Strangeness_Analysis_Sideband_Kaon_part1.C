@@ -10,7 +10,6 @@
 #include <TF1.h>
 #include <TH2.h>
 #include <TH3.h>
-#include <THn.h>
 #include <TMath.h>
 #include <TRandom.h>
 #include <TRandom3.h>
@@ -48,7 +47,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   Data<<"RGA_Spring2019_Inbending_dst_Tree_Total_201021";
   Quantity<<"";
   Date<<"09122021";
-  Version<<"02";
+  Version<<"03";
 
   Output_File_Name<<"/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_"<<Additional_information.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
@@ -168,6 +167,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hkaons=new TH1D("hkaons","kaon numbers; Kaons in event;Counts",6,0,6);
   auto* hproton=new TH1D("hproton","proton momentum; proton momentum [GeV];Counts",200,0,10);
   auto* hregion=new TH1D("hregion","Regions;Region;Counts",3,1,4);
+  auto* h_photon_energy_S1 = new TH1F("h_photon_energy_S1","Photon energy for S1",120,0,12);
+  auto* h_photon_energy_S2 = new TH1F("h_photon_energy_S2","Photon energy for S2",120,0,12);
+  auto* h_photon_energy_S3 = new TH1F("h_photon_energy_S3","Photon energy for S3",120,0,12);
 
   // Histograms looking at kaon properties
   auto* hmass_S1_kp_1=new TH1F("hmass_S1_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
@@ -220,11 +222,6 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* h_delta_beta_kp_s3_1FD=new TH2D("h_delta_beta_kp_s3_1FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
   auto* h_delta_beta_kp_s3_2FD=new TH2D("h_delta_beta_kp_s3_2FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
   auto* h_delta_beta_kp_s3_3FD=new TH2D("h_delta_beta_kp_s3_3FD","#Delta #Beta K^{+}; P [GeV]; #Delta #Beta",200,0,11,200,-1,1);
-
-  // Int_t bins[4] = {300,100,100,100};
-  // Double_t xmin[4] = {0,0.2,0.2,0.2};
-  // Double_t xmax[4] = {3,0.8,0.8,0.8};
-
   auto* hmiss_s3_a__S3_kp_1=new TH2F("hmiss_s3_a__S3_kp_1",
   "MM against M(K^{+}) (1) ;MM(e' K^{+} K^{+} K^{+}) [GeV];M(K^{+}) (1) [GeV]",
   300,0,3,100,0.2,0.8);
@@ -753,10 +750,12 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
 
     // Setting beam energy to value given at top of macro
     beam.SetXYZM(0,0,beam_energy,0);
-
-    // beam = (TLorentzVector)*readbeam;
-
     hbeam->Fill(beam.Rho());
+
+    // Determine photon four vector
+    TLorentzVector Photon;
+    Photon = beam - v_el.at(0);
+
 
     // Here you can apply conditions on the events you want to analyse
     if(v_kp.size() > 0 && v_el.size() == 1 &&v_region_el.at(0) == 1){
@@ -773,17 +772,23 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
         h_delta_beta_kp_s1_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
 
         if(v_region_kp.at(0)!=1) continue;
+
         // Looking at the angular distribution for forward going kaons
         h_theta_s1_kp->Fill(v_kp.at(0).Theta() * TMath::RadToDeg());
+
         // Looking at delta beta vs momentum for the kaon
         h_delta_beta_kp_s1_1FD->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
 
+        // Put a cut on the delta beta of the K+
         if(fabs(v_delta_beta_kp.at(0))<0.02){
-          hmiss_1_a__S1_kp_1->Fill(miss1.M(),v_Mass_kp.at(0));
 
+          // Plot the missing mass against calculated kaon mass
+          hmiss_1_a__S1_kp_1->Fill(miss1.M(),v_Mass_kp.at(0));
+          // Plot the calculated mass of the kaon
           hmass_S1_kp_1->Fill(v_Mass_kp.at(0));
 
-
+          // Plot the photon energy distribution
+          h_photon_energy_S1->Fill(Photon.E());
 
 
           if(v_pr.size()==1){
@@ -863,7 +868,8 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
           hmass_S2_kp_1->Fill(v_Mass_kp.at(0));
           hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
 
-
+          // Plot the photon energy distribution
+          h_photon_energy_S2->Fill(Photon.E());
 
 
         }
@@ -895,6 +901,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
           hmass_S3_kp_1_a->Fill(v_Mass_kp.at(0));
           hmass_S3_kp_2_a->Fill(v_Mass_kp.at(1));
           hmass_S3_kp_3_a->Fill(v_Mass_kp.at(2));
+
+          // Plot the photon energy distribution
+          h_photon_energy_S3->Fill(Photon.E());
         }
       }
     }
