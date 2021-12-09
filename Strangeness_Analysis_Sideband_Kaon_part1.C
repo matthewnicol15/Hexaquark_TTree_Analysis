@@ -167,9 +167,9 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
   auto* hkaons=new TH1D("hkaons","kaon numbers; Kaons in event;Counts",6,0,6);
   auto* hproton=new TH1D("hproton","proton momentum; proton momentum [GeV];Counts",200,0,10);
   auto* hregion=new TH1D("hregion","Regions;Region;Counts",3,1,4);
-  auto* h_photon_energy_S1 = new TH1F("h_photon_energy_S1","Photon energy for S1",120,0,12);
-  auto* h_photon_energy_S2 = new TH1F("h_photon_energy_S2","Photon energy for S2",120,0,12);
-  auto* h_photon_energy_S3 = new TH1F("h_photon_energy_S3","Photon energy for S3",120,0,12);
+  auto* h_photon_energy_S1 = new TH2F("h_photon_energy_S1","Photon energy for S1 vs calculated kaon mass",100,0.2,0.8,120,0,12);
+  auto* h_photon_energy_S2 = new TH2F("h_photon_energy_S2","Photon energy for S2 vs calculated kaon mass",100,0.2,0.8,120,0,12);
+  auto* h_photon_energy_S3 = new TH2F("h_photon_energy_S3","Photon energy for S3 vs calculated kaon mass",100,0.2,0.8,120,0,12);
 
   // Histograms looking at kaon properties
   auto* hmass_S1_kp_1=new TH1F("hmass_S1_kp_1","K^{+} mass;M(K^{+});Counts",100,0.2,0.8);
@@ -788,7 +788,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
           hmass_S1_kp_1->Fill(v_Mass_kp.at(0));
 
           // Plot the photon energy distribution
-          h_photon_energy_S1->Fill(Photon.E());
+          h_photon_energy_S1->Fill(v_Mass_kp.at(0),Photon.E());
 
 
           if(v_pr.size()==1){
@@ -869,7 +869,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
           hmass_S2_kp_2->Fill(v_Mass_kp.at(1));
 
           // Plot the photon energy distribution
-          h_photon_energy_S2->Fill(Photon.E());
+          h_photon_energy_S2->Fill(v_Mass_kp.at(0),Photon.E());
 
 
         }
@@ -903,7 +903,7 @@ void Strangeness_Analysis_Sideband_Kaon_part1(){
           hmass_S3_kp_3_a->Fill(v_Mass_kp.at(2));
 
           // Plot the photon energy distribution
-          h_photon_energy_S3->Fill(Photon.E());
+          h_photon_energy_S3->Fill(v_Mass_kp.at(0),Photon.E());
         }
       }
     }
