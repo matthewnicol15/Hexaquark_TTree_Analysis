@@ -23,6 +23,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
   // Create strings for naming output file
   ostringstream File_Path;
   ostringstream Data;
+  ostringstream Additional_information;
   ostringstream Quantity;
   ostringstream Date;
   ostringstream Version;
@@ -32,12 +33,13 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
+  Additional_information<<"_2kp_";
   Quantity<<"Total";
   Topology<<"Topology_9";
   Date<<"09122021";
-  Version<<"01";
+  Version<<"04";
 
-  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
+  Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<Additional_information.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
 
   //////////////////////////////////////////////////////////////////////////////
@@ -125,9 +127,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
 
   // Analysis Plots
   auto* h_proton_pion_pairs = new TH1F("h_proton_pion_pairs",
-  "Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts ",400,1,3,400,1,3);
+  "Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV];Counts ",400,1,3);
   auto* h_inv_omegas = new TH1F("h_inv_omegas",
-  "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV];Counts",400,1,3,400,1,3);
+  "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV];Counts",400,1,3);
   auto* h_invariant_masses = new TH2F("h_invariant_masses",
   "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV]",200,1,1.8,200,1.5,2.3);
 
@@ -310,9 +312,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
 
   // These are used to define the missing masses later
   TLorentzVector beam;
-  TLorentzVector proton_pion_1, proton_pion_2;
-  TLorentzVector omega_1, omega_2;
-  TLorentzVector delta_1, delta_2;
+  TLorentzVector proton_pion;
+  TLorentzVector omega;
 
 
   Double_t c=30;  // Speed of light used for calculating vertex time
@@ -728,28 +729,39 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
     {
       hkaonpno_topology_3->Fill(v_kp.size());
 
-
+      // Cutting on number of K+
+      if(v_kp.size() < 2) continue;
 
       //////////////////////////////////////////////////////////////////////////////
       //// Checking possible invariant mass combinations    ////////////////////////
       //////////////////////////////////////////////////////////////////////////////
 
-      // Cutting on the delta beta of certain particles
-      // if(fabs(v_delta_beta_km.at(0)) > 0.02) continue;
 
-      // Looping over all pions
-      for(Int_t pim_pos = 0; pim_pos < v_pim.size(); pim_pos++) {
+      Int_t pimsize = v_pim.size();
+      Int_t prsize = v_pr.size();
+      Int_t kmsize = v_km.size();
 
-        // Lambdas
-        proton_pion = v_pr.at(0) + v_pim.at(pim_pos);
+      // Looping over all protons
+      for(Int_t pr_pos = 0; pr_pos < prsize; pr_pos++) {
 
-        // Omegas
-        omega = v_pr.at(0) + v_pim.at(pim_pos) + v_km.at(0);
+        // Looping over all k-
+        for(Int_t km_pos = 0; km_pos < kmsize; km_pos++) {
 
-        // Filling histogram with all proton pion invariant masses
-        h_proton_pion_pairs->Fill(proton_pion.M());
-        h_inv_omegas->Fill(omega.M());
-        h_invariant_masses->Fill(proton_pion.M(),omega.M());
+          // Looping over all pions
+          for(Int_t pim_pos = 0; pim_pos < pimsize; pim_pos++) {
+
+            // Lambdas
+            proton_pion = v_pr.at(pr_pos) + v_pim.at(pim_pos);
+
+            // Omegas
+            omega = v_pr.at(pr_pos) + v_pim.at(pim_pos) + v_km.at(km_pos);
+
+            // Filling histogram with all proton pion invariant masses
+            h_proton_pion_pairs->Fill(proton_pion.M());
+            h_inv_omegas->Fill(omega.M());
+            h_invariant_masses->Fill(proton_pion.M(),omega.M());
+          }
+        }
       }
     }
   }
