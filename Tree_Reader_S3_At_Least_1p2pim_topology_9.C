@@ -42,12 +42,12 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
 
   // Setting the strings for output file name
   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
-  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
-  Additional_information<<"_2kp_";
+  Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1kp1p1pim_Tree_081221_01";
+  Additional_information<<"_3kp_";
   Quantity<<"Total";
   Topology<<"Topology_9";
-  Date<<"09122021";
-  Version<<"04";
+  Date<<"05012022";
+  Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<Additional_information.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -60,9 +60,9 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_Total_06122021_01.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGB/RGB_Spring2020_Inbending_1eFD_at_least_1kp1p1pim_Tree_Total_08122021.root");
   // Read TTree within root file and assign it to 't1'
-  TTree *t1 = (TTree*)f->Get("RGB_Spring2020_Inbending_06122021");
+  TTree *t1 = (TTree*)f->Get("RGB_Spring2019_Inbending_08122021");
 
 
   // Creating components to read from TTree
@@ -732,7 +732,6 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
     //// Selecting Events for specific topolgies    //////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
 
-
     // Here you can apply conditions on the events you want to analyse
     // Requiring exact topology 3
     if(v_el.size() != 1 || v_pr.size() < 1 || v_pim.size() < 1 || v_km.size() < 1) continue;
@@ -740,7 +739,11 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_9(){
       hkaonpno_topology_3->Fill(v_kp.size());
 
       // Cutting on number of K+
-      if(v_kp.size() < 2) continue;
+      if(v_kp.size() < 3) continue;
+
+      // Require the kaons in the FD
+      // if(v_region_kp.at(0) != 1 || v_region_kp.at(1) != 1 || v_region_kp.at(2) != 1) continue;
+
 
       //////////////////////////////////////////////////////////////////////////////
       //// Checking possible invariant mass combinations    ////////////////////////
