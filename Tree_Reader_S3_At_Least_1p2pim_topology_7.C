@@ -45,8 +45,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
   Data<<"RGB_Spring2020_Inbending_S3_eFD_At_Least_1p2pim_Tree_061221_01";
   Quantity<<"Total";
   Topology<<"Topology_7";
-  Date<<"08122021";
-  Version<<"02";
+  Date<<"05012022";
+  Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -80,8 +80,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
 
 
   // Particle information
-  vector<TLorentzVector> *v_p4=0;   // 4-vectors for the detected particles
-  vector<TLorentzVector> *v_vertex=0;   // Vertex information for particles
+  std::vector<TLorentzVector> *v_p4=0;   // 4-vectors for the detected particles
+  std::vector<TLorentzVector> *v_vertex=0;   // Vertex information for particles
   vector<double> *v_path=0;   // Measured path of particles
   vector<double> *v_time=0;   // Measured time of flight of particles
   vector<double> *v_beta=0;   // Beta measured from FTOF
@@ -123,8 +123,8 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
 
   // Event Information
   auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
-  auto* hkaonpno_topology_7 = new TH1F("hkaonpno_topology_7", "Number of K^{+};# of K^{+}; Counts",10,0,10);
-  auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",5,0,4);
+  auto* hkaonpno = new TH1F("hkaonpno", "Number of K^{+};# of K^{+}; Counts",10,0,10);
+  auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",3,0,3);
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
@@ -701,7 +701,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_7(){
     // Requiring exact topology 7
     if(v_el.size() != 1 || v_pr.size() < 1 || v_pim.size() < 2 || v_km.size() < 1 || v_neutron.size() < 1) continue;
     {
-      hkaonpno_topology_7->Fill(v_kp.size());
+      hkaonpno->Fill(v_kp.size());
 
       //////////////////////////////////////////////////////////////////////////////
       //// Calculating invariant mass combinations    //////////////////////////////

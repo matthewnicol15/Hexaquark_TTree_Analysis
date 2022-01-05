@@ -46,7 +46,7 @@ void Tree_Reader_S3_2kp_Omega(){
   Quantity<<"Total";
   Topology<<"Omega";
   Date<<"05122021";
-  Version<<"01";
+  Version<<"02";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
   "_"<<Topology.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -77,7 +77,6 @@ void Tree_Reader_S3_2kp_Omega(){
   Int_t readchargetracks; // Number of positive or negative charge tracks
   Int_t readelno; // e^-
   Int_t region; // which region the particles go in (FT, FD, CD)
-
 
   // Particle information
   vector<TLorentzVector> *v_p4=0;   // 4-vectors for the detected particles
@@ -454,7 +453,6 @@ void Tree_Reader_S3_2kp_Omega(){
     //////////////////////////////////////////////////////////////////////////////
     //// Looping over particles in the current event    //////////////////////////
     //////////////////////////////////////////////////////////////////////////////
-
     // This reads the number of particles in the current entry/event
     Int_t Nparticles = v_p4->size();
 
@@ -705,7 +703,7 @@ void Tree_Reader_S3_2kp_Omega(){
     //////////////////////////////////////////////////////////////////////////////
     //// Selecting Events for specific topolgies    //////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
-    
+
 
     // Here you can apply conditions on the events you want to analyse
     // Requiring exact topology 7
