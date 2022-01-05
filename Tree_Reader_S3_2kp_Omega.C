@@ -14,7 +14,7 @@
 #include <vector>
 
 // Macro name
-void Tree_Reader_S3_At_Least_1kp_Omega(){
+void Tree_Reader_S3_2kp_Omega(){
 
 
   // Beam energies
@@ -45,7 +45,7 @@ void Tree_Reader_S3_At_Least_1kp_Omega(){
   Data<<"RGB_Spring2020_Inbending_at_least_1eFD_1Kp_Tree_Total_22102021";
   Quantity<<"Total";
   Topology<<"Omega";
-  Date<<"16122021";
+  Date<<"05122021";
   Version<<"01";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
@@ -125,6 +125,12 @@ void Tree_Reader_S3_At_Least_1kp_Omega(){
   auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
   auto* hkaonpno_topology_7 = new TH1F("hkaonpno_topology_7", "Number of K^{+};# of K^{+}; Counts",10,0,10);
   auto* hregion=new TH1F("hregion","Regions hit;Region;Counts",3,0,3);
+  auto* h_delta_beta_kp_1 = new TH2F("h_delta_beta_kp_1","#Delta#Beta of K^{+} (1);P [GeV];#Delta#Beta",480,0,12,400,-0.4,0.4);
+  auto* h_delta_beta_kp_2 = new TH2F("h_delta_beta_kp_2","#Delta#Beta of K^{+} (2);P [GeV];#Delta#Beta",480,0,12,400,-0.4,0.4);
+  auto* h_delta_beta_km_1 = new TH2F("h_delta_beta_km_1","#Delta#Beta of K^{-} (1);P [GeV];#Delta#Beta",480,0,12,400,-0.4,0.4);
+  auto* h_delta_beta_pim_1 = new TH2F("h_delta_beta_pim_1","#Delta#Beta of #pi^{-} (1);P [GeV];#Delta#Beta",480,0,12,400,-0.4,0.4);
+  auto* h_delta_beta_pr_1 = new TH2F("h_delta_beta_pr_1","#Delta#Beta of p (1);P [GeV];#Delta#Beta",480,0,12,400,-0.4,0.4);
+
 
   // Particle Information
   auto* hmass=new TH1F("hmass","Calculated Mass;Mass [GeV];Counts",200,0,2);
@@ -134,7 +140,13 @@ void Tree_Reader_S3_At_Least_1kp_Omega(){
   "Invariant mass of p #pi^{-};M(p #pi^{-}) [GeV]",400,1,3);
   auto* h_inv_omega = new TH1F("h_inv_omega",
   "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV]",400,1,3);
+  auto* h_inv_omega_1 = new TH1F("h_inv_omega_1",
+  "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV]",400,1,3);
+  auto* h_inv_omega_2 = new TH1F("h_inv_omega_2",
+  "Invariant mass of p #pi^{-} K^{-};M(p #pi^{-} K^{-}) [GeV]",400,1,3);
   auto* h_invariant_mass_1 = new TH2F("h_invariant_mass_1",
+  "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV]",200,1,1.8,200,1.5,2.3);
+  auto* h_invariant_mass_2 = new TH2F("h_invariant_mass_2",
   "Invariant masses ;M(p #pi^{-}) [GeV];M(p #pi^{-} K^{-}) [GeV]",200,1,1.8,200,1.5,2.3);
 
   //////////////////////////////////////////////////////////////////////////////
@@ -693,13 +705,21 @@ void Tree_Reader_S3_At_Least_1kp_Omega(){
     //////////////////////////////////////////////////////////////////////////////
     //// Selecting Events for specific topolgies    //////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
-
+    
 
     // Here you can apply conditions on the events you want to analyse
     // Requiring exact topology 7
     if(v_el.size() != 1 || v_kp.size() < 2 || v_pr.size() < 1 || v_pim.size() < 1 || v_km.size() < 1) continue;
     {
       hkaonpno_topology_7->Fill(v_kp.size());
+
+      // Looking at particle purity through delta beta
+      h_delta_beta_kp_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
+      h_delta_beta_kp_2->Fill(v_kp.at(1).Rho(),v_delta_beta_kp.at(1));
+      h_delta_beta_km_1->Fill(v_km.at(0).Rho(),v_delta_beta_km.at(0));
+      h_delta_beta_pim_1->Fill(v_pim.at(0).Rho(),v_delta_beta_pim.at(0));
+      h_delta_beta_pr_1->Fill(v_pr.at(0).Rho(),v_delta_beta_pr.at(0));
+
 
       //////////////////////////////////////////////////////////////////////////////
       //// Calculating invariant mass combinations    //////////////////////////////
@@ -724,9 +744,20 @@ void Tree_Reader_S3_At_Least_1kp_Omega(){
 
       // Checking if pion 1 produces a reasonable lambda
       if(proton_pion_1.M() < 1.16){
+        h_inv_omega_1->Fill(omega_1.M());
 
         h_invariant_mass_1->Fill(proton_pion_1.M(),omega_1.M());
       }
+
+      if(fabs(v_delta_beta_kp.at(0)) < 0.02 && fabs(v_delta_beta_kp.at(1)) < 0.02 && fabs(v_delta_beta_km.at(0)) < 0.02){
+        h_invariant_mass_2->Fill(proton_pion_1.M(),omega_1.M());
+
+        h_inv_omega_2->Fill(omega_1.M());
+
+
+      }
+
+
     }
   }
   fileOutput1.Write();
