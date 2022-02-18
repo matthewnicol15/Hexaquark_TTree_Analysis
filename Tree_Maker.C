@@ -18,14 +18,16 @@
 using namespace clas12;
 
 
-void Tree_Maker(){
+void Tree_Maker(TString inFileName, TString outFileName){
   auto start = std::chrono::high_resolution_clock::now();
   gBenchmark->Start("timer");
   int counter=0;
 
   // Data files to process
-  TString inputFile("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/*.hipo");
-
+  // TString inputFile("/home/matthewn/links/RGB_Spring_2020_Inbending_dst/*.hipo");
+  // For running on Slurm
+  TString inputFile = inFileName;
+  TString outputFile = outFileName;
 
   gROOT->ProcessLine(".L /home/matthewn/Documents/Macros/Loader.C+"); // Uses Loader.C file, make sure Loader.C is in this file path
 
@@ -38,8 +40,9 @@ void Tree_Maker(){
   auto files=fake.GetListOfFiles();
 
   // Create root file to save TTree in
-  TFile f("/volatile/clas12/matthewn/RGB_Spring2020_Inbending_1eFD_at_least_1kp1p1pim_Tree_08122021_05.root","recreate");
-  // TFile f("/lustre19/expphy/volatile/clas12/matthewn/Trees/Dibaryon/RGB_Spring2020_Inbending_1eFD_at_least_1p2pim_Tree_06122021_04.root","recreate");
+  // TFile f("/volatile/clas12/matthewn/RGB_Spring2020_Inbending_1eFD_at_least_1kp1p1pim_Tree_08122021_05.root","recreate");
+  // For running in Slurm
+  TFile fileOutput1(outputFile,"recreate");
   // Creating TTree object
   TTree RGB_Spring2019_Inbending_08122021("RGB_Spring2019_Inbending_08122021","it's a tree!");
 
@@ -279,6 +282,6 @@ void Tree_Maker(){
   std::chrono::duration<double> elapsed = finish - start;
   std::cout << "Elapsed time: " << elapsed.count()<< " events = "<<counter<< " s\n";
   cout<<"events in tree "<<Tree_Events<<endl;
-  f.Write(); // Write information to the root file
-  f.Close(); // Close the root file at the end
+  fileOutput1.Write(); // Write information to the root file
+  fileOutput1.Close(); // Close the root file at the end
 }
