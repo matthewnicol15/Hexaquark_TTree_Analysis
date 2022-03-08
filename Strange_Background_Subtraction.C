@@ -63,7 +63,7 @@
    // Define functions for fitting kaon calculated mass
    // Functions for strangeness 1 - kaon 1
    // Total function
-   TF1 *func1_S1 = new TF1("func1_S1","gaus(0) + gaus(3) + pol5(6)",0.365,0.72);
+   TF1 *func1_S1 = new TF1("func1_S1","gaus(0) + gaus(3) + gaus(6)",0.365,0.72);
    // Signal narrow gaussian
    TF1 *func2_S1 = new TF1("func2_S1","gaus(0)",0.365,0.72);
    // Signal wide gaussian
@@ -71,11 +71,11 @@
    // Total signal
    TF1 *func4_S1 = new TF1("func4_S1","gaus(0) + gaus(3)",0.365,0.72);
    // Background
-   TF1 *func5_S1 = new TF1("func5_S1","pol5(0)",0.365,0.72);
+   TF1 *func5_S1 = new TF1("func5_S1","gaus(0)",0.365,0.72);
 
    // Functions for strangeness 2 - kaon 1
    // Total function
-   TF1 *func1_S2 = new TF1("func1_S2","gaus(0) + gaus(3) + pol5(6)",0.365,0.72);
+   TF1 *func1_S2 = new TF1("func1_S2","gaus(0) + gaus(3) + gaus(6)",0.365,0.72);
    // Signal narrow gaussian
    TF1 *func2_S2 = new TF1("func2_S2","gaus(0)",0.365,0.72);
    // Signal wide gaussian
@@ -83,7 +83,7 @@
    // Total signal
    TF1 *func4_S2 = new TF1("func4_S2","gaus(0) + gaus(3)",0.365,0.72);
    // Background
-   TF1 *func5_S2 = new TF1("func5_S2","pol5(0)",0.365,0.72);
+   TF1 *func5_S2 = new TF1("func5_S2","gaus(0)",0.365,0.72);
 
    // Functions for strangeness 3 - kaon 1
    // Total function
@@ -95,7 +95,7 @@
    // Total signal
    TF1 *func4_S3 = new TF1("func4_S3","gaus(0) + gaus(3)",0.365,0.72);
    // Background
-   TF1 *func5_S3 = new TF1("func5_S3","pol3(0)",0.365,0.72);
+   TF1 *func5_S3 = new TF1("func5_S3","gaus(0)",0.365,0.72);
 
 
    // Setting parameters before fitting
@@ -106,6 +106,14 @@
    func1_S1->SetParameter(3,S1_kp1_mass_total->GetMaximum() / 2);
    func1_S1->SetParameter(4,0.493);
    func1_S1->SetParameter(5,0.03);
+   func1_S1->SetParameter(6,S1_kp1_mass_total->GetMaximum() / 4);
+   func1_S1->SetParameter(7,0.345);
+   func1_S1->SetParameter(8,0.5);
+
+   // func5_S1->SetParameter(0,S1_kp1_mass_total->GetMaximum() / 4);
+   // func5_S1->SetParLimits(0,S1_kp1_mass_total->GetMaximum() / 9, S1_kp1_mass_total->GetMaximum() / 2.5);
+   // func5_S1->SetParameter(1,0.345);
+   // func5_S1->SetParameter(2,0.5);
 
    // Setting parameter limits before fitting
    func1_S1->SetParLimits(0,S1_kp1_mass_total->GetMaximum() / 5,S1_kp1_mass_total->GetMaximum()); // amplitude for first gauss
@@ -113,7 +121,8 @@
    func1_S1->SetParLimits(2,0.005,0.02); // sigma for first gauss
    func1_S1->SetParLimits(3,S1_kp1_mass_total->GetMaximum() / 5,S1_kp1_mass_total->GetMaximum()); // amplitude for second gauss
    func1_S1->SetParLimits(4,0.480,0.505); // mean for second gauss
-   func1_S1->SetParLimits(5,0.005,0.03); // sigma for second gauss
+   func1_S1->SetParLimits(5,0.005,0.04); // sigma for second gauss
+   func1_S1->SetParLimits(7,0.1,0.38); // mean for background gauss
 
    // Strangeness 2 - kaon 1
    func1_S2->SetParameter(0,S2_kp1_mass_total->GetMaximum() / 2);
@@ -122,6 +131,10 @@
    func1_S2->SetParameter(3,S2_kp1_mass_total->GetMaximum() / 2);
    func1_S2->SetParameter(4,0.493);
    func1_S2->SetParameter(5,0.03);
+   func1_S2->SetParameter(6,S1_kp1_mass_total->GetMaximum() / 4);
+   func1_S2->SetParameter(7,0.345);
+   func1_S2->SetParameter(8,0.5);
+
 
    // Setting parameter limits before fitting
    func1_S2->SetParLimits(0,S2_kp1_mass_total->GetMaximum() / 5,S2_kp1_mass_total->GetMaximum()); // amplitude for first gauss
@@ -129,7 +142,8 @@
    func1_S2->SetParLimits(2,0.005,0.02); // sigma for first gauss
    func1_S2->SetParLimits(3,S2_kp1_mass_total->GetMaximum() / 5,S2_kp1_mass_total->GetMaximum()); // amplitude for second gauss
    func1_S2->SetParLimits(4,0.480,0.505); // mean for second gauss
-   func1_S2->SetParLimits(5,0.005,0.03); // sigma for second gauss
+   func1_S2->SetParLimits(5,0.005,0.04); // sigma for second gauss
+   func1_S2->SetParLimits(7,0.1,0.38); // mean for background gauss
 
    // Strangeness 3 - kaon 1
    func1_S3->SetParameter(0,S3_kp1_mass_total->GetMaximum() / 2);
@@ -138,6 +152,10 @@
    func1_S3->SetParameter(3,S3_kp1_mass_total->GetMaximum() / 2);
    func1_S3->SetParameter(4,0.493);
    func1_S3->SetParameter(5,0.03);
+   func1_S3->SetParameter(6,S1_kp1_mass_total->GetMaximum() / 4);
+   func1_S3->SetParameter(7,0.345);
+   func1_S3->SetParameter(8,0.5);
+
 
    // Setting parameter limits before fitting
    func1_S3->SetParLimits(0,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum()); // amplitude for first gauss
@@ -145,7 +163,8 @@
    func1_S3->SetParLimits(2,0.005,0.02); // sigma for first gauss
    func1_S3->SetParLimits(3,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum()); // amplitude for second gauss
    func1_S3->SetParLimits(4,0.480,0.505); // mean for second gauss
-   func1_S3->SetParLimits(5,0.005,0.03); // sigma for second gauss
+   func1_S3->SetParLimits(5,0.005,0.04); // sigma for second gauss
+   func1_S3->SetParLimits(7,0.1,0.38); // mean for background gauss
 
 
 
@@ -167,9 +186,9 @@
    func5_S1->FixParameter(0, func1_S1->GetParameter(6));
    func5_S1->FixParameter(1, func1_S1->GetParameter(7));
    func5_S1->FixParameter(2, func1_S1->GetParameter(8));
-   func5_S1->FixParameter(3, func1_S1->GetParameter(9));
-   func5_S1->FixParameter(4, func1_S1->GetParameter(10));
-   func5_S1->FixParameter(5, func1_S1->GetParameter(11));
+   // func5_S1->FixParameter(3, func1_S1->GetParameter(9));
+   // func5_S1->FixParameter(4, func1_S1->GetParameter(10));
+   // func5_S1->FixParameter(5, func1_S1->GetParameter(11));
 
 
    // Strangeness 2 - kaon 1
@@ -189,9 +208,9 @@
    func5_S2->FixParameter(0, func1_S2->GetParameter(6));
    func5_S2->FixParameter(1, func1_S2->GetParameter(7));
    func5_S2->FixParameter(2, func1_S2->GetParameter(8));
-   func5_S2->FixParameter(3, func1_S2->GetParameter(9));
-   func5_S2->FixParameter(4, func1_S2->GetParameter(10));
-   func5_S2->FixParameter(5, func1_S2->GetParameter(11));
+   // func5_S2->FixParameter(3, func1_S2->GetParameter(9));
+   // func5_S2->FixParameter(4, func1_S2->GetParameter(10));
+   // func5_S2->FixParameter(5, func1_S2->GetParameter(11));
 
 
    // Strangeness 3 - kaon 1
@@ -427,15 +446,15 @@
    func4_S1->Draw("same");
    func5_S1->Draw("same");
 
-   auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
-   c2->cd();
-   S1_miss_mass_total->Draw();
-
-
-   auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
-   c3->cd();
-   h_projectionx_S1_sig[1]->Draw();
-   l1->Draw("same");
+   // auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
+   // c2->cd();
+   // S1_miss_mass_total->Draw();
+   //
+   //
+   // auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
+   // c3->cd();
+   // h_projectionx_S1_sig[1]->Draw();
+   // l1->Draw("same");
 
    auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
    c4->cd();
@@ -446,34 +465,34 @@
    func4_S2->Draw("same");
    func5_S2->Draw("same");
 
-   auto *c5 = new TCanvas("c5","Strageness 2 Before background Subtraction",800,800);
-   c5->cd();
-   S2_miss_mass_total->Draw();
+   // auto *c5 = new TCanvas("c5","Strageness 2 Before background Subtraction",800,800);
+   // c5->cd();
+   // S2_miss_mass_total->Draw();
+   //
+   //
+   // auto *c6 = new TCanvas("c6","Strageness 2 After background Subtraction",800,800);
+   // c6->cd();
+   // h_projectionx_S2_sig[1]->Draw();
+   // l1->Draw("same");
+   // cascade_line->Draw("same");
+   // cascade_1530_line->Draw("same");
 
+   // auto *c7 = new TCanvas("c7","Strangeness 3 kaon 1 mass",800,800);
+   // c7->cd();
+   // S3_kp1_mass_total->Draw();
+   // func1_S3->Draw("same");
+   // func2_S3->Draw("same");
+   // func3_S3->Draw("same");
+   // func4_S3->Draw("same");
+   // func5_S3->Draw("same");
 
-   auto *c6 = new TCanvas("c6","Strageness 2 After background Subtraction",800,800);
-   c6->cd();
-   h_projectionx_S2_sig[1]->Draw();
-   l1->Draw("same");
-   cascade_line->Draw("same");
-   cascade_1530_line->Draw("same");
-
-   auto *c7 = new TCanvas("c7","Strangeness 3 kaon 1 mass",800,800);
-   c7->cd();
-   S3_kp1_mass_total->Draw();
-   func1_S3->Draw("same");
-   func2_S3->Draw("same");
-   func3_S3->Draw("same");
-   func4_S3->Draw("same");
-   func5_S3->Draw("same");
-
-   auto *c8 = new TCanvas("c8","Strageness 3 Before background Subtraction",800,800);
-   c8->cd();
-   S3_miss_mass_total->Draw();
-
-
-   auto *c9 = new TCanvas("c9","Strageness 3 After background Subtraction",800,800);
-   c9->cd();
-   h_projectionx_S3_sig[1]->Draw();
-   l1->Draw("same");
+   // auto *c8 = new TCanvas("c8","Strageness 3 Before background Subtraction",800,800);
+   // c8->cd();
+   // S3_miss_mass_total->Draw();
+   //
+   //
+   // auto *c9 = new TCanvas("c9","Strageness 3 After background Subtraction",800,800);
+   // c9->cd();
+   // h_projectionx_S3_sig[1]->Draw();
+   // l1->Draw("same");
 }
