@@ -7,7 +7,7 @@
 
    // Input file
    // RGA data
-   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGB_Sping2019_Inbending_at_least_1e1KpFD_Tree_Total_01032022_Total_Scaling_07032022_01.root");
+   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022_Total_Scaling_10032022_01.root");
 
    // Getting the multidimensional histogram plots
    TH3F *h_S1_Photon_Energy__Miss_Mass__Kaon_Mass = (TH3F*)f1->Get("h_S1_Photon_Energy__Miss_Mass__Kaon_Mass");
@@ -25,6 +25,9 @@
    //////////////////////////////////////////////////////////////////////////////
    //// Take all the projections    ///////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////
+
+   h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->Rebin3D(1,1,1);
+
 
    // Strangeness 1
    // Photon energy
@@ -87,7 +90,7 @@
 
    // Functions for strangeness 3 - kaon 1
    // Total function
-   TF1 *func1_S3 = new TF1("func1_S3","gaus(0) + gaus(3) + pol3(6)",0.365,0.72);
+   TF1 *func1_S3 = new TF1("func1_S3","gaus(0) + gaus(3) + gaus(6)",0.365,0.72);
    // Signal narrow gaussian
    TF1 *func2_S3 = new TF1("func2_S3","gaus(0)",0.365,0.72);
    // Signal wide gaussian
@@ -107,7 +110,7 @@
    func1_S1->SetParameter(4,0.493);
    func1_S1->SetParameter(5,0.03);
    func1_S1->SetParameter(6,S1_kp1_mass_total->GetMaximum() / 4);
-   func1_S1->SetParameter(7,0.345);
+   func1_S1->FixParameter(7,0.3);
    func1_S1->SetParameter(8,0.5);
 
    // func5_S1->SetParameter(0,S1_kp1_mass_total->GetMaximum() / 4);
@@ -122,7 +125,7 @@
    func1_S1->SetParLimits(3,S1_kp1_mass_total->GetMaximum() / 5,S1_kp1_mass_total->GetMaximum()); // amplitude for second gauss
    func1_S1->SetParLimits(4,0.480,0.505); // mean for second gauss
    func1_S1->SetParLimits(5,0.005,0.04); // sigma for second gauss
-   func1_S1->SetParLimits(7,0.1,0.38); // mean for background gauss
+   // func1_S1->SetParLimits(7,0.1,0.38); // mean for background gauss
 
    // Strangeness 2 - kaon 1
    func1_S2->SetParameter(0,S2_kp1_mass_total->GetMaximum() / 2);
@@ -230,7 +233,7 @@
    func5_S3->FixParameter(0, func1_S3->GetParameter(6));
    func5_S3->FixParameter(1, func1_S3->GetParameter(7));
    func5_S3->FixParameter(2, func1_S3->GetParameter(8));
-   func5_S3->FixParameter(3, func1_S3->GetParameter(9));
+   // func5_S3->FixParameter(3, func1_S3->GetParameter(9));
    // func5_S3->FixParameter(4, func1_S3->GetParameter(10));
    // func5_S3->FixParameter(5, func1_S3->GetParameter(11));
 
@@ -256,6 +259,9 @@
       // Taking projection of MM from kaon mass bin for sig and back
       h_projectionx_S1_sig[bin] = (TH1D*)h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->ProjectionY("",0,h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->GetNbinsX(),bin,bin)->Clone(h_projectionx_S1_sig_name.str().c_str());
       h_projectionx_S1_back[bin] = (TH1D*)h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->ProjectionY("",0,h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->GetNbinsX(),bin,bin)->Clone("h_projectionx_S1_back");
+
+      // h_projectionx_S1_sig[bin]->Sumw2();
+      // h_projectionx_S1_back[bin]->Sumw2();
 
       // Make sure there are reasonable statistics in the projection
       if(h_projectionx_S1_sig[bin]->Integral() > 100){
@@ -446,15 +452,15 @@
    func4_S1->Draw("same");
    func5_S1->Draw("same");
 
-   // auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
-   // c2->cd();
-   // S1_miss_mass_total->Draw();
-   //
-   //
-   // auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
-   // c3->cd();
-   // h_projectionx_S1_sig[1]->Draw();
-   // l1->Draw("same");
+   auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
+   c2->cd();
+   S1_miss_mass_total->Draw();
+
+
+   auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
+   c3->cd();
+   h_projectionx_S1_sig[1]->Draw();
+   l1->Draw("same");
 
    auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
    c4->cd();
