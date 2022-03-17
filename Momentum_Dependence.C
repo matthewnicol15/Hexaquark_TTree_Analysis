@@ -41,20 +41,22 @@
   Double_t par0, par1, par2, par3, par4, par5, par6, par7, par8, par9;
   for(Int_t i = 0; i < 160; i++){
      counter++;
+
      // Determining bin max and min
      bin_1 = 1 + (i*0.01);
      bin_2 = 1 + (i+1)*0.01;
 
 
      // Cutting out pion cross over between 1.1 and 1.35 GeV
-     if(bin_1 > 1.1 && bin_1 < 1.35) continue;
+     if(bin_1 < 1.35) continue;
+     // if(bin_1 > 1.1 && bin_1 < 1.35) continue;
 
      // Kaons only plotted up to 3 GeV
      if(bin_1 > 3) continue;
      // cout<<"bin "<<i<<" 1st bin "<<bin_1<<" 2nd bin "<<bin_2<<endl;
 
-     Missing_Mass_S1_Projections[i] = (TH1F*) hist_S1->ProjectionY("",hist_S1->GetXaxis()->FindBin(bin_1),hist_S1->GetXaxis()->FindBin(bin_2),0,hist_S1->GetNbinsZ())->Clone();
-     Kaon_Mass_S1_Projections[i] = (TH1F*) hist_S1->ProjectionZ("",hist_S1->GetXaxis()->FindBin(bin_1),hist_S1->GetXaxis()->FindBin(bin_2),0,hist_S1->GetNbinsY())->Clone();
+     Missing_Mass_S1_Projections[i] = (TH1F*) hist_S1->ProjectionY("",hist_S1->GetXaxis()->FindBin(bin_1),hist_S1->GetXaxis()->FindBin(bin_1),0,hist_S1->GetNbinsZ())->Clone();
+     Kaon_Mass_S1_Projections[i] = (TH1F*) hist_S1->ProjectionZ("",hist_S1->GetXaxis()->FindBin(bin_1),hist_S1->GetXaxis()->FindBin(bin_1),0,hist_S1->GetNbinsY())->Clone();
 
      // Rebin projections
      // Strangeness 2 looks good with factor of 2
@@ -78,8 +80,10 @@
 
      // Setting parameters based on functions determined
      par0 = Kaon_Mass_S1_Projections[i]->GetMaximum() / 2; // amplitude for 1st signal gaus
+     // par0 = 0.08024 * pow(i,2) - 20.9076 * i + 1827.356; // amplitude for 1st signal gaus
      par1 = 0.493; // mean for both signal gauss
-     par2 = 0.000000857 * pow(i+1,2) + 0.00001848 * (i+1) + 0.01094; // sigma for 1st signal gaus
+     // par2 = 0.000000857 * pow(i+1,2) + 0.00001848 * (i+1) + 0.01094; // sigma for 1st signal gaus
+     par2 = 0.00000135 * pow(i+1,2) - 0.00005776 * (i+1) + 0.01323; // sigma for 1st signal gaus
      par3 = Kaon_Mass_S1_Projections[i]->GetMaximum() / 3; // amplitude for 2nd signal gaus
      par4 = -0.00001617 * pow(i+1,2) + 0.001323 * (i+1) + 1.928; // ratio between signal gaussian sigmas
      par5 = 2 * Kaon_Mass_S1_Projections[i]->GetBinContent(Kaon_Mass_S1_Projections[i]->FindBin(0.365)); // amplitude for back gaus
@@ -101,10 +105,11 @@
     func1[i]->SetParameter(9,par9); // slope for back pol1
 
     // Setting parameter limits
-    func1[i]->SetParLimits(0,Kaon_Mass_S1_Projections[i]->GetMaximum() / 20, Kaon_Mass_S1_Projections[i]->GetMaximum()); // amplitude for 1st signal gaus
+    func1[i]->SetParLimits(0,Kaon_Mass_S1_Projections[i]->GetMaximum() / 30, Kaon_Mass_S1_Projections[i]->GetMaximum()); // amplitude for 1st signal gaus
+    // func1[i]->SetParLimits(0,par0 * 0.7, par0 * 1.3); // amplitude for 1st signal gaus
     func1[i]->SetParLimits(1,par1 * 0.98, par1 * 1.02); // mean for both signal gaus
-    func1[i]->SetParLimits(2,0.85 * par2, 1.15 * par2); // sigma for 1st signal gaus
-    func1[i]->SetParLimits(3,Kaon_Mass_S1_Projections[i]->GetMaximum() / 20, Kaon_Mass_S1_Projections[i]->GetMaximum()); // amplitude for 2nd signal gaus
+    func1[i]->SetParLimits(2,0.8 * par2, 1.2 * par2); // sigma for 1st signal gaus
+    func1[i]->SetParLimits(3,Kaon_Mass_S1_Projections[i]->GetMaximum() / 30, Kaon_Mass_S1_Projections[i]->GetMaximum()); // amplitude for 2nd signal gaus
     func1[i]->SetParLimits(4,0.85 * par4, 1.15 * par4); // ratio between signal gaussian sigmas
     func1[i]->SetParLimits(5,Kaon_Mass_S1_Projections[i]->GetBinContent(Kaon_Mass_S1_Projections[i]->FindBin(0.365)) / 5, 4 * Kaon_Mass_S1_Projections[i]->GetMaximum()); // amplitude for back gaus
     func1[i]->SetParLimits(6,par6 * 0.98, par6 * 1.02); // mean for back gaus (pion mass)
