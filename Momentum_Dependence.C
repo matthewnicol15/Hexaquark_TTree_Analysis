@@ -16,33 +16,40 @@
    TH1F *h_sigma_3 = new TH1F("h_sigma_3","sigma 3 relationship",160,1,2.6);
    TH1F *h_chi2 = new TH1F("h_chi2","chi^{2} relationship",160,1,2.6);
 
+   TH1F *h_S1_Integral = new TH1F("h_S1_Integral","S1 integral",160,1,2.6);
+   TH1F *h_S2_Integral = new TH1F("h_S2_Integral","S2 integral",160,1,2.6);
+   // TH1F *h_S1_S2_Ratio = new TH1F("h_S1_S2_Ratio","Ratio between S1 and S2",160,1,2.6);
+
    // 2d histograms for the signal subtraction
    TH2F *h_signal_2d = new TH2F("h_signal_2d","2D signal",500,0.3,0.8,300,0,3);
 
 
    // Changing loop to momentum bin values
-   Double_t bin_1[160], bin_2[160], momentum[136];
+   Double_t bin_1[160], bin_2[160], momentum[135], momentum_mid;
+   // Ratio between S1 and S2
+   Double_t S1_Integral[135], S2_Integral[135];
    // Reduced chi^2
    Double_t Chi2;
    // Parameter values
-   Double_t Sigma_1[136], Amp_1[136], Amp_2[136];
+   Double_t Sigma_1[135], Amp_1[135], Amp_2[135], amp_ratio[135];
    // Parameter errors
-   Double_t Sigma_1_error[136], Amp_1_error[136], Amp_2_error[136];
+   Double_t Sigma_1_error[135], Amp_1_error[135], Amp_2_error[135], momentum_error[135], Amp_ratio_error[135];
    // Function range
    Double_t Range_min, Range_max;
 
    // TF1 *func1 = new TF1(funcname.str().c_str(),"gaus(0) + pol3(3)",0.365,0.6);
-   TH1F *Missing_Mass_S1_Projections[160];
-   TH1F *Kaon_Mass_S1_Projections[160];
+   TH1F *Missing_Mass_S1_Projections[135];
+   TH1F *Kaon_Mass_S1_Projections[135];
+   TH1F *Kaon_Mass_S2_Projections[135];
 
    // Create arrays of the various functions
-   TF1 *func1[160];
-   TF1 *signal_1[160];
-   TF1 *signal_2[160];
-   TF1 *signal_total[160];
-   TF1 *background_1[160];
-   TF1 *background_2[160];
-   TF1 *background_total[160];
+   TF1 *func1[135];
+   TF1 *signal_1[135];
+   TF1 *signal_2[135];
+   TF1 *signal_total[135];
+   TF1 *background_1[135];
+   TF1 *background_2[135];
+   TF1 *background_total[135];
 
    Int_t counter = 0;
 
@@ -51,26 +58,29 @@
    Double_t par0, par1, par2, par3, par4, par5, par6, par7, par8, par9;
    for(Int_t i = 0; i < 160; i++){
 
-      // Determining bin max and min
-      bin_1[i] = 1 + (i * 0.01);
-      bin_2[i] = 1 + (i + 1) * 0.01;
+      momentum_mid = 1 + ((i + 0.5) * 0.01);
+
 
       // Cutting out pion cross over between 1.1 and 1.35 GeV
-      // if(bin_1[i] < 1.35) continue;
-      if(bin_1[i] > 1.1 && bin_1[i] < 1.35) continue;
+      if(momentum_mid > 1.1 && momentum_mid < 1.35) continue;
 
       // Kaons only plotted up to 3 GeV
-      if(bin_1[i] > 3) continue;
-      // cout<<"bin "<<i<<" 1st bin "<<bin_1[i]<<" 2nd bin "<<bin_2[i]<<endl;
+      if(momentum_mid > 3) continue;
 
-      counter++;
 
-      momentum[counter] = 1 + ((i + 0.5) * 0.01);
+      momentum[counter] = momentum_mid;
 
 
 
-      Missing_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionY("",hist_S1->GetXaxis()->FindBin(bin_1[i]),hist_S1->GetXaxis()->FindBin(bin_1[i]),0,hist_S1->GetNbinsZ())->Clone();
-      Kaon_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionZ("",hist_S1->GetXaxis()->FindBin(bin_1[i]),hist_S1->GetXaxis()->FindBin(bin_1[i]),0,hist_S1->GetNbinsY())->Clone();
+      Missing_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionY("",hist_S1->GetXaxis()->FindBin(momentum_mid),hist_S1->GetXaxis()->FindBin(momentum_mid),0,hist_S1->GetNbinsZ())->Clone();
+      Kaon_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionZ("",hist_S1->GetXaxis()->FindBin(momentum_mid),hist_S1->GetXaxis()->FindBin(momentum_mid),0,hist_S1->GetNbinsY())->Clone();
+      Kaon_Mass_S2_Projections[counter] = (TH1F*) hist_S2->ProjectionZ("",hist_S2->GetXaxis()->FindBin(momentum_mid),hist_S2->GetXaxis()->FindBin(momentum_mid),0,hist_S2->GetNbinsY())->Clone();
+
+      // Calculate integrals and ratio for S1 and S2
+      S1_Integral[counter] = Kaon_Mass_S1_Projections[counter]->Integral();
+      S2_Integral[counter] = Kaon_Mass_S2_Projections[counter]->Integral();
+
+      // cout<< "Integral ratio " << S1_S2_Ratio[counter] << endl;
 
       // Rebin projections
       // Strangeness 2 looks good with factor of 2
@@ -94,25 +104,38 @@
 
 
       // Setting parameters based on functions determined
-      par0 = Kaon_Mass_S1_Projections[counter]->GetMaximum() / 2; // amplitude for 1st signal gaus
-      // par0 = 0.08024 * pow(i,2) - 20.9076 * i + 1827.356; // amplitude for 1st signal gaus
-      par1 = 0.493677; // mean for both signal gauss
-      // par2 = 0.000000857 * pow(i+1,2) + 0.00001848 * (i+1) + 0.01094; // sigma for 1st signal gaus
-      par2 = 0.00000135 * pow(i+1,2) - 0.00005776 * (i+1) + 0.01323; // sigma for 1st signal gaus
-      par3 = Kaon_Mass_S1_Projections[counter]->GetMaximum() / 3; // amplitude for 2nd signal gaus
-      par4 = 2; // ratio between signal gaussian sigmas
-      // par4 = -0.00001617 * pow(i+1,2) + 0.001323 * (i+1) + 1.928; // ratio between signal gaussian sigmas
+      // par0 = Kaon_Mass_S1_Projections[counter]->GetMaximum() / 2; // amplitude for 1st signal gaus
+      // // par0 = 0.08024 * pow(i,2) - 20.9076 * i + 1827.356; // amplitude for 1st signal gaus
+      // par1 = 0.493677; // mean for both signal gauss
+      // // par2 = 0.000000857 * pow(i+1,2) + 0.00001848 * (i+1) + 0.01094; // sigma for 1st signal gaus
+      // par2 = 0.00000135 * pow(i+1,2) - 0.00005776 * (i+1) + 0.01323; // sigma for 1st signal gaus
+      // par3 = Kaon_Mass_S1_Projections[counter]->GetMaximum() / 3; // amplitude for 2nd signal gaus
+      // par4 = 2; // ratio between signal gaussian sigmas
+      // // par4 = -0.00001617 * pow(i+1,2) + 0.001323 * (i+1) + 1.928; // ratio between signal gaussian sigmas
+      // par5 = 2 * Kaon_Mass_S1_Projections[counter]->GetBinContent(Kaon_Mass_S1_Projections[counter]->FindBin(0.365)); // amplitude for back gaus
+      // par6 = 0.1396; // mean for back gaus (pion mass)
+      // par7 = 0.3; // sigma for back gaus
+      // par8 = -5; // constant for back pol1
+      // par9 = -10; // slope for back pol1
+
+      par0 = 550*exp(-0.5*((momentum[counter]-1.1418174)/0.32175315)*((momentum[counter]-1.1418174)/0.32175315))+(296.52772+-27.580470*momentum[counter]);
+      par1 = 4.95277e-01 -2.78269e-04*momentum[counter] - (2.19406e-03 * exp(-pow(momentum[counter]-1.79144e+00,2) / 2 /pow(2.70089e-01,2))); // mean for both signal gauss
+      // par1 = 0.493677; // mean for both signal gauss
+      par2 = 	exp(-5.87651e+00+9.50189e-01*momentum[counter])+exp(-4.83642e+00+-9.34420e-01*momentum[counter]);
+      par3 = par0 * (3.63259e-01 * exp(-pow(momentum[counter] - 1.82697e+00,2) / 2 / pow(1.82220e-01,2)) + 1.27857e+00 * exp(-pow(momentum[counter] - 2.00491e+00,2) / 2 / pow(6.26903e-01,2))); // amplitude for 2nd signal gaus
+      par4 = 2;
       par5 = 2 * Kaon_Mass_S1_Projections[counter]->GetBinContent(Kaon_Mass_S1_Projections[counter]->FindBin(0.365)); // amplitude for back gaus
       par6 = 0.1396; // mean for back gaus (pion mass)
       par7 = 0.3; // sigma for back gaus
       par8 = -5; // constant for back pol1
       par9 = -10; // slope for back pol1
 
+
       // Setting parameters
       func1[counter]->SetParameter(0,par0); // amplitude for 1st signal gaus
       func1[counter]->FixParameter(1,par1); // mean for both signal gaus
-      func1[counter]->SetParameter(2,par2); // sigma for 1st signal gaus
-      func1[counter]->SetParameter(3,par3); // amplitude for 2nd signal gaus
+      func1[counter]->FixParameter(2,par2); // sigma for 1st signal gaus
+      func1[counter]->FixParameter(3,par3); // amplitude for 2nd signal gaus
       func1[counter]->FixParameter(4,par4); // ratio between signal gaussian sigmas
       func1[counter]->SetParameter(5,par5); // amplitude for back gaus
       func1[counter]->SetParameter(6,par6); // mean for back gaus (pion mass)
@@ -121,10 +144,10 @@
       func1[counter]->SetParameter(9,par9); // slope for back pol1
 
       // Setting parameter limits
-      func1[counter]->SetParLimits(0,Kaon_Mass_S1_Projections[counter]->GetMaximum() / 30, Kaon_Mass_S1_Projections[counter]->GetMaximum()); // amplitude for 1st signal gaus
-      // func1[counter]->SetParLimits(0,par0 * 0.7, par0 * 1.3); // amplitude for 1st signal gaus
+      // func1[counter]->SetParLimits(0,Kaon_Mass_S1_Projections[counter]->GetMaximum() / 30, Kaon_Mass_S1_Projections[counter]->GetMaximum()); // amplitude for 1st signal gaus
+      func1[counter]->SetParLimits(0,par0 * 0.7, par0 * 1.3); // amplitude for 1st signal gaus
       // func1[counter]->SetParLimits(1,par1 * 0.98, par1 * 1.02); // mean for both signal gaus
-      func1[counter]->SetParLimits(2,0.8 * par2, 1.2 * par2); // sigma for 1st signal gaus
+      // func1[counter]->SetParLimits(2,0.8 * par2, 1.2 * par2); // sigma for 1st signal gaus
       func1[counter]->SetParLimits(3,Kaon_Mass_S1_Projections[counter]->GetMaximum() / 30, Kaon_Mass_S1_Projections[counter]->GetMaximum()); // amplitude for 2nd signal gaus
       // func1[counter]->SetParLimits(4,0.85 * par4, 1.15 * par4); // ratio between signal gaussian sigmas
       func1[counter]->SetParLimits(5,Kaon_Mass_S1_Projections[counter]->GetBinContent(Kaon_Mass_S1_Projections[counter]->FindBin(0.365)) / 5, 4 * Kaon_Mass_S1_Projections[counter]->GetMaximum()); // amplitude for back gaus
@@ -166,114 +189,133 @@
       Amp_1[counter] = func1[counter]->GetParameter(0);
       Sigma_1[counter] = func1[counter]->GetParameter(2);
       Amp_2[counter] = func1[counter]->GetParameter(3);
+      amp_ratio[counter] = func1[counter]->GetParameter(3) / func1[counter]->GetParameter(0);
 
       // Get the projection fit errors
       Sigma_1_error[counter] = func1[counter]->GetParError(2);
       Amp_1_error[counter] = func1[counter]->GetParError(0);
       Amp_2_error[counter] = func1[counter]->GetParError(3);
+      Amp_ratio_error[counter] = 0.2;
+      // momentum_error[counter] = sqrt(Kaon_Mass_S1_Projections[counter]->Integral()) / Kaon_Mass_S1_Projections[counter]->Integral();
 
-      // h_chi2->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetChisquare() / func1[counter]->GetNDF());
-      // h_amp_1->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(0));
-      // h_amp_1->SetBinError(i+1,func1[counter]->GetParError(0));
-      // h_mean_signal->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(1));
-      // h_mean_signal->SetBinError(i+1,func1[counter]->GetParError(1));
-      // h_sigma_1->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(2));
-      // h_sigma_1->SetBinError(i+1,func1[counter]->GetParError(2));
-      // h_amp_2->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(3));
-      // h_amp_2->SetBinError(i+1,func1[counter]->GetParError(3));
-      // h_sigma_factor->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(4));
-      // h_sigma_factor->SetBinError(i+1,func1[counter]->GetParError(4));
-      // h_sigma_3->Fill((bin_1[i]+bin_2[i])/2,func1[counter]->GetParameter(7));
-      // h_sigma_3->SetBinError(i+1,func1[counter]->GetParError(7));
+      h_chi2->Fill(momentum[counter], Chi2);
+      h_sigma_1->Fill(momentum[counter],Sigma_1[counter]);
+      h_sigma_1->SetBinError(i, Sigma_1_error[counter]);
+      h_amp_1->Fill(momentum[counter],Amp_1[counter]);
+      h_amp_1->SetBinError(i, Amp_1_error[counter]);
+      h_amp_2->Fill(momentum[counter],Amp_2[counter]);
+      h_amp_2->SetBinError(i, Amp_2_error[counter]);
+      h_mean_signal->Fill(momentum[counter],func1[counter]->GetParameter(1));
+      h_mean_signal->SetBinError(momentum[counter],func1[counter]->GetParError(1));
+
+      h_S1_Integral->Fill(momentum[counter], S1_Integral[counter]);
+      h_S2_Integral->Fill(momentum[counter], S2_Integral[counter]);
+
+
+      counter++;
 
    }
 
-   TGraph* gr1 = new TGraph(136,momentum,Sigma_1);
-   TGraph* gr2 = new TGraph(136,Amp_1,Amp_1_error);
-   TGraph* gr3 = new TGraph(136,Amp_2,Amp_2_error);
+   h_S1_Integral->Sumw2();
+   // h_S2_Integral->Sumw2();
+   auto *h_S1_S2_Ratio = new TH1F();
+   h_S1_S2_Ratio = (TH1F*)h_S1_Integral->Clone("h_S1_S2_Ratio");
+   h_S1_S2_Ratio->Divide(h_S2_Integral);
 
-   TF1 *func_sig_1_amp = new TF1("func_sig_1_amp","pol2(0)",1.0,2.6);
-   TF1 *func_sig_mean = new TF1("func_sig_mean","pol4(0)",1.0,2.6);
-   TF1 *func_sig_1_sigma = new TF1("func_sig_1_sigma","pol2(0)",1.0,2.6);
-   TF1 *func_sig_2_sigma = new TF1("func_sig_2_sigma","pol3(0)",1.0,2.6);
-   TF1 *func_sig_2_amp = new TF1("func_sig_2_amp","pol2(0)",1.0,2.6);
+   // Creating TGraphs for the parameters
+   TGraphErrors* gr1 = new TGraphErrors(135, momentum, Sigma_1, 0, Sigma_1_error);
+   TGraphErrors* gr2 = new TGraphErrors(135, momentum, Amp_1, 0, Amp_1_error);
+   TGraphErrors* gr3 = new TGraphErrors(135, momentum, Amp_2, 0, Amp_2_error);
+   TGraphErrors* gr4 = new TGraphErrors(135, momentum, amp_ratio, 0, Amp_ratio_error);
+
+   // Creating fits for parameters
+   TF1 *func_sig_1_amp = new TF1("func_sig_1_amp","gaus(0) + pol1(3)",1.0,2.6);
+   TF1 *func_sig_1_mean = new TF1("func_sig_1_mean","pol1(0) - gaus(2)",1.0,2.6);
+   TF1 *func_sig_1_sigma = new TF1("func_sig_1_sigma","expo(0) + expo(2)",1.0,2.6);
+   TF1 *func_sig_2_amp = new TF1("func_sig_2_amp","gaus(0) + gaus(3)",1.0,2.6);
+
+
+   // Defining parameters
+   par0 = 550*exp(-0.5*pow((momentum[counter]-1.1418174) / 0.32175315,2)) +(296.52772+-27.580470*momentum[counter]);
+   par1 = 4.95277e-01 -2.78269e-04*momentum[counter] - (2.19406e-03 * exp(-0.5*pow((momentum[counter]-1.79144e+00) / 2.70089e-01,2))); // mean for both signal gauss
+   // par1 = 0.493677; // mean for both signal gauss
+   par2 = 	exp(-5.87651e+00+9.50189e-01*momentum[counter]) + exp(-4.83642e+00+-9.34420e-01*momentum[counter]);
+   par3 = par0 * (3.63259e-01 * exp(-0.5*pow((momentum[counter] - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((momentum[counter] - 2.00491e+00) / 6.26903e-01,2))); // amplitude for 2nd signal gaus
 
    // Setting parameters for fitting parameters
-   // signal 1 amplitude
-   func_sig_1_amp->SetParameter(0,2.24102e+03);
-   func_sig_1_amp->SetParameter(1,-1.68864e+03);
-   func_sig_1_amp->SetParameter(2,3.51047e+02);
 
-   // signal mean
-   // func_sig_mean->FixParameter(0,0.483238);
-   // func_sig_mean->FixParameter(1,0.000674655);
-   // func_sig_mean->FixParameter(2,-1.45551e-05);
-   // func_sig_mean->FixParameter(3,1.22688e-07);
-   // func_sig_mean->FixParameter(4,-3.49508e-10);
+   // signal 1 amplitude
+   // gaus + pol1
+   func_sig_1_amp->FixParameter(0,550);
+   func_sig_1_amp->FixParameter(1,1.1418174);
+   func_sig_1_amp->FixParameter(2,0.32175315);
+   func_sig_1_amp->FixParameter(3,296.52772);
+   func_sig_1_amp->FixParameter(4,-27.580470);
+
+   // signal 1 mean
+   // pol1 - gaus
+   func_sig_1_mean->FixParameter(0,4.95277e-01);
+   func_sig_1_mean->FixParameter(1,-2.78269e-04);
+   func_sig_1_mean->FixParameter(2,2.19406e-03);
+   func_sig_1_mean->FixParameter(3,1.79144e+00);
+   func_sig_1_mean->FixParameter(4,2.70089e-01);
 
    // signal 1 sigma
-   func_sig_1_sigma->SetParameter(0,2.23320e-02);
-   func_sig_1_sigma->SetParameter(1,-1.94565e-02);
-   func_sig_1_sigma->SetParameter(2,9.12836e-03);
+   // 2 exponentials
+   func_sig_1_sigma->FixParameter(0,-5.87651e+00);
+   func_sig_1_sigma->FixParameter(1,9.50189e-01);
+   func_sig_1_sigma->FixParameter(2,-4.83642e+00);
+   func_sig_1_sigma->FixParameter(3,-9.34420e-01);
 
-   // signal 1 amplitude
-   func_sig_1_amp->SetParameter(0,3.87290e+02);
-   func_sig_1_amp->SetParameter(1,3.14119e+02);
-   func_sig_1_amp->SetParameter(2,-1.54320e+02);
-
-   // signal 2 sigma
-   // func_sig_2_sigma->FixParameter(0,1.62832);
-   // func_sig_2_sigma->FixParameter(1,1.54654e-02);
-   // func_sig_2_sigma->FixParameter(2,- 1.99258e-04);
-   // func_sig_2_sigma->FixParameter(3,7.19587e-07);
+   // signal 2 amplitude
+   // signal 1 amp * 2 gaus
+   func_sig_2_amp->FixParameter(0,3.63259e-01);
+   func_sig_2_amp->FixParameter(1,1.82697e+00);
+   func_sig_2_amp->FixParameter(2,1.82220e-01);
+   func_sig_2_amp->FixParameter(3,1.27857e+00);
+   func_sig_2_amp->FixParameter(4,2.00491e+00);
+   func_sig_2_amp->FixParameter(5,6.26903e-01);
 
    // Fitting parameter functions
-   h_amp_1->Fit("func_sig_1_amp","RBLQ");
-   h_amp_2->Fit("func_sig_1_amp","RBLQ");
-   // h_sigma_1->Fit("func_sig_1_sigma","RBLQ");
-   gr1->Fit("func_sig_1_sigma","RBLQ");
+   gr1->Fit("func_sig_1_sigma","RBQ");
+   gr2->Fit("func_sig_1_amp","RBQ");
+   gr3->Fit("func_sig_2_amp","RBQ");
 
-
+   // Creating strings for parameter values
    ostringstream signal_1_amp, signal_mean, signal_1_sigma, signal_2_amp, signal_2_sigma, total_function;
 
+   TH2F *Signal_Function = new TH2F("Signal_Function","",500,0.3,0.8,300,0,3);
+   TF1 *signal_function = new TF1("signal_function","gaus(0) + gaus(3)",0.35,0.8);
+   TF1 *background_function = new TF1("background_function","gaus(0) + gaus(3)",0.35,0.8);
 
-   // // Without fixed mean and sigma ratio for both signal gaussians
-   // signal_1_amp <<"0.04633 * pow(y,2) - 11.92 * y + 1002";
-   // signal_mean <<"(-3.49508e-10 * pow(y,4) + 1.22688e-07 * pow(y,3) - 1.45551e-05 * pow(y,2) + 0.000674655 * y + 0.483238)";
-   // signal_1_sigma <<" 1.336e-06 * pow(y,2) - 6.264e-05 * y + 0.01385";
-   // signal_2_amp <<"5.52306e-04 * pow(y,3) - 1.80445e-01 * pow(y,2) + 1.49715e+01 * y + 1.30435e+02";
-   // signal_2_sigma <<" 7.19587e-07 * pow(y,3) - 1.99258e-04 * pow(y,2) + 1.54654e-02 * y + 1.62832";
+   // Creating signal function and histogram
+   // Loop over kaon momentum
+   for(Int_t y_pos=1; y_pos < 300; y_pos++){
+
+      // Set signal function parameters based on values obtained from the 1D fit
+      // parameter functions for current bin in momentum
+      signal_function->SetParameter(0,func_sig_1_amp->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+      signal_function->SetParameter(1,func_sig_1_mean->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+      signal_function->SetParameter(2,func_sig_1_sigma->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+      signal_function->SetParameter(3,func_sig_1_amp->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos))*func_sig_2_amp->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+      signal_function->SetParameter(4,func_sig_1_mean->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+      signal_function->SetParameter(5,2 * func_sig_1_sigma->Eval(Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+
+      // Loop over kaon mass
+      for(Int_t x_pos=1; x_pos < 500; x_pos++){
+
+         // Set bin content for 2D signal histogram based on current momentum
+         // and kaon mass bin
+         Signal_Function->SetBinContent(x_pos,y_pos,signal_function->Eval(Signal_Function->GetXaxis()->GetBinCenter(x_pos),Signal_Function->GetYaxis()->GetBinCenter(y_pos)));
+
+      }
+   }
 
 
-
-   // With fixed mean and sigma ratio for both signal gaussians
-   signal_1_amp << func_sig_1_amp->GetParameter(2) << " * pow(y,2) + " << func_sig_1_amp->GetParameter(1) << " * y + " << func_sig_1_amp->GetParameter(0);
-   signal_1_sigma << func_sig_1_sigma->GetParameter(2) << " * pow(y,2) + " << func_sig_1_sigma->GetParameter(1) << " * y + " << func_sig_1_sigma->GetParameter(0);
-   signal_2_amp << func_sig_2_amp->GetParameter(2) << " * pow(y,2) + " << func_sig_2_amp->GetParameter(1) << " * y + " << func_sig_2_amp->GetParameter(0);
-   signal_mean <<"0.493677";
-   // signal_1_sigma <<" 1.336e-06 * pow(y,2) - 6.264e-05 * y + 0.01385";
-   // signal_2_amp <<"5.52306e-04 * pow(y,3) - 1.80445e-01 * pow(y,2) + 1.49715e+01 * y + 1.30435e+02";
-   signal_2_sigma <<" 2";
-
-   total_function << signal_1_amp.str().c_str() << " * exp(-pow(x-"
-   << signal_mean.str().c_str() << ",2) / (2 * pow("
-   << signal_1_sigma.str().c_str() << ",2)))"
-   << " + " << signal_2_amp.str().c_str()
-   << " * exp(-pow(x - " << signal_mean.str().c_str()
-   << " ,2) / (2 * pow(" << signal_1_sigma.str().c_str()
-   << " * " << signal_2_sigma.str().c_str()
-   << " ,2)))";
-
-   TF2 *signal_functions = new TF2("signal_functions",total_function.str().c_str(),0.3, 0.8, 0, 3);
-   cout << total_function.str().c_str() << endl;
-   // h_signal_2d->Draw();
-   // signal_functions->Draw("colz,same");
    TH2F * Kaon_Mass_Momentum = new TH2F();
    Kaon_Mass_Momentum = (TH2F*)hist_S1->Project3D("xz")->Clone();
 
-   Kaon_Mass_Momentum->Add(signal_functions,-1);
+   Kaon_Mass_Momentum->Add(Signal_Function,-1);
    Kaon_Mass_Momentum->Draw("colz");
 
-   gr1->Draw("e");
-   cout<< counter<<endl;
 }
