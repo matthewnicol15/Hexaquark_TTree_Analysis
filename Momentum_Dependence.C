@@ -1,11 +1,18 @@
 // Making lots of projections in momentum
 
 {
+
+
    // Get input file
    TFile *f1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022_Total_Scaling_16032022_01.root");
    // Get histogram from input file
    TH3F* hist_S1=(TH3F*)f1->Get("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass");
    TH3F* hist_S2=(TH3F*)f1->Get("h_S2_Kaon_Momentum__Miss_Mass__Kaon_Mass");
+
+   // Rebin strangeness 2 due to low statistics
+   hist_S2->Rebin3D(2,1,1);
+
+   TFile fileOutput1("Kaon_Background_Subtraction_RGA_Fall2018_Outbending_24032022_01.root","recreate");
 
    // histograms looking at fit parameters as a function of momentum
    TH1F *h_sigma_1 = new TH1F("h_sigma_1","sigma 1 relationship",160,1,2.6);
@@ -58,7 +65,8 @@
    for(Int_t i = 0; i < 160; i++){
 
       momentum_mid = 1 + ((i + 0.5) * 0.01);
-
+      // momentum_mid = hist_S2->GetXaxis()->GetBinCenter(i+51);
+      // cout <<i+100<<" "<<momentum_mid<<" " <<hist_S2->GetXaxis()->GetBinCenter(i+51)<<endl;
 
       // Cutting out pion cross over between 1.1 and 1.35 GeV
       if(momentum_mid > 1.1 && momentum_mid < 1.35) continue;
@@ -70,19 +78,15 @@
       momentum[counter] = momentum_mid;
 
 
-      Missing_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionY("",hist_S1->GetXaxis()->FindBin(momentum_mid),hist_S1->GetXaxis()->FindBin(momentum_mid),0,hist_S1->GetNbinsZ())->Clone();
+      Missing_Mass_S1_Projections[counter] = (TH1F*) hist_S2->ProjectionY("",hist_S2->GetXaxis()->FindBin(momentum_mid),hist_S2->GetXaxis()->FindBin(momentum_mid),0,hist_S2->GetNbinsZ())->Clone();
       Kaon_Mass_S1_Projections[counter] = (TH1F*) hist_S1->ProjectionZ("",hist_S1->GetXaxis()->FindBin(momentum_mid),hist_S1->GetXaxis()->FindBin(momentum_mid),0,hist_S1->GetNbinsY())->Clone();
       Kaon_Mass_S2_Projections[counter] = (TH1F*) hist_S2->ProjectionZ("",hist_S2->GetXaxis()->FindBin(momentum_mid),hist_S2->GetXaxis()->FindBin(momentum_mid),0,hist_S2->GetNbinsY())->Clone();
+      // Kaon_Mass_S1_Projections[counter] = (TH1F*) hist_S2->ProjectionZ("",i+51,i+52,0,hist_S2->GetNbinsY())->Clone();
 
       // Calculate integrals and ratio for S1 and S2
       S1_Integral[counter] = Kaon_Mass_S1_Projections[counter]->Integral();
       S2_Integral[counter] = Kaon_Mass_S2_Projections[counter]->Integral();
 
-      // cout<< "Integral ratio " << S1_S2_Ratio[counter] << endl;
-
-      // Rebin projections
-      // Strangeness 2 looks good with factor of 2
-      // Kaon_Mass_S1_Projections[counter]->Rebin(2);
 
       // Setting range of functions
       ostringstream funcname, sig1, sig2, sigtotal, back1, back2, backtotal;
@@ -100,6 +104,9 @@
       background_1[counter] = new TF1(back1.str().c_str(),"gaus(0)",0.0,0.65);
       background_2[counter] = new TF1(back2.str().c_str(),"[0]*[1] + [1]*x",0.365,0.65);
       background_total[counter] = new TF1(backtotal.str().c_str(),"gaus(0) + [3]*[4] + [4]*x",0.365,0.65);
+
+      // For Strangeness 2
+      // par0 = (1/2000) * 550*exp(-0.5*pow((momentum[counter]-1.1418174)/0.32175315,2))+296.52772+-27.580470*momentum[counter];
 
 
       par0 = 550*exp(-0.5*pow((momentum[counter]-1.1418174)/0.32175315,2))+296.52772+-27.580470*momentum[counter];
@@ -182,7 +189,8 @@
 
       h_S1_Integral->Fill(momentum[counter], S1_Integral[counter]);
       h_S2_Integral->Fill(momentum[counter], S2_Integral[counter]);
-
+      // h_S1_Integral->Fill(momentum[counter], Kaon_Mass_S1_Projections[counter]->GetBinContent(Kaon_Mass_S1_Projections[counter]->FindBin(0.493)));
+      // h_S2_Integral->Fill(momentum[counter], Kaon_Mass_S2_Projections[counter]->GetBinContent(Kaon_Mass_S2_Projections[counter]->FindBin(0.493)));
 
       counter++;
 
@@ -254,7 +262,6 @@
    TH2F *Background_Function = new TH2F("Background_Function","",500,0.3,0.8,300,0,3);
    TF1 *signal_function = new TF1("signal_function","gaus(0) + gaus(3)",0.3,0.8);
 
-   // hist_S1->GetZaxis()->SetRange(hist_S1->GetZaxis()->FindBin(0.37),hist_S1->GetZaxis()->FindBin(0.8));
 
    // Take copy of the data kaon momentum vs mass
    TH2F *Kaon_Mass_Momentum = new TH2F();
@@ -287,7 +294,13 @@
          // Set bin content for 2D signal histogram based on current momentum
          // and kaon mass bin
          Signal_Function->SetBinContent(z_pos,x_pos,signal_function->Eval(Signal_Function->GetXaxis()->GetBinCenter(z_pos),Signal_Function->GetYaxis()->GetBinCenter(x_pos)));
+
+         // Make sure there are no negative values for the background
+         if(Kaon_Mass_Momentum->GetBinContent(z_pos,x_pos) - Signal_Function->GetBinContent(z_pos,x_pos)>0)
          Background_Function->SetBinContent(z_pos,x_pos,Kaon_Mass_Momentum->GetBinContent(z_pos,x_pos) - Signal_Function->GetBinContent(z_pos,x_pos));
+         else
+         Background_Function->SetBinContent(z_pos,x_pos,0);
+
 
          // Loop over missing mass
          for(Int_t y_pos=1; y_pos < 300; y_pos++){
@@ -296,6 +309,7 @@
 
             S1_Signal->SetBinContent(x_pos, y_pos, z_pos, Signal_Function->GetBinContent(x_pos,z_pos) * S1_Signal->GetBinContent(x_pos,y_pos,z_pos));
 
+            // Make sure there are no negative values for the background
             if(Background_Function->GetBinContent(x_pos,z_pos) - Signal_Function->GetBinContent(x_pos,z_pos) > 0){
                S1_Background->SetBinContent(x_pos, y_pos, z_pos, (Background_Function->GetBinContent(x_pos,z_pos) - Signal_Function->GetBinContent(x_pos,z_pos)) * S1_Background->GetBinContent(x_pos,y_pos,z_pos));
             }
@@ -308,18 +322,34 @@
    }
 
 
-   TH1F *test = new TH1F();
-   test = (TH1F*)S1_Signal->Project3D("y")->Clone();
-   TH1F *test_back = new TH1F();
-   test_back = (TH1F*)S1_Background->Project3D("y")->Clone();
+   // Double_t Scale_Low_MM = Signal_Function->Integral(Signal_Function->GetYaxis()->FindBin(0.0),Signal_Function->GetYaxis()->FindBin(0.9)) / Background_Function->Integral(Background_Function->GetYaxis()->FindBin(0.0),Background_Function->GetYaxis()->FindBin(0.9));
+   // Background_Function->Scale(Scale_Low_MM);
+   //
+   // TH2F *Result = new TH2F();
+   // Result = (TH2F*)Signal_Function->Clone();
+   //
+   // Result->Add(Background_Function,-1);
+   //
+   // Signal_Function->Scale(Kaon_Mass_Momentum->Integral() / (Background_Function->Integral() + Result->Integral()));
+   // Background_Function->Scale(Kaon_Mass_Momentum->Integral() / (Background_Function->Integral() + Result->Integral()));
 
-   Double_t Scale = test->Integral(test->FindBin(0),test->FindBin(0.85)) / test_back->Integral(test_back->FindBin(0),test_back->FindBin(0.85));
-   test->Scale(1/Scale);
-   test->Draw();
-   test_back->Draw("same");
-
+   // TH1F *test = new TH1F();
+   // test = (TH1F*)S1_Signal->Project3D("y")->Clone();
+   // TH1F *test_back = new TH1F();
+   // test_back = (TH1F*)S1_Background->Project3D("y")->Clone();
+   //
+   // Double_t Scale = test->Integral(test->FindBin(0),test->FindBin(0.85)) / test_back->Integral(test_back->FindBin(0),test_back->FindBin(0.85));
+   // test->Scale(1/Scale);
+   // test->Draw();
+   // test_back->Draw("same");
+   // Double_t Scale_2 = hist_S1->Integral() /(test->Integral() + test_back->Integral()) ;
+   // cout<<"scale "<<Scale_2<<endl;
+   // test->Scale(Scale_2);
+   // test_back->Scale(Scale_2);
    // Kaon_Mass_Momentum->Add(Signal_Function,-1);
    // Kaon_Mass_Momentum->Draw("colz");
    // Background_Function->Draw("colz");
+
+   fileOutput1.Write();
 
 }
