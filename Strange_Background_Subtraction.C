@@ -17,7 +17,9 @@
 
    TH1D *S3_photon_energy_total = new TH1D("S3_photon_energy_total","",120,0,12);
    TH1D *S3_miss_mass_total = new TH1D("S3_miss_mass_total","",300,0,3);
+   TH1D *S3_miss_mass_total_Copy = new TH1D("S3_miss_mass_total_Copy","",300,0,3);
    TH1D *S3_kp1_mass_total = new TH1D("S3_kp1_mass_total","",500,0.3,0.8);
+   TH1D *S3_miss_mass_total_copied = new TH1D("S3_miss_mass_total_copied","",15,0.94,3.94);
 
    // Make array for all the 1D projections
    TH1D *h_projectionx_S1_sig[500];
@@ -49,7 +51,7 @@
    TH1D *S1_kp1_mass_total = (TH1D*)h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->Project3D("z")->Clone("S1_kp1_mass_total");
 
 
-   h_S2_Photon_Energy__Miss_Mass__Kaon_Mass->Rebin3D(1,6,2);
+   h_S2_Photon_Energy__Miss_Mass__Kaon_Mass->Rebin3D(1,2,2);
 
    // Strangeness 2
    // Photon energy
@@ -63,6 +65,7 @@
    h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->Rebin3D(S3_rebin_x,S3_rebin_y,S3_rebin_z);
    S3_photon_energy_total->Rebin(S3_rebin_x);
    S3_miss_mass_total->Rebin(S3_rebin_y);
+   S3_miss_mass_total_Copy->Rebin(S3_rebin_y);
    S3_kp1_mass_total->Rebin(S3_rebin_z);
 
 
@@ -74,6 +77,7 @@
 
             S3_photon_energy_total->SetBinContent(s3_x, S3_photon_energy_total->GetBinContent(s3_x) + h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->GetBinContent(s3_x, s3_y, s3_z));
             S3_miss_mass_total->SetBinContent(s3_y, S3_miss_mass_total->GetBinContent(s3_y) + h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->GetBinContent(s3_x, s3_y, s3_z));
+            S3_miss_mass_total_Copy->SetBinContent(s3_y, S3_miss_mass_total_Copy->GetBinContent(s3_y) + h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->GetBinContent(s3_x, s3_y, s3_z));
             S3_kp1_mass_total->SetBinContent(s3_z, S3_kp1_mass_total->GetBinContent(s3_z) + h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->GetBinContent(s3_x, s3_y, s3_z));
 
          }
@@ -185,10 +189,10 @@
 
 
    // Setting parameter limits before fitting
-   func1_S3->SetParLimits(0,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum()); // amplitude for first gauss
+   func1_S3->SetParLimits(0,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum()*1.05); // amplitude for first gauss
    // func1_S3->SetParLimits(1,0.480,0.505); // mean for first gauss
    func1_S3->SetParLimits(2,0.005,0.03); // sigma for first gauss
-   func1_S3->SetParLimits(3,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum()); // amplitude for second gauss
+   func1_S3->SetParLimits(3,S3_kp1_mass_total->GetMaximum() / 5,S3_kp1_mass_total->GetMaximum() * 1.05); // amplitude for second gauss
    // func1_S3->SetParLimits(4,0.480,0.505); // mean for second gauss
    func1_S3->SetParLimits(5,0.01,0.04); // sigma for second gauss
    func1_S3->SetParLimits(7,0.1,0.38); // mean for background gauss
@@ -291,12 +295,16 @@
       if(h_projectionx_S1_sig[bin]->Integral() > 100){
 
          // Determine the scaling factor looking at the signal function
-         S1_Scaling_Factor_sig = func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S1_sig[bin]->Integral() ;
+         // S1_Scaling_Factor_sig = func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S1_sig[bin]->Integral() ;
+         S1_Scaling_Factor_sig = func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) /  (func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)));
 
          // Determine the scaling factor looking at the background function
          // S1_Scaling_Factor_back = func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S1_back[bin]->Integral();
-         S1_Scaling_Factor_back = (func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) -
-         func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S1_back[bin]->Integral();
+         // S1_Scaling_Factor_back = (func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) -
+         // func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S1_back[bin]->Integral();
+         S1_Scaling_Factor_back = func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) /  (func4_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S1->Eval(S1_kp1_mass_total->GetBinCenter(bin)));
 
          // If background scaling factor is less than 0 set to zero
          if(S1_Scaling_Factor_back < 0) S1_Scaling_Factor_back = 0;
@@ -317,15 +325,19 @@
 
    // Determining the integral of signal and background where MM < 1, this is
    // done to ensure below threshold background is removed properly
+   Double_t total_integral_S1 = S1_miss_mass_total->Integral(S1_miss_mass_total->FindBin(0), S1_miss_mass_total->FindBin(3));
+   Double_t back_total_integral_S1 = h_projectionx_S1_back[1]->Integral(h_projectionx_S1_back[1]->FindBin(0), h_projectionx_S1_back[1]->FindBin(3));
+   Double_t sig_total_integral_S1 = h_projectionx_S1_sig[1]->Integral(h_projectionx_S1_sig[1]->FindBin(0), h_projectionx_S1_sig[1]->FindBin(3));
    Double_t back_integral_S1 = h_projectionx_S1_back[1]->Integral(h_projectionx_S1_back[1]->FindBin(0), h_projectionx_S1_back[1]->FindBin(1));
-   Double_t sig_integral_S1 = h_projectionx_S1_sig[1]->Integral(h_projectionx_S1_sig[1]->FindBin(0), h_projectionx_S1_sig[1]->FindBin(1));
+   Double_t sig_integral_S1 = S1_miss_mass_total->Integral(S1_miss_mass_total->FindBin(0), S1_miss_mass_total->FindBin(1));
    // Scale the background accordingly for low MM
    h_projectionx_S1_back[1]->Scale(sig_integral_S1 / back_integral_S1);
 
    // Subtract the background histogram from the signal
-   h_projectionx_S1_sig[1]->Add(h_projectionx_S1_back[1], -1);
-
-   h_projectionx_S1_sig[1]->Scale((S1_kp1_mass_total->Integral() - (func5_S1->Integral(0.37,0.78) / S1_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S1_sig[1]->Integral());
+   // h_projectionx_S1_sig[1]->Add(h_projectionx_S1_back[1], -1);
+   S1_miss_mass_total->Add(h_projectionx_S1_back[1], -1);
+   S1_miss_mass_total->Scale((sig_total_integral_S1 / (sig_total_integral_S1 + back_total_integral_S1)) * total_integral_S1 / S1_miss_mass_total->Integral());
+   // h_projectionx_S1_sig[1]->Scale((S1_kp1_mass_total->Integral() - (func5_S1->Integral(0.37,0.78) / S1_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S1_sig[1]->Integral());
 
    //////////////////////////////////////////////////////////////////////////////
    // Strangeness 2 - kaon 1
@@ -347,12 +359,16 @@
       if(h_projectionx_S2_sig[bin]->Integral() > 100){
 
          // Determine the scaling factor looking at the signal function
-         S2_Scaling_Factor_sig = func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
+         // S2_Scaling_Factor_sig = func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_sig[bin]->Integral() ;
+         S2_Scaling_Factor_sig = func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) /  (func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)));
 
          // Determine the scaling factor looking at the background function
          // S2_Scaling_Factor_back = func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S2_back[bin]->Integral();
-         S2_Scaling_Factor_back = (func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) -
-         func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S2_back[bin]->Integral();
+         // S2_Scaling_Factor_back = (func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) -
+         // func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S2_back[bin]->Integral();
+         S2_Scaling_Factor_back = func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) /  (func4_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S2->Eval(S2_kp1_mass_total->GetBinCenter(bin)));
 
          // If background scaling factor is less than 0 set to zero
          if(S2_Scaling_Factor_back < 0) S2_Scaling_Factor_back = 0;
@@ -373,15 +389,19 @@
 
    // Determining the integral of signal and background where MM < 1, this is
    // done to ensure below threshold background is removed properly
+   Double_t total_integral_S2 = S2_miss_mass_total->Integral(S2_miss_mass_total->FindBin(0), S2_miss_mass_total->FindBin(3));
+   Double_t back_total_integral_S2 = h_projectionx_S2_back[1]->Integral(h_projectionx_S2_back[1]->FindBin(0), h_projectionx_S2_back[1]->FindBin(3));
+   Double_t sig_total_integral_S2 = h_projectionx_S2_sig[1]->Integral(h_projectionx_S2_sig[1]->FindBin(0), h_projectionx_S2_sig[1]->FindBin(3));
    Double_t back_integral_S2 = h_projectionx_S2_back[1]->Integral(h_projectionx_S2_back[1]->FindBin(0), h_projectionx_S2_back[1]->FindBin(1));
-   Double_t sig_integral_S2 = h_projectionx_S2_sig[1]->Integral(h_projectionx_S2_sig[1]->FindBin(0), h_projectionx_S2_sig[1]->FindBin(1));
+   Double_t sig_integral_S2 = S2_miss_mass_total->Integral(S2_miss_mass_total->FindBin(0), S2_miss_mass_total->FindBin(1));
    // Scale the background accordingly for low MM
    h_projectionx_S2_back[1]->Scale(sig_integral_S2 / back_integral_S2);
 
    // Subtract the background histogram from the signal
-   h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
-
-   h_projectionx_S2_sig[1]->Scale((S2_kp1_mass_total->Integral() - (func5_S2->Integral(0.37,0.78) / S2_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S2_sig[1]->Integral());
+   // h_projectionx_S2_sig[1]->Add(h_projectionx_S2_back[1], -1);
+   S2_miss_mass_total->Add(h_projectionx_S2_back[1], -1);
+   S2_miss_mass_total->Scale((sig_total_integral_S2 / (sig_total_integral_S2 + back_total_integral_S2)) * total_integral_S2 / S2_miss_mass_total->Integral());
+   // h_projectionx_S2_sig[1]->Scale((S2_kp1_mass_total->Integral() - (func5_S2->Integral(0.37,0.78) / S2_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S2_sig[1]->Integral());
 
 
    //////////////////////////////////////////////////////////////////////////////
@@ -408,12 +428,16 @@
          counter++;
 
          // Determine the scaling factor looking at the signal function
-         S3_Scaling_Factor_sig = func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S3_sig[bin]->Integral() ;
+         // S3_Scaling_Factor_sig = func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S3_sig[bin]->Integral() ;
+         S3_Scaling_Factor_sig = func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) /  (func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)));
 
          // Determine the scaling factor looking at the background function
+         S3_Scaling_Factor_back = func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) /  (func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) +
+         func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)));
          // S3_Scaling_Factor_back = func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) / h_projectionx_S3_back[bin]->Integral();
-         S3_Scaling_Factor_back = (func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) -
-         func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S3_back[bin]->Integral();
+         // S3_Scaling_Factor_back = (func5_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin)) -
+         // func4_S3->Eval(S3_kp1_mass_total->GetBinCenter(bin))) / h_projectionx_S3_back[bin]->Integral();
 
          // If background scaling factor is less than 0 set to zero
          if(S3_Scaling_Factor_back < 0) S3_Scaling_Factor_back = 0;
@@ -440,24 +464,56 @@
    //    h_projectionx_S3_sig[1]->SetBinError(l,Errors);
    //
    // }
+   // S3_miss_mass_total->Sumw2();
 
 
    // Determining the integral of signal and background where MM < 1, this is
    // done to ensure below threshold background is removed properly
-   Double_t back_integral_S3 = h_projectionx_S3_back[1]->Integral(h_projectionx_S3_back[1]->FindBin(0), h_projectionx_S3_back[1]->FindBin(1));
-   Double_t sig_integral_S3 = h_projectionx_S3_sig[1]->Integral(h_projectionx_S3_sig[1]->FindBin(0), h_projectionx_S3_sig[1]->FindBin(1));
+   Double_t total_integral_S3 = S3_miss_mass_total->Integral(S3_miss_mass_total->FindBin(0), S3_miss_mass_total->FindBin(3));
+   Double_t back_total_integral_S3 = h_projectionx_S3_back[1]->Integral(h_projectionx_S3_back[1]->FindBin(0), h_projectionx_S3_back[1]->FindBin(3));
+   Double_t sig_total_integral_S3 = h_projectionx_S3_sig[1]->Integral(h_projectionx_S3_sig[1]->FindBin(0), h_projectionx_S3_sig[1]->FindBin(3));
+   Double_t back_integral_S3 = h_projectionx_S3_back[1]->Integral(h_projectionx_S3_back[1]->FindBin(0), h_projectionx_S3_back[1]->FindBin(1.0));
+   Double_t sig_integral_S3 = S3_miss_mass_total->Integral(S3_miss_mass_total->FindBin(0), S3_miss_mass_total->FindBin(1.0));
    // Scale the background accordingly for low MM
    h_projectionx_S3_back[1]->Scale(sig_integral_S3 / back_integral_S3);
 
-   Double_t Scaling = S3_kp1_mass_total->Integral() / h_projectionx_S3_sig[1]->Integral();
-
-   h_projectionx_S3_sig[1]->Scale(Scaling);
-   h_projectionx_S3_back[1]->Scale(Scaling);
-
    // Subtract the background histogram from the signal
-   h_projectionx_S3_sig[1]->Add(h_projectionx_S3_back[1], -1);
+   // h_projectionx_S3_sig[1]->Add(h_projectionx_S3_back[1], -1);
+   S3_miss_mass_total->Add(h_projectionx_S3_back[1], -1);
+   // S3_miss_mass_total->Scale((sig_total_integral_S3 / (sig_total_integral_S3 + back_total_integral_S3)) * total_integral_S3 / S3_miss_mass_total->Integral());
 
-   h_projectionx_S3_sig[1]->Scale((S3_kp1_mass_total->Integral() - (func5_S3->Integral(0.37,0.78) / S3_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S3_sig[1]->Integral());
+   for(Int_t S3_bin=1; S3_bin < S3_miss_mass_total->GetNbinsX() + 1; S3_bin++){
+
+      S3_miss_mass_total_copied->SetBinContent(S3_bin,S3_miss_mass_total->GetBinContent(S3_bin));
+
+      Double_t S3_Back_Error, S3_Data_Error, Subtracted_Error;
+
+      if(h_projectionx_S3_back[1]->GetBinContent(S3_bin) > 0){
+         S3_Back_Error = sqrt(h_projectionx_S3_back[1]->GetBinContent(S3_bin));
+      }
+      else{
+         S3_Back_Error = 0;
+      }
+      if(S3_miss_mass_total_Copy->GetBinContent(S3_bin) > 0){
+         S3_Data_Error = sqrt(S3_miss_mass_total_Copy->GetBinContent(S3_bin));
+      }
+      else{
+         S3_Data_Error = 0;
+      }
+
+      if(S3_Back_Error!=0 && S3_Data_Error!=0){
+         Subtracted_Error = sqrt(pow(S3_Back_Error,2) + pow(S3_Data_Error,2));
+      }
+      else{
+         Subtracted_Error = 0;
+      }
+
+
+
+      S3_miss_mass_total->SetBinError(S3_bin, Subtracted_Error);
+   }
+
+   // h_projectionx_S3_sig[1]->Scale((S3_kp1_mass_total->Integral() - (func5_S3->Integral(0.37,0.78) / S3_kp1_mass_total->GetBinWidth(1))) / h_projectionx_S3_sig[1]->Integral());
 
    // Setting up styles
    gROOT->Reset();
@@ -544,19 +600,31 @@
    // Threshold for S3
    auto *S3_Hex = new TLine(1.737,0,1.737,40);
    auto *S3_Mol = new TLine(1.969,0,1.969,40);
-   auto *S3_Threshold_line = new TLine(1.8154,0,1.8154,40);
+   auto *S3_Mol_2 = new TLine(3.136,0,3.136,40);
+   auto *S3_Threshold_line = new TLine(1.8154,0,1.8154,50);
 
    // Change colours of functions to made it clearer
    // Particle lines
    cascade_line->SetLineColor(kRed);
    cascade_1530_line->SetLineColor(kRed);
-   S3_Threshold_line->SetLineColor(kRed);
+   S3_Hex->SetLineStyle(2);
+   S3_Mol->SetLineStyle(2);
+   S3_Threshold_line->SetLineStyle(2);
    S3_Hex->SetLineWidth(3);
    S3_Mol->SetLineWidth(3);
    S3_Threshold_line->SetLineWidth(3);
-   S3_Hex->SetLineColor(kGreen);
-   S3_Mol->SetLineColor(kOrange);
+   S3_Threshold_line->SetLineColor(kGreen);
+   S3_Hex->SetLineColor(kOrange);
+   S3_Mol->SetLineColor(kMagenta);
 
+
+   S2_miss_mass_total->SetLineWidth(3);
+   S2_miss_mass_total->SetLineColor(4);
+   S2_miss_mass_total->SetMarkerStyle(8);
+   S2_miss_mass_total->SetMarkerSize(1);
+   S2_miss_mass_total->SetMarkerColor(4);
+   S2_miss_mass_total->GetXaxis()->SetTitleOffset(1.2);
+   S2_miss_mass_total->GetYaxis()->SetTitle("Counts");
 
    // auto *c1 = new TCanvas("c1","Strangeness 1 kaon 1 mass",800,800);
    // c1->cd();
@@ -572,10 +640,11 @@
    // S1_miss_mass_total->Draw();
 
 
-   auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
-   c3->cd();
-   h_projectionx_S1_sig[1]->Draw();
-   l1->Draw("same");
+   // auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
+   // c3->cd();
+   // S1_miss_mass_total->Draw();
+   // // h_projectionx_S1_sig[1]->Draw();
+   // l1->Draw("same");
 
    // auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
    // c4->cd();
@@ -593,19 +662,20 @@
    //
    auto *c6 = new TCanvas("c6","Strageness 2 After background Subtraction",800,800);
    c6->cd();
-   h_projectionx_S2_sig[1]->Draw();
+   S2_miss_mass_total->Draw();
+   // h_projectionx_S2_sig[1]->Draw();
    l1->Draw("same");
    cascade_line->Draw("same");
    cascade_1530_line->Draw("same");
 
-   auto *c7 = new TCanvas("c7","Strangeness 3 kaon 1 mass",800,800);
-   c7->cd();
-   S3_kp1_mass_total->Draw();
-   func1_S3->Draw("same");
-   func2_S3->Draw("same");
-   func3_S3->Draw("same");
-   func4_S3->Draw("same");
-   func5_S3->Draw("same");
+   // auto *c7 = new TCanvas("c7","Strangeness 3 kaon 1 mass",800,800);
+   // c7->cd();
+   // S3_kp1_mass_total->Draw();
+   // func1_S3->Draw("same");
+   // func2_S3->Draw("same");
+   // func3_S3->Draw("same");
+   // func4_S3->Draw("same");
+   // func5_S3->Draw("same");
 
    // auto *c8 = new TCanvas("c8","Strageness 3 Before background Subtraction",800,800);
    // c8->cd();
@@ -614,7 +684,7 @@
    //
    auto *c9 = new TCanvas("c9","Strageness 3 After background Subtraction",800,800);
    c9->cd();
-   h_projectionx_S3_sig[1]->Draw();
+   S3_miss_mass_total->Draw();
    l1->Draw("same");
    S3_Hex->Draw("same");
    S3_Mol->Draw("same");
