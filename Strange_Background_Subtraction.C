@@ -7,7 +7,7 @@
 
    // Input file
    // RGA data
-   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGB_Spring2019_Inbending_at_least_1e1KpFD_Tree_Total_03032022_Total_Scaling_23032022_01.root");
+   TFile *f1=new TFile("/mnt/d/PhD/Analysis_Output/Hexaquark/RGA_Spring2019_Inbending_at_least_1e1KpFD_KpChi3_Tree_Total_20062022_Total_Scaling_20062022_01.root");
 
    // Getting the multidimensional histogram plots
    TH3F *h_S1_Photon_Energy__Miss_Mass__Kaon_Mass = (TH3F*)f1->Get("h_S1_Photon_Energy__Miss_Mass__Kaon_Mass");
@@ -626,25 +626,30 @@
    S2_miss_mass_total->GetXaxis()->SetTitleOffset(1.2);
    S2_miss_mass_total->GetYaxis()->SetTitle("Counts");
 
-   // auto *c1 = new TCanvas("c1","Strangeness 1 kaon 1 mass",800,800);
-   // c1->cd();
-   // S1_kp1_mass_total->Draw();
-   // func1_S1->Draw("same");
-   // func2_S1->Draw("same");
-   // func3_S1->Draw("same");
-   // func4_S1->Draw("same");
-   // func5_S1->Draw("same");
+   auto *c1 = new TCanvas("c1","Strangeness 1 kaon 1 mass",800,800);
+   c1->cd();
+   S1_kp1_mass_total->Draw();
+   func1_S1->Draw("same");
+   func2_S1->Draw("same");
+   func3_S1->Draw("same");
+   func4_S1->Draw("same");
+   func5_S1->Draw("same");
 
-   // auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
-   // c2->cd();
-   // S1_miss_mass_total->Draw();
+   auto *c2 = new TCanvas("c2","Strageness 1 Before background Subtraction",800,800);
+   c2->cd();
+   h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->Project3D("y")->Draw();
+   h_S1_Photon_Energy__Miss_Mass__Kaon_Mass_y->SetMinimum(-5000);
+   h_S1_Photon_Energy__Miss_Mass__Kaon_Mass_y->SetMaximum(70000);
+   S1_miss_mass_total->SetLineColor(kRed);
+   S1_miss_mass_total->Draw("same");
+   l1->Draw("same");
 
 
-   // auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
-   // c3->cd();
-   // S1_miss_mass_total->Draw();
-   // // h_projectionx_S1_sig[1]->Draw();
-   // l1->Draw("same");
+   auto *c3 = new TCanvas("c3","Strageness 1 After background Subtraction",800,800);
+   c3->cd();
+   S1_miss_mass_total->Draw();
+   // h_projectionx_S1_sig[1]->Draw();
+   l1->Draw("same");
 
    // auto *c4 = new TCanvas("c4","Strangeness 2 kaon 1 mass",800,800);
    // c4->cd();
@@ -660,13 +665,13 @@
    // S2_miss_mass_total->Draw();
    //
    //
-   auto *c6 = new TCanvas("c6","Strageness 2 After background Subtraction",800,800);
-   c6->cd();
-   S2_miss_mass_total->Draw();
-   // h_projectionx_S2_sig[1]->Draw();
-   l1->Draw("same");
-   cascade_line->Draw("same");
-   cascade_1530_line->Draw("same");
+   // auto *c6 = new TCanvas("c6","Strageness 2 After background Subtraction",800,800);
+   // c6->cd();
+   // S2_miss_mass_total->Draw();
+   // // h_projectionx_S2_sig[1]->Draw();
+   // l1->Draw("same");
+   // cascade_line->Draw("same");
+   // cascade_1530_line->Draw("same");
 
    // auto *c7 = new TCanvas("c7","Strangeness 3 kaon 1 mass",800,800);
    // c7->cd();
@@ -682,11 +687,11 @@
    // S3_miss_mass_total->Draw();
    //
    //
-   auto *c9 = new TCanvas("c9","Strageness 3 After background Subtraction",800,800);
-   c9->cd();
-   S3_miss_mass_total->Draw();
-   l1->Draw("same");
-   S3_Hex->Draw("same");
-   S3_Mol->Draw("same");
-   S3_Threshold_line->Draw("same");
+   // auto *c9 = new TCanvas("c9","Strageness 3 After background Subtraction",800,800);
+   // c9->cd();
+   // S3_miss_mass_total->Draw();
+   // l1->Draw("same");
+   // S3_Hex->Draw("same");
+   // S3_Mol->Draw("same");
+   // S3_Threshold_line->Draw("same");
 }
