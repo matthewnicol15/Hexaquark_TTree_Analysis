@@ -18,16 +18,6 @@
 void Tree_Reader_Strangeness_Scaling(){
 
 
-   // Beam energies
-   // RGA Fall 2018
-   Double_t beam_energy = 10.604;
-   // RGA Spring 2019
-   // Double_t beam_energy = 10.199;
-   // RGB Spring 2020, for runno less than 11394
-   Double_t beam_energy_low = 10.2129;
-   // RGB Spring 2020, for runno 11394 and above
-   Double_t beam_energy_high = 10.3894;
-
    //////////////////////////////////////////////////////////////////////////////
    ////Define variables for naming    ///////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////
@@ -42,13 +32,13 @@ void Tree_Reader_Strangeness_Scaling(){
    ostringstream Output_File_Name;
 
    // Setting the strings for output file name
-   File_Path<<"/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/";
+   File_Path<<"/mnt/d/PhD/Analysis_Output/Hexaquark/";
    // File_Path<<"/mnt/c/Users/Nics/Documents/";
-   Data<<"RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022";
-   Quantity<<"1M";
+   Data<<"S3_Sim_RGB_Spring2019_Inbending_at_least_1e1KpFD_KpChi3_Tree_Total_23062022";
+   Quantity<<"Total";
    Topology<<"Scaling";
-   Date<<"24032022";
-   Version<<"03";
+   Date<<"23062022";
+   Version<<"01";
 
 
    Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<
@@ -61,17 +51,13 @@ void Tree_Reader_Strangeness_Scaling(){
    //////////////////////////////////////////////////////////////////////////////
 
    // Read file with information on vectors
-   gROOT->ProcessLine(".L /media/mn688/Elements1/PhD/Macros/Loader.C+");
-   // gROOT->ProcessLine(".L /mnt/c/Users/Nics/Documents/Loader.C+");
-
-
+   gROOT->ProcessLine(".L /mnt/d/PhD/Macros/Loader.C+");
 
    // Read input root file and assign it to 'f'
-   TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/Strangeness_Scaling/RGA_Fall18_Inbending_Scaling_Strangeness_24022022_01.root");
+   TFile *f = new TFile("/mnt/d/PhD/Trees/Simulations/Hexaquark/S3_Sim_job4904_Deuteron_Target_210622_01/S3_Sim_job4904_10_6_Beam_Deuteron_Target_230622_01.root");
    // TFile *f = new TFile("/mnt/c/Users/Nics/Documents/RGA_Fall18_Inbending_Scaling_Strangeness_24022022_01.root");
    // Read TTree within root file and assign it to 't1'
    TTree *t1 = (TTree*)f->Get("Tree");
-
 
 
    // Creating components to read from TTree
@@ -79,6 +65,9 @@ void Tree_Reader_Strangeness_Scaling(){
    // Event information
    TLorentzVector *readbeam=NULL;  // Information on the beam
    TLorentzVector *readtarget=NULL; // Information on the target
+   TLorentzVector Target_Sim(0,0,0,1.8756); // Information on the target
+   TLorentzVector Beam_Sim;
+   Beam_Sim.SetXYZM(0,0,10.6,0.000511);
    // TLorentzVector *el=NULL;   // 4-vectors for the scattered electron
    Double_t start_time; // Event start time
    Int_t readrunno;
@@ -112,8 +101,6 @@ void Tree_Reader_Strangeness_Scaling(){
    t1->SetBranchAddress("triggerno",&readtriggerno);
    t1->SetBranchAddress("start_time",&start_time);
    t1->SetBranchAddress("p4",&v_p4);
-   // t1->SetBranchAddress("el",&el);
-   // t1->SetBranchAddress("Photon_Energy",&Photon_Energy,"Photon_Energy/D");
    t1->SetBranchAddress("vertex",&v_vertex);
    t1->SetBranchAddress("beta",&v_beta);
    t1->SetBranchAddress("status",&v_status);
@@ -127,25 +114,11 @@ void Tree_Reader_Strangeness_Scaling(){
    t1->SetBranchAddress("beam",&readbeam);
    t1->SetBranchAddress("target",&readtarget);
    t1->SetBranchAddress("elno",&readelno);
-   // t1->SetBranchAddress("negative_charge_tracks",&negative_charge_tracks);
    t1->SetBranchAddress("positive_charge_tracks",&positive_charge_tracks);
-   // t1->SetBranchAddress("Kaonp_FD_Chi3",&Kaonp_FD_Chi3);
-   // t1->SetBranchAddress("electronFD",&electronFD);
-
-
-   // Getting signal and background function histograms for weighting
-   TFile *f2 = new TFile("/media/mn688/Elements1/PhD/Macros/Hexaquark_TTree_Analysis/Kaon_Background_Subtraction_RGA_Fall2018_Outbending_24032022_01.root");
-
-   TH2F *Signal_Function = new TH2F();
-   TH2F *Background_Function = new TH2F();
-
-   Signal_Function = (TH2F*) f2->Get("Signal_Function");
-   Background_Function = (TH2F*) f2->Get("Background_Function");
 
 
    // Path and name for the output file to save
    TFile fileOutput1(Output_File_Name.str().c_str(),"recreate");
-
 
    // Getting particle database to use for masses
    auto db=TDatabasePDG::Instance();
@@ -158,16 +131,15 @@ void Tree_Reader_Strangeness_Scaling(){
    auto* hbeam=new TH1F("hbeam","Beam mass; Beam Mass [GeV];Counts",200,0,11);
    auto* h_S1_Photon_Energy__Miss_Mass__Kaon_Mass = new TH3F("h_S1_Photon_Energy__Miss_Mass__Kaon_Mass","Photon energy, missing mass and kaon mass",120,0,12,300,0,3,500,0.3,0.8);
    auto* h_S2_Photon_Energy__Miss_Mass__Kaon_Mass = new TH3F("h_S2_Photon_Energy__Miss_Mass__Kaon_Mass","Photon energy, missing mass and kaon mass",120,0,12,300,0,3,500,0.3,0.8);
-   auto* h_S3_Photon_Energy__Miss_Mass__Kaon_Mass = new TH3F("h_S3_Photon_Energy__Miss_Mass__Kaon_Mass","Photon energy, missing mass and kaon mass",120,0,12,300,0,3,500,0.3,0.8);
+   auto* h_S3_Photon_Energy__Miss_Mass__Kaon_Mass = new TH3F("h_S3_Photon_Energy__Miss_Mass__Kaon_Mass","Photon energy, missing mass and kaon mass",120,0,12,300,2,5,500,0.3,0.8);
 
 
    // Missing mass, kaon momentum and kaon mass
    auto* h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass = new TH3F("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass","Kaon momentum, missing mass and kaon mass",300,0,3,300,0,3,500,0.3,0.8);
-   auto* h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig = new TH3F("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig","Kaon momentum, missing mass and kaon mass",300,0,3,300,0,3,500,0.3,0.8);
-   auto* h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back = new TH3F("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back","Kaon momentum, missing mass and kaon mass",300,0,3,300,0,3,500,0.3,0.8);
    auto* h_S2_Kaon_Momentum__Miss_Mass__Kaon_Mass = new TH3F("h_S2_Kaon_Momentum__Miss_Mass__Kaon_Mass","Kaon momentum, missing mass and kaon mass",300,0,3,300,0,3,500,0.3,0.8);
-   auto* h_S3_Kaon_Momentum__Miss_Mass__Kaon_Mass = new TH3F("h_S3_Kaon_Momentum__Miss_Mass__Kaon_Mass","Kaon momentum, missing mass and kaon mass",300,0,3,300,0,3,500,0.3,0.8);
+   auto* h_S3_Kaon_Momentum__Miss_Mass__Kaon_Mass = new TH3F("h_S3_Kaon_Momentum__Miss_Mass__Kaon_Mass","Kaon momentum, missing mass and kaon mass",300,0,3,300,2,5,500,0.3,0.8);
 
+   auto* h_S1_Miss_Mass = new TH1F("h_S1_Miss_Mass","Missing Mass",300,0,3);
 
 
    // Histograms looking at kaon properties
@@ -185,10 +157,6 @@ void Tree_Reader_Strangeness_Scaling(){
    //////////////////////////////////////////////////////////////////////////////
    //// Making variables    ///////////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////
-
-   // Weights for background subtraction
-   Double_t Signal_Weight;
-   Double_t Background_Weight;
 
    // Create vectors of TLorentzVectors to store information of
    // all particles of a given type (important when you have more than 1
@@ -376,9 +344,9 @@ void Tree_Reader_Strangeness_Scaling(){
 
 
    // Reads the total number of entries in the TTree
-   // Long64_t nentries = t1->GetEntries();
+   Long64_t nentries = t1->GetEntries();
    // You can just run over a set number of events for fast analysis
-   Long64_t nentries = 1000000;
+   // Long64_t nentries = 100;
 
    cout<<nentries<<endl;
 
@@ -394,7 +362,6 @@ void Tree_Reader_Strangeness_Scaling(){
          fprintf (stderr, "%lld\r", i/Percentage);
          fflush (stderr);
       }
-
       // All the vectors must be cleared at the start of each event entry
       // e^-
       v_el.clear();
@@ -487,7 +454,6 @@ void Tree_Reader_Strangeness_Scaling(){
       v_vertex_time_neutron.clear();
       v_vertex_neutron.clear();
       v_region_neutron.clear();
-
 
       //////////////////////////////////////////////////////////////////////////////
       //// Looping over particles in the current event    //////////////////////////
@@ -632,6 +598,8 @@ void Tree_Reader_Strangeness_Scaling(){
 
          // K^+
          else if(v_PID->at(j)==321){
+
+
             // Setting the 4-vector and assigning mass from PDG
             kp.SetXYZM(v_p4->at(j).Px(),v_p4->at(j).Py(),v_p4->at(j).Pz(),db->GetParticle(321)->Mass());
             TOF_kp = v_time->at(j); // Measured time
@@ -736,13 +704,13 @@ void Tree_Reader_Strangeness_Scaling(){
          }
       }
 
-      // beam = (TLorentzVector)*readbeam;
+      beam = (TLorentzVector)*readbeam;
       // Setting the beam momentum based on run
       // if(readrunno < 11394)beam.SetXYZM(0,0,beam_energy_low,0);
-      // else beam.SetXYZM(0,0,beam_energy_high,0);
+      // else beam.SetXYZM(0,0,beam_energy_high,06);
       // if(readrunno < 6400)   beam.SetXYZM(0,0,beam_energy,0);
       // else beam.SetXYZM(0,0,beam_energy_low,0);
-      beam.SetXYZM(0,0,beam_energy,0);
+      // beam.SetXYZM(0,0,10.6,0);
       hbeam->Fill(beam.Rho());
 
       //////////////////////////////////////////////////////////////////////////////
@@ -760,11 +728,6 @@ void Tree_Reader_Strangeness_Scaling(){
       // Strangness 1
       if(v_kp.size() == 1){
 
-         Signal_Weight = Signal_Function->GetBinContent(Signal_Function->GetXaxis()->FindBin(v_Mass_kp.at(0)),Signal_Function->GetYaxis()->FindBin(v_kp.at(0).Rho()));
-         Background_Weight = Background_Function->GetBinContent(Background_Function->GetXaxis()->FindBin(v_Mass_kp.at(0)),Background_Function->GetYaxis()->FindBin(v_kp.at(0).Rho())) - Signal_Weight;
-
-         // If background weight is negative set it to zero
-         if(Background_Weight < 0) Background_Weight = 0;
 
          // Missing mass
          Miss_S1_eKp = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0);
@@ -772,12 +735,11 @@ void Tree_Reader_Strangeness_Scaling(){
          // K+ properties
          h_delta_beta_S1_kp_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
          h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass->Fill(v_kp.at(0).Rho(), Miss_S1_eKp.M(),v_Mass_kp.at(0));
-         h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->Fill(v_kp.at(0).Rho(), Miss_S1_eKp.M(),v_Mass_kp.at(0),Signal_Weight);
-         h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->Fill(v_kp.at(0).Rho(), Miss_S1_eKp.M(),v_Mass_kp.at(0),Background_Weight);
 
+         h_S1_Miss_Mass->Fill(Miss_S1_eKp.M());
 
-            // Look at photon energy, missing mass and kaon mass
-            h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S1_eKp.M(),v_Mass_kp.at(0));
+         // Look at photon energy, missing mass and kaon mass
+         h_S1_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S1_eKp.M(),v_Mass_kp.at(0));
       }
 
       // Strangness 2
@@ -794,8 +756,8 @@ void Tree_Reader_Strangeness_Scaling(){
          // Delta beta cut
          // if(v_kp.at(0).Rho() > 1.33 && v_kp.at(1).Rho() > 0.9 && fabs(v_delta_beta_kp.at(0)) < 0.02 && fabs(v_delta_beta_kp.at(1)) < 0.02){
 
-            // Look at photon energy, missing mass and kaon mass
-            h_S2_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S2_eKpKp.M(),v_Mass_kp.at(0));
+         // Look at photon energy, missing mass and kaon mass
+         h_S2_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S2_eKpKp.M(),v_Mass_kp.at(0));
          // }
       }
 
@@ -803,7 +765,8 @@ void Tree_Reader_Strangeness_Scaling(){
       if(v_kp.size() == 3){
 
          // Missing mass
-         Miss_S3_eKpKpKp = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
+         // Miss_S3_eKpKpKp = beam + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
+         Miss_S3_eKpKpKp = Beam_Sim + (TLorentzVector)*readtarget - v_el.at(0) - v_kp.at(0) - v_kp.at(1) - v_kp.at(2);
 
          // K+ properties
          h_delta_beta_S3_kp_1->Fill(v_kp.at(0).Rho(),v_delta_beta_kp.at(0));
@@ -815,26 +778,11 @@ void Tree_Reader_Strangeness_Scaling(){
          // if(fabs(v_delta_beta_kp.at(0)) < 0.02 && fabs(v_delta_beta_kp.at(1)) < 0.02 &&
          // fabs(v_delta_beta_kp.at(2)) < 0.02){
 
-            // Look at photon energy, missing mass and kaon mass
-            h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S3_eKpKpKp.M(),v_Mass_kp.at(0));
+         // Look at photon energy, missing mass and kaon mass
+         h_S3_Photon_Energy__Miss_Mass__Kaon_Mass->Fill(Photon.E(),Miss_S3_eKpKpKp.M(),v_Mass_kp.at(0));
          // }
       }
    }
-
-   // Scale to match low MM background
-   Double_t Back_Integral = h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->Integral(h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->GetYaxis()->FindBin(0.0),h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->GetYaxis()->FindBin(0.9));
-   Double_t Sig_Integral = h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->Integral(h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->GetYaxis()->FindBin(0.0),h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->GetYaxis()->FindBin(0.9));
-   h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->Scale(Sig_Integral / Back_Integral);
-
-
-   // Subtract background from signal
-   h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->Add(h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back,-1);
-
-   // Normalise for total events
-   Double_t Scale_2 = h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass->Integral() / (h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->Integral() + h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->Integral());
-   h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Sig->Scale(Scale_2);
-   h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass_Back->Scale(Scale_2);
-
 
    fileOutput1.Write();
 }
