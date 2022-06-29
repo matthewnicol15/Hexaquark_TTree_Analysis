@@ -48,7 +48,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   Topology<<"Topology_8";
   Additional_Info<<"";
   Date<<"08122021";
-  Version<<"02";
+  Version<<"03";
 
   Output_File_Name<<File_Path.str().c_str()<<Data.str().c_str()<<"_"<<Quantity.str().c_str()<<"_"<<
   Topology.str().c_str()<<Additional_Info.str().c_str()<<"_"<<Date.str().c_str()<<"_"<<Version.str().c_str()<<".root";
@@ -327,6 +327,7 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
   //// Looping over events in the tree    //////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
+  auto start = std::chrono::high_resolution_clock::now();
 
   // Reads the total number of entries in the TTree
   Long64_t nentries = t1->GetEntries();
@@ -341,10 +342,17 @@ void Tree_Reader_S3_At_Least_1p2pim_topology_8(){
     t1->GetEntry(i);
 
     // This prints out the percentage of events completed so far
+    // if (i % Percentage == 0){
+    //   fprintf (stderr, "%lld\r", i/Percentage);
+    //   fflush (stderr);
+    // }
+
     if (i % Percentage == 0){
-      fprintf (stderr, "%lld\r", i/Percentage);
-      fflush (stderr);
+      auto finish = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double> elapsed = finish - start;
+      cout<<i/Percentage<<"% completed "<<"    eta(s): "<<(elapsed.count()*100/(i/Percentage)) - elapsed.count()<<endl;
     }
+
 
     // All the vectors must be cleared at the start of each event entry
     // e^-
