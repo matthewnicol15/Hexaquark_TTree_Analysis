@@ -21,7 +21,7 @@ using namespace clas12;
 using namespace std;
 
 
-void Tree_Maker_PureMC(TString loader_file, TString inFileName, TString outFileName, const std::string databaseF){
+void Tree_Maker_PureMC(TString loader_file, TString inFileName, TString outFileName, const std::string databaseF, TString targetmaterial){
    auto start = std::chrono::high_resolution_clock::now();
    gBenchmark->Start("timer");
    int counter=0;
@@ -34,6 +34,8 @@ void Tree_Maker_PureMC(TString loader_file, TString inFileName, TString outFileN
 
    TString outputFile = outFileName;
    TFile fileOutput1(outputFile,"recreate");
+
+   TString Target = targetmaterial;
 
    TTree Tree("Tree","it's a tree!");
 
@@ -121,8 +123,20 @@ void Tree_Maker_PureMC(TString loader_file, TString inFileName, TString outFileN
    // Setting TLorentzVectors for beam and target
    TLorentzVector beam(0,0,0,0); // Set 4 vector four the beam, all momentum in z-direction
    Double_t beam_E; // Used for the beam energy obtained from the RCDB
-   TLorentzVector target(0,0,0,0.93827); // Set 4 vector for target, stationary so no momentum
-   // TLorentzVector target(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
+
+   // Creating the target TLorentzVector
+   TLorentzVector target(0,0,0,0); // Set 4 vector for target, stationary so no momentum
+   // Setting target mass
+   if(Target == "proton" || Target == "Proton"){
+      target.SetXYZM(0,0,0,0.93827); // Set 4 vector for target, stationary so no momentum
+      cout << "proton" << endl;
+   }
+   else if(Target == "deuteron" || Target == "Deuteron"){
+      target.SetXYZM(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
+      cout << "deuteron" << endl;
+
+   }
+   cout << "target mass is " << target.M() << endl;
 
    Double_t c = 30; // Speed of light, used to calculate vertex time
 

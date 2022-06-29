@@ -21,8 +21,7 @@ using namespace clas12;
 using namespace std;
 
 
-// void Tree_Maker(){
-void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, const std::string databaseF){
+void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, const std::string databaseF, TString targetmaterial){
    auto start = std::chrono::high_resolution_clock::now();
    gBenchmark->Start("timer");
    int counter=0;
@@ -35,6 +34,8 @@ void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, co
 
    TString outputFile = outFileName;
    TFile fileOutput1(outputFile,"recreate");
+
+   TString Target = targetmaterial;
 
    TTree Tree("Tree","it's a tree!");
 
@@ -119,9 +120,21 @@ void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, co
    // Setting TLorentzVectors for beam and target
    TLorentzVector beam(0,0,0,0); // Set 4 vector four the beam, all momentum in z-direction
    Double_t beam_E; // Used for the beam energy obtained from the RCDB
-   TLorentzVector target(0,0,0,0.93827); // Set 4 vector for target, stationary so no momentum
-   // TLorentzVector target(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
 
+   // Creating the target TLorentzVector
+   TLorentzVector target(0,0,0,0); // Set 4 vector for target, stationary so no momentum
+   // Setting target mass
+   if(Target == "proton" || Target == "Proton"){
+      target.SetXYZM(0,0,0,0.93827); // Set 4 vector for target, stationary so no momentum
+      cout << "proton" << endl;
+   }
+   else if(Target == "deuteron" || Target == "Deuteron"){
+      target.SetXYZM(0,0,0,1.8756); // Set 4 vector for target, stationary so no momentum
+      cout << "deuteron" << endl;
+
+   }
+   cout << "target mass is " << target.M() << endl;
+   
    Double_t c = 30; // Speed of light, used to calculate vertex time
 
    // Assign a branch to each measurable and name it
@@ -196,7 +209,6 @@ void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, co
          beam_E = rcdbData.beam_energy*0.001;
          beam.SetXYZM(0, 0, beam_E, 0.000511);
 
-
          elno = 0;
          positronno = 0;
          protonno = 0;
@@ -213,7 +225,6 @@ void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, co
          positive_charge_tracks = 0;
          negative_charge_tracks = 0;
 
-         // This loop goes over each particle within the current event
          // This loop goes over each particle within the current event
          for(auto& p : c12->getDetParticles()){
 
@@ -303,9 +314,7 @@ void Tree_Maker(TString loader_file, TString inFileName, TString outFileName, co
             Tree_Events++;
          }
       }
-      // Prints out the file currently analysed and how many events are in tree
-      // cout<<"file: "<<i<<"events in tree "<<Tree_Events<<endl;
-   // }
+
    Tree.Write(); // Write information to the TTree
    auto finish = std::chrono::high_resolution_clock::now();
    std::chrono::duration<double> elapsed = finish - start;
