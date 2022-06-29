@@ -20,7 +20,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   gROOT->ProcessLine(".L ~/work/Macros/Loader.C+");
 
   // Grabbing part 1 file for the kaon mass fit function
-  TFile *fin1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGA_Spring2019_Inbending_dst_Tree_04_Total_22112021_01.root");
+  TFile *fin1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_Analysis_RGA_Smeared_Spring2019_Inbending_dst_Tree_Total_221021__10012022_01.root");
   // Getting the kaon mass fit functions from part 1
   // Strangeness 1 - kaon 1
   // Total function
@@ -30,13 +30,13 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
 
 
   TF1 *func1_s2_kp1 = (TF1*)fin1->Get("func1_s2_kp1");
-  cout<<func1->GetParameter(0)<<" "<<func1->GetParameter(1)<<" "<<func1->GetParameter(2)<<endl;
-  cout<<func1_s2_kp1->GetParameter(0)<<" "<<func1_s2_kp1->GetParameter(1)<<" "<<func1_s2_kp1->GetParameter(2)<<endl;
+  // cout<<func1->GetParameter(0)<<" "<<func1->GetParameter(1)<<" "<<func1->GetParameter(2)<<endl;
+  // cout<<func1_s2_kp1->GetParameter(0)<<" "<<func1_s2_kp1->GetParameter(1)<<" "<<func1_s2_kp1->GetParameter(2)<<endl;
 
 
 
   // Read input root file and assign it to 'f'
-  TFile *f = new TFile("/shared/storage/physhad/JLab/mn688/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_201021_04.root");
+  TFile *f = new TFile("/media/mn688/Elements1/PhD/Trees/Dibaryon/RGA/RGA_Spring2019_Inbending_at_least_1eFD_1Kp_Tree_Total_201021.root");
 
   // Read TTree within root file and assign it to 't1'
   TTree *t1 = (TTree*)f->Get("RGA_Spring2019_Inbending_201021");
@@ -89,7 +89,7 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   t1->SetBranchAddress("triggerno",&readtriggerno);
 
   // Path and name for the output file to save
-  TFile fileOutput1("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_231121_01.root","recreate");
+  // TFile fileOutput1("/media/mn688/Elements1/PhD/Analysis_Output/Strangeness_RGA_SPRING_2019_Inbending_eFD_Kp_201021_04_part2_Total_231121_01.root","recreate");
 
 
   // Getting particle database to use for masses
@@ -743,6 +743,6 @@ void Strangeness_Analysis_Sideband_Kaon_part2(){
   func5_s2_kp2->Write();
 
   // Save the output file
-  fileOutput1.Write();
+  // fileOutput1.Write();
 
 }
