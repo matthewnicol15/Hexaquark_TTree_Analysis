@@ -138,7 +138,7 @@
       // Defining functions
       func1[counter_S1] = new TF1(funcname.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [8] * exp(-0.5 * pow((x-[1]) / (2*[2]),2)) + gaus(3) + [6]*[7] + [7]*x",0.365,0.65);
       signal_1[counter_S1] = new TF1(sig1.str().c_str(),"gaus(0)",0.365,0.65);
-      signal_2[counter_S1] = new TF1(sig2.str().c_str(),"[0] * (3.63259e-01 * exp(-0.5*pow((x - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((x - 2.00491e+00) / 6.26903e-01,2))) * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
+      signal_2[counter_S1] = new TF1(sig2.str().c_str(),"gaus(0)",0.365,0.65);
       signal_total[counter_S1] = new TF1(sigtotal.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [3] * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
       background_1[counter_S1] = new TF1(back1.str().c_str(),"gaus(0)",0.0,0.65);
       background_2[counter_S1] = new TF1(back2.str().c_str(),"[0]*[1] + [1]*x",0.365,0.65);
@@ -149,10 +149,12 @@
       par0 = 1090*exp(-0.5*pow((momentum_S1[counter_S1]-1.052)/0.272,2))+1299+-322.3*momentum_S1[counter_S1];
       par1 = 4.95277e-01 -2.78269e-04*momentum_S1[counter_S1] - 2.19406e-03 * exp(-0.5*pow((momentum_S1[counter_S1]-1.79144e+00) / 2.70089e-01,2)); // mean for both signal gauss
       par2 = exp(-5.87651e+00+9.50189e-01*momentum_S1[counter_S1])+exp(-4.83642e+00+-9.34420e-01*momentum_S1[counter_S1]);
-      par3 = -2466.73 + 8254.67*momentum_S1[counter_S1] -8574.25*pow(momentum_S1[counter_S1],2)+3580.97*pow(momentum_S1[counter_S1],3) -511.388*pow(momentum_S1[counter_S1],4); // amplitude for back gaus
+      // par3 = -2466.73 + 8254.67*momentum_S1[counter_S1] -8574.25*pow(momentum_S1[counter_S1],2)+3580.97*pow(momentum_S1[counter_S1],3) -511.388*pow(momentum_S1[counter_S1],4); // amplitude for back gaus
+      par3 = 1500*exp(-0.5*pow((momentum_S1[counter_S1]-2.5)/0.23,2))+1142+-835*momentum_S1[counter_S1]+208*pow(momentum_S1[counter_S1],2); // amp for back gaus
       par4 = 0.1396; // mean for back gaus (pion mass)
       // par5 = 0.3; // sigma for back gaus
-      par5 = 0.393*exp(-0.5*pow((momentum_S1[counter_S1]-1.46)/0.613,2))+-0.534+0.224*momentum_S1[counter_S1]; // sigma for back gaus
+      // par5 = 0.393*exp(-0.5*pow((momentum_S1[counter_S1]-1.46)/0.613,2))+-0.534+0.224*momentum_S1[counter_S1]; // sigma for back gaus
+      par5 = 0.11*exp(-0.5*pow((momentum_S1[counter_S1]-1.72)/0.3564,2))+0+0.05*momentum_S1[counter_S1]; // sigma for back gaus
       par6 = -5; // constant for back pol1
       par7 = -10; // slope for back pol1
       par8 = 0.578473*exp(-0.5*pow((momentum_S1[counter_S1]-1.66762)/0.229272,2)) + 1.34606*exp(-0.5*pow((momentum_S1[counter_S1]-2.12122)/0.701563,2));
@@ -172,10 +174,10 @@
 
       // Setting parameter limits
       // func1[counter_S1]->SetParLimits(3,0, Kaon_Mass_S1_Projections[counter_S1]->GetBinContent(Kaon_Mass_S1_Projections[counter_S1]->FindBin(0.365)) * 10); // amplitude for back gaus
-      // func1[counter_S1]->SetParLimits(3,par3 * 0.75, par3 * 1.25); // amplitude for back gaus
+      func1[counter_S1]->SetParLimits(3,0,5000); // amplitude for back gaus
       // func1[counter_S1]->SetParLimits(4,par4 * 0.6, par4 * 1.4); // mean for back gaus (pion mass)
       // func1[counter_S1]->SetParLimits(4,par4 * 0.85, par4 * 1.15); // mean for back gaus (pion mass)
-      // func1[counter_S1]->SetParLimits(5,par5*0.9, par5*1.1); // sigma for back gaus
+      func1[counter_S1]->SetParLimits(5,0.0,0.3); // sigma for back gaus
       func1[counter_S1]->SetParLimits(6,-1000, -0.7); // constant for back pol1
       func1[counter_S1]->SetParLimits(7,-500, 0); // slope for back pol1
 
