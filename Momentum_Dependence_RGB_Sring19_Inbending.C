@@ -3,7 +3,7 @@
 {
 
    Int_t S2_x_rebin=2;
-   Int_t S2_y_rebin=1;
+   Int_t S2_y_rebin=4;
    Int_t S2_z_rebin=2;
    Int_t S3_x_rebin=10;
    Int_t S3_y_rebin=20;
@@ -149,11 +149,8 @@
       par0 = 1090*exp(-0.5*pow((momentum_S1[counter_S1]-1.052)/0.272,2))+1299+-322.3*momentum_S1[counter_S1];
       par1 = 4.95277e-01 -2.78269e-04*momentum_S1[counter_S1] - 2.19406e-03 * exp(-0.5*pow((momentum_S1[counter_S1]-1.79144e+00) / 2.70089e-01,2)); // mean for both signal gauss
       par2 = exp(-5.87651e+00+9.50189e-01*momentum_S1[counter_S1])+exp(-4.83642e+00+-9.34420e-01*momentum_S1[counter_S1]);
-      // par3 = -2466.73 + 8254.67*momentum_S1[counter_S1] -8574.25*pow(momentum_S1[counter_S1],2)+3580.97*pow(momentum_S1[counter_S1],3) -511.388*pow(momentum_S1[counter_S1],4); // amplitude for back gaus
       par3 = 1500*exp(-0.5*pow((momentum_S1[counter_S1]-2.5)/0.23,2))+1142+-835*momentum_S1[counter_S1]+208*pow(momentum_S1[counter_S1],2); // amp for back gaus
       par4 = 0.1396; // mean for back gaus (pion mass)
-      // par5 = 0.3; // sigma for back gaus
-      // par5 = 0.393*exp(-0.5*pow((momentum_S1[counter_S1]-1.46)/0.613,2))+-0.534+0.224*momentum_S1[counter_S1]; // sigma for back gaus
       par5 = 0.11*exp(-0.5*pow((momentum_S1[counter_S1]-1.72)/0.3564,2))+0+0.05*momentum_S1[counter_S1]; // sigma for back gaus
       par6 = -5; // constant for back pol1
       par7 = -10; // slope for back pol1
@@ -286,20 +283,19 @@
       // Defining functions
       func1_S2[counter_S2] = new TF1(funcname_S2.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [8] * exp(-0.5 * pow((x-[1]) / (2*[2]),2)) + gaus(3) + [6]*[7] + [7]*x",0.365,0.65);
       signal_1_S2[counter_S2] = new TF1(sig1_S2.str().c_str(),"gaus(0)",0.365,0.65);
-      signal_2_S2[counter_S2] = new TF1(sig2_S2.str().c_str(),"[0] * (3.63259e-01 * exp(-0.5*pow((x - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((x - 2.00491e+00) / 6.26903e-01,2))) * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
-      signal_total_S2[counter_S2] = new TF1(sigtotal_S2.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * (3.63259e-01 * exp(-0.5*pow((x - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((x - 2.00491e+00) / 6.26903e-01,2))) * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
+      signal_2_S2[counter_S2] = new TF1(sig2_S2.str().c_str(),"gaus(0)",0.365,0.65);
+      signal_total_S2[counter_S2] = new TF1(sigtotal_S2.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [3] * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
       background_1_S2[counter_S2] = new TF1(back1_S2.str().c_str(),"gaus(0)",0.0,0.65);
       background_2_S2[counter_S2] = new TF1(back2_S2.str().c_str(),"[0]*[1] + [1]*x",0.365,0.65);
       background_total_S2[counter_S2] = new TF1(backtotal_S2.str().c_str(),"gaus(0) + [3]*[4] + [4]*x",0.365,0.65);
 
       // Defining parameters for fits
-      par0_S2 = 40*exp(-0.5*pow((momentum_S2[counter_S2]-1.2)/0.18,2))+80+-20*momentum_S2[counter_S2];
+      par0_S2 = 44*exp(-0.5*pow((momentum_S2[counter_S2]-1.206)/0.186,2))+74+-17*momentum_S2[counter_S2];
       par1_S2 = 4.95277e-01 -2.78269e-04*momentum_S2[counter_S2] - 2.19406e-03 * exp(-0.5*pow((momentum_S2[counter_S2]-1.79144e+00) / 2.70089e-01,2)); // mean for both signal gauss
       par2_S2 = exp(-5.87651e+00+9.50189e-01*momentum_S2[counter_S2])+exp(-4.83642e+00+-9.34420e-01*momentum_S2[counter_S2]);
-      par3_S2 = -2466.73 + 8254.67*momentum_S2[counter_S2] -8574.25*pow(momentum_S2[counter_S2],2)+3580.97*pow(momentum_S2[counter_S2],3) -511.388*pow(momentum_S2[counter_S2],4); // amplitude for back gaus
+      par3_S2 = 1500*exp(-0.5*pow((momentum_S2[counter_S2]-2.5)/0.23,2))+1142+-835*momentum_S2[counter_S2]+208*pow(momentum_S2[counter_S2],2); // amp for back gaus
       par4_S2 = 0.1396; // mean for back gaus (pion mass)
-      // par5_S2 = 0.3; // sigma for back gaus
-      par5_S2 = 0.393*exp(-0.5*pow((momentum_S2[counter_S2]-1.46)/0.613,2))+-0.534+0.224*momentum_S2[counter_S2]; // sigma for back gaus
+      par5_S2 = 0.11*exp(-0.5*pow((momentum_S2[counter_S2]-1.72)/0.3564,2))+0+0.05*momentum_S2[counter_S2]; // sigma for back gaus
       par6_S2 = -5; // constant for back pol1
       par7_S2 = -10; // slope for back pol1
       par8_S2 = 0.578473*exp(-0.5*pow((momentum_S2[counter_S2]-1.66762)/0.229272,2)) + 1.34606*exp(-0.5*pow((momentum_S2[counter_S2]-2.12122)/0.701563,2));
@@ -309,7 +305,8 @@
       func1_S2[counter_S2]->FixParameter(0,par0_S2); // amplitude for 1st signal gaus
       func1_S2[counter_S2]->FixParameter(1,par1_S2); // mean for both signal gaus
       func1_S2[counter_S2]->FixParameter(2,par2_S2); // sigma for 1st signal gaus
-      func1_S2[counter_S2]->SetParameter(3,par3_S2); // amplitude for back gaus
+      // func1_S2[counter_S2]->SetParameter(3,par3_S2); // amplitude for back gaus
+      func1_S2[counter_S2]->SetParameter(3,2.5*Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.365))); // amplitude for back gaus
       func1_S2[counter_S2]->FixParameter(4,par4_S2); // mean for back gaus (pion mass)
       func1_S2[counter_S2]->SetParameter(5,par5_S2); // sigma for back gaus
       func1_S2[counter_S2]->SetParameter(6,par6_S2); // constant for back pol1
@@ -318,9 +315,12 @@
 
 
       // Setting parameter limits
-      // func1_S2[counter_S2]->SetParLimits(3,Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.365)) / 5, 4 * Kaon_Mass_S2_Projections[counter_S2]->GetMaximum()); // amplitude for back gaus
-      // func1_S2[counter_S2]->SetParLimits(4,par4_S2 * 0.98, par4_S2 * 1.02); // mean for back gaus (pion mass)
-      // func1_S2[counter_S2]->SetParLimits(5,0.1, 0.8); // sigma for back gaus
+      // func1_S2[counter_S2]->SetParLimits(0,0.2*Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.5)), 1.02*Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.5))); // amplitude for back gaus
+      // func1_S2[counter_S2]->SetParLimits(3,0, Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.365)) * 10); // amplitude for back gaus
+      func1_S2[counter_S2]->SetParLimits(3,0.9*Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.365)),5*Kaon_Mass_S2_Projections[counter_S2]->GetBinContent(Kaon_Mass_S2_Projections[counter_S2]->FindBin(0.365))); // amplitude for back gaus
+      // func1_S2[counter_S2]->SetParLimits(4,par4 * 0.6, par4 * 1.4); // mean for back gaus (pion mass)
+      // func1_S2[counter_S2]->SetParLimits(4,par4 * 0.85, par4 * 1.15); // mean for back gaus (pion mass)
+      func1_S2[counter_S2]->SetParLimits(5,0.025,0.35); // sigma for back gaus
       func1_S2[counter_S2]->SetParLimits(6,-1000, -0.7); // constant for back pol1
       func1_S2[counter_S2]->SetParLimits(7,-500, 0); // slope for back pol1
 
@@ -331,12 +331,13 @@
       signal_1_S2[counter_S2]->SetParameter(0,func1_S2[counter_S2]->GetParameter(0));
       signal_1_S2[counter_S2]->SetParameter(1,func1_S2[counter_S2]->GetParameter(1));
       signal_1_S2[counter_S2]->SetParameter(2,func1_S2[counter_S2]->GetParameter(2));
-      signal_2_S2[counter_S2]->SetParameter(0,func1_S2[counter_S2]->GetParameter(0));
+      signal_2_S2[counter_S2]->SetParameter(0,func1_S2[counter_S2]->GetParameter(0)*func1_S2[counter_S2]->GetParameter(8));
       signal_2_S2[counter_S2]->SetParameter(1,func1_S2[counter_S2]->GetParameter(1));
-      signal_2_S2[counter_S2]->SetParameter(2,func1_S2[counter_S2]->GetParameter(2));
+      signal_2_S2[counter_S2]->SetParameter(2,2*func1_S2[counter_S2]->GetParameter(2));
       signal_total_S2[counter_S2]->SetParameter(0,func1_S2[counter_S2]->GetParameter(0));
       signal_total_S2[counter_S2]->SetParameter(1,func1_S2[counter_S2]->GetParameter(1));
       signal_total_S2[counter_S2]->SetParameter(2,func1_S2[counter_S2]->GetParameter(2));
+      signal_total_S2[counter_S2]->SetParameter(3,func1_S2[counter_S2]->GetParameter(8));
       background_1_S2[counter_S2]->SetParameter(0,func1_S2[counter_S2]->GetParameter(3));
       background_1_S2[counter_S2]->SetParameter(1,func1_S2[counter_S2]->GetParameter(4));
       background_1_S2[counter_S2]->SetParameter(2,func1_S2[counter_S2]->GetParameter(5));
@@ -410,28 +411,31 @@
       // Defining functions
       func1_S3[counter_S3] = new TF1(funcname_S3.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [8] * exp(-0.5 * pow((x-[1]) / (2*[2]),2)) + gaus(3) + [6]*[7] + [7]*x",0.365,0.65);
       signal_1_S3[counter_S3] = new TF1(sig1_S3.str().c_str(),"gaus(0)",0.365,0.65);
-      signal_2_S3[counter_S3] = new TF1(sig2_S3.str().c_str(),"[0] * (3.63259e-01 * exp(-0.5*pow((x - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((x - 2.00491e+00) / 6.26903e-01,2))) * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
-      signal_total_S3[counter_S3] = new TF1(sigtotal_S3.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * (3.63259e-01 * exp(-0.5*pow((x - 1.82697e+00) / 1.82220e-01,2)) + 1.27857e+00 * exp(-0.5 * pow((x - 2.00491e+00) / 6.26903e-01,2))) * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
+      signal_2_S3[counter_S3] = new TF1(sig2_S3.str().c_str(),"gaus(0)",0.365,0.65);
+      signal_total_S3[counter_S3] = new TF1(sigtotal_S3.str().c_str(),"[0] * exp(-0.5*pow((x-[1]) / [2],2)) + [0] * [3] * exp(-0.5 * pow((x-[1]) / (2*[2]),2))",0.365,0.65);
       background_1_S3[counter_S3] = new TF1(back1_S3.str().c_str(),"gaus(0)",0.0,0.65);
       background_2_S3[counter_S3] = new TF1(back2_S3.str().c_str(),"[0]*[1] + [1]*x",0.365,0.65);
       background_total_S3[counter_S3] = new TF1(backtotal_S3.str().c_str(),"gaus(0) + [3]*[4] + [4]*x",0.365,0.65);
 
-      par0_S3 = 43.357*exp(-0.5*pow((momentum_S3[counter_S3]-1.22)/0.13,2))+32.647+-5.934*momentum_S3[counter_S3];
+      // Defining parameters for fits
+      par0_S3 = 39.8*exp(-0.5*pow((momentum_S3[counter_S3]-1.23)/0.12,2))+32.65+-5.9*momentum_S3[counter_S3];
       par1_S3 = 4.95277e-01 -2.78269e-04*momentum_S3[counter_S3] - 2.19406e-03 * exp(-0.5*pow((momentum_S3[counter_S3]-1.79144e+00) / 2.70089e-01,2)); // mean for both signal gauss
       par2_S3 = exp(-5.87651e+00+9.50189e-01*momentum_S3[counter_S3])+exp(-4.83642e+00+-9.34420e-01*momentum_S3[counter_S3]);
-      par3_S3 = -2466.73 + 8254.67*momentum_S3[counter_S3] -8574.25*pow(momentum_S3[counter_S3],2)+3580.97*pow(momentum_S3[counter_S3],3) -511.388*pow(momentum_S3[counter_S3],4); // amplitude for back gaus
+      par3_S3 = 1500*exp(-0.5*pow((momentum_S3[counter_S3]-2.5)/0.23,2))+1142+-835*momentum_S3[counter_S3]+208*pow(momentum_S3[counter_S3],2); // amp for back gaus
       par4_S3 = 0.1396; // mean for back gaus (pion mass)
-      // par5_S3 = 0.3; // sigma for back gaus
-      par5_S3 = 0.393*exp(-0.5*pow((momentum_S3[counter_S3]-1.46)/0.613,2))+-0.534+0.224*momentum_S3[counter_S3]; // sigma for back gaus
+      par5_S3 = 0.11*exp(-0.5*pow((momentum_S3[counter_S3]-1.72)/0.3564,2))+0+0.05*momentum_S3[counter_S3]; // sigma for back gaus
       par6_S3 = -5; // constant for back pol1
       par7_S3 = -10; // slope for back pol1
       par8_S3 = 0.578473*exp(-0.5*pow((momentum_S3[counter_S3]-1.66762)/0.229272,2)) + 1.34606*exp(-0.5*pow((momentum_S3[counter_S3]-2.12122)/0.701563,2));
 
+
       // Setting parameters
       func1_S3[counter_S3]->FixParameter(0,par0_S3); // amplitude for 1st signal gaus
+      // func1_S3[counter_S3]->SetParameter(0,0.5*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.5))); // amplitude for 1st signal gaus
       func1_S3[counter_S3]->FixParameter(1,par1_S3); // mean for both signal gaus
       func1_S3[counter_S3]->FixParameter(2,par2_S3); // sigma for 1st signal gaus
-      func1_S3[counter_S3]->SetParameter(3,par3_S3); // amplitude for back gaus
+      // func1_S3[counter_S3]->SetParameter(3,par3_S3); // amplitude for back gaus
+      func1_S3[counter_S3]->SetParameter(3,2.5*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.365))); // amplitude for back gaus
       func1_S3[counter_S3]->FixParameter(4,par4_S3); // mean for back gaus (pion mass)
       func1_S3[counter_S3]->SetParameter(5,par5_S3); // sigma for back gaus
       func1_S3[counter_S3]->SetParameter(6,par6_S3); // constant for back pol1
@@ -440,10 +444,12 @@
 
 
       // Setting parameter limits
-      // func1_S3[counter_S3]->SetParLimits(0, 0, 1.2 * Kaon_Mass_S3_Projections[counter_S3]->GetMaximum()); // amplitude for back gaus
-      // func1_S3[counter_S3]->SetParLimits(3,Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.365)) / 5, 4 * Kaon_Mass_S3_Projections[counter_S3]->GetMaximum()); // amplitude for back gaus
-      // func1_S3[counter_S3]->SetParLimits(4,par4_S3 * 0.98, par4_S3 * 1.02); // mean for back gaus (pion mass)
-      // func1_S3[counter_S3]->SetParLimits(5,0.1, 0.8); // sigma for back gaus
+      func1_S3[counter_S3]->SetParLimits(0,0.2*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.5)), 1.02*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.5))); // amplitude for sig gaus
+      // func1_S3[counter_S3]->SetParLimits(3,0, Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.365)) * 10); // amplitude for back gaus
+      func1_S3[counter_S3]->SetParLimits(3,0.9*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.365)),5*Kaon_Mass_S3_Projections[counter_S3]->GetBinContent(Kaon_Mass_S3_Projections[counter_S3]->FindBin(0.365))); // amplitude for back gaus
+      // func1_S3[counter_S3]->SetParLimits(4,par4 * 0.6, par4 * 1.4); // mean for back gaus (pion mass)
+      // func1_S3[counter_S3]->SetParLimits(4,par4 * 0.85, par4 * 1.15); // mean for back gaus (pion mass)
+      func1_S3[counter_S3]->SetParLimits(5,0.025,0.35); // sigma for back gaus
       func1_S3[counter_S3]->SetParLimits(6,-1000, -0.7); // constant for back pol1
       func1_S3[counter_S3]->SetParLimits(7,-500, 0); // slope for back pol1
 
@@ -454,12 +460,13 @@
       signal_1_S3[counter_S3]->SetParameter(0,func1_S3[counter_S3]->GetParameter(0));
       signal_1_S3[counter_S3]->SetParameter(1,func1_S3[counter_S3]->GetParameter(1));
       signal_1_S3[counter_S3]->SetParameter(2,func1_S3[counter_S3]->GetParameter(2));
-      signal_2_S3[counter_S3]->SetParameter(0,func1_S3[counter_S3]->GetParameter(0));
+      signal_2_S3[counter_S3]->SetParameter(0,func1_S3[counter_S3]->GetParameter(0)*func1_S3[counter_S3]->GetParameter(8));
       signal_2_S3[counter_S3]->SetParameter(1,func1_S3[counter_S3]->GetParameter(1));
-      signal_2_S3[counter_S3]->SetParameter(2,func1_S3[counter_S3]->GetParameter(2));
+      signal_2_S3[counter_S3]->SetParameter(2,2*func1_S3[counter_S3]->GetParameter(2));
       signal_total_S3[counter_S3]->SetParameter(0,func1_S3[counter_S3]->GetParameter(0));
       signal_total_S3[counter_S3]->SetParameter(1,func1_S3[counter_S3]->GetParameter(1));
       signal_total_S3[counter_S3]->SetParameter(2,func1_S3[counter_S3]->GetParameter(2));
+      signal_total_S3[counter_S3]->SetParameter(3,func1_S3[counter_S3]->GetParameter(8));
       background_1_S3[counter_S3]->SetParameter(0,func1_S3[counter_S3]->GetParameter(3));
       background_1_S3[counter_S3]->SetParameter(1,func1_S3[counter_S3]->GetParameter(4));
       background_1_S3[counter_S3]->SetParameter(2,func1_S3[counter_S3]->GetParameter(5));
@@ -575,13 +582,13 @@
    // Strangeness 2
    // signal 1 amplitude
    // gaus + pol1
-   func_sig_1_amp_S2->SetParameter(0,40);
-   func_sig_1_amp_S2->SetParameter(1,1.2);
-   func_sig_1_amp_S2->SetParameter(2,0.18);
-   func_sig_1_amp_S2->SetParameter(3,80);
-   func_sig_1_amp_S2->SetParameter(4,-20);
-   //
-   //
+   func_sig_1_amp_S2->SetParameter(0,44);
+   func_sig_1_amp_S2->SetParameter(1,1.206);
+   func_sig_1_amp_S2->SetParameter(2,0.186);
+   func_sig_1_amp_S2->SetParameter(3,74);
+   func_sig_1_amp_S2->SetParameter(4,-17);
+   
+
    // signal 1 mean
    // pol1 - gaus
    func_sig_1_mean_S2->FixParameter(0,4.95277e-01);
@@ -608,11 +615,12 @@
    // Strangeness 3
    // signal 1 amplitude
    // gaus + pol1
-   func_sig_1_amp_S3->FixParameter(0,43.357);
-   func_sig_1_amp_S3->FixParameter(1,1.22);
-   func_sig_1_amp_S3->FixParameter(2,0.13);
-   func_sig_1_amp_S3->FixParameter(3,32.647);
-   func_sig_1_amp_S3->FixParameter(4,-5.934);
+   func_sig_1_amp_S3->FixParameter(0,39.8);
+   func_sig_1_amp_S3->FixParameter(1,1.23);
+   func_sig_1_amp_S3->FixParameter(2,0.12);
+   func_sig_1_amp_S3->FixParameter(3,32.65);
+   func_sig_1_amp_S3->FixParameter(4,-5.9);
+
 
 
    // signal 1 mean
