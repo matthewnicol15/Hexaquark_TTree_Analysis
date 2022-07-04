@@ -6,13 +6,13 @@
    Int_t S2_y_rebin=4;
    Int_t S2_z_rebin=2;
    Int_t S3_x_rebin=10;
-   Int_t S3_y_rebin=20;
+   Int_t S3_y_rebin=10;
    Int_t S3_z_rebin=30;
 
 
    // Get input file
    // TFile *f1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022_Total_Scaling_16032022_01.root");
-   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGB_Spring2019_Inbending_at_least_1e1KpFD_Tree_Total_03032022_Total_Scaling_23032022_01.root");
+   TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/S3_RGB_Spring2019_Inbending_at_least_1e1KpFD_KpChi3_Tree_Total_03032022_Total_Scaling_04072022_02.root");
    // Get histogram from input file
    TH3F* hist_S1=(TH3F*)f1->Get("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass");
    TH3F* hist_S2=(TH3F*)f1->Get("h_S2_Kaon_Momentum__Miss_Mass__Kaon_Mass");
@@ -24,7 +24,7 @@
    // Rebin strangeness 3 due to low statistics
    hist_S3->Rebin3D(S3_x_rebin,S3_y_rebin,S3_z_rebin);
 
-   TFile fileOutput1("Kaon_Background_Subtraction_RGB_Spring2019_Inbending_28062022_01.root","recreate");
+   TFile fileOutput1("Kaon_Background_Subtraction_RGB_Spring2019_Inbending_S3Rebin10_04072022_04.root","recreate");
 
    // histograms looking at fit parameters as a function of momentum
    TH1F *h_sigma_1 = new TH1F("h_sigma_1","sigma 1 relationship",300,1,2.6);
@@ -587,7 +587,7 @@
    func_sig_1_amp_S2->SetParameter(2,0.186);
    func_sig_1_amp_S2->SetParameter(3,74);
    func_sig_1_amp_S2->SetParameter(4,-17);
-   
+
 
    // signal 1 mean
    // pol1 - gaus
@@ -689,8 +689,8 @@
    TH3F *S1_Background = new TH3F("S1_Background","Back",300,0,3,300,0,3,500,0.3,0.8);
    TH3F *S2_Signal = new TH3F("S2_Signal","Sig2",300/S2_x_rebin,0,3,300/S2_y_rebin,0,3,500/S2_z_rebin,0.3,0.8);
    TH3F *S2_Background = new TH3F("S2_Background","Back2",300/S2_x_rebin,0,3,300/S2_y_rebin,0,3,500/S2_z_rebin,0.3,0.8);
-   TH3F *S3_Signal = new TH3F("S3_Signal","Sig3",300/S3_x_rebin,0,3,300/S3_y_rebin,0,3,500/S3_z_rebin,0.3,0.8);
-   TH3F *S3_Background = new TH3F("S3_Background","Back3",300/S3_x_rebin,0,3,300/S3_y_rebin,0,3,500/S3_z_rebin,0.3,0.8);
+   TH3F *S3_Signal = new TH3F("S3_Signal","Sig3",300/S3_x_rebin,0,3,400/S3_y_rebin,1,5,500/S3_z_rebin,0.3,0.8);
+   TH3F *S3_Background = new TH3F("S3_Background","Back3",300/S3_x_rebin,0,3,400/S3_y_rebin,1,5,500/S3_z_rebin,0.3,0.8);
 
 
    // Creating signal function and histogram
@@ -864,7 +864,8 @@
    S3_Signal->ProjectionY("S3sig",1,hist_S3->GetNbinsX(),1,hist_S3->GetNbinsZ(),"");
    S3_Background->ProjectionY("S3back",1,hist_S3->GetNbinsX(),1,hist_S3->GetNbinsZ(),"");
 
-   S3back->Scale(S3data->Integral(S3data->FindBin(0),S3data->FindBin(1.55)) / S3back->Integral(S3back->FindBin(0),S3back->FindBin(1.55)));
+   // S3back->Scale(S3data->Integral(S3data->FindBin(1.6),S3data->FindBin(2.45)) / S3back->Integral(S3back->FindBin(1.6),S3back->FindBin(2.45)));
+   // S3back->Scale(S3data->GetBinContent(S3data->FindBin(1.55))/S3back->GetBinContent(S3back->FindBin(1.55)));
    TH1F *S3Result=(TH1F*)S3data->Clone("S3Result");
    S3Result->Add(S3back,-1);
 
