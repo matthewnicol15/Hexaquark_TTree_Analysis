@@ -11,8 +11,8 @@
 
 
    // Get input file
-   TFile *f1 = new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022_Total_Scaling_16032022_01.root");
-   // TFile *f1=new TFile("/media/mn688/Elements1/PhD/Analysis_Output/Hexaquark/RGB_Spring2019_Inbending_at_least_1e1KpFD_Tree_Total_03032022_Total_Scaling_23032022_01.root");
+   TFile *f1 = new TFile("/mnt/d/PhD/Analysis_Output/Hexaquark/RGA_Fall2018_Outbending_at_least_1e1KpFD_Tree_Total_24022022_Total_Scaling_16032022_01.root");
+   // TFile *f1=new TFile("/mnt/d/PhD/Analysis_Output/Hexaquark/RGB_Spring2019_Inbending_at_least_1e1KpFD_Tree_Total_03032022_Total_Scaling_23032022_01.root");
    // Get histogram from input file
    TH3F* hist_S1=(TH3F*)f1->Get("h_S1_Kaon_Momentum__Miss_Mass__Kaon_Mass");
    TH3F* hist_S2=(TH3F*)f1->Get("h_S2_Kaon_Momentum__Miss_Mass__Kaon_Mass");
@@ -24,7 +24,7 @@
    // Rebin strangeness 3 due to low statistics
    hist_S3->Rebin3D(S3_x_rebin,S3_y_rebin,S3_z_rebin);
 
-   TFile fileOutput1("Kaon_Background_Subtraction_RGA_Fall2018_Outbending_Alternative_27062022_01.root","recreate");
+   TFile fileOutput1("Kaon_Background_Subtraction_RGA_Fall2018_Outbending_Alternative_16072022_01.root","recreate");
 
    // histograms looking at fit parameters as a function of momentum
    TH1F *h_sigma_1 = new TH1F("h_sigma_1","sigma 1 relationship",300,1,2.6);
@@ -850,7 +850,7 @@
    S1_Signal->ProjectionY("S1sig",1,hist_S1->GetNbinsX(),1,hist_S1->GetNbinsZ(),"");
    S1_Background->ProjectionY("S1back",1,hist_S1->GetNbinsX(),1,hist_S1->GetNbinsZ(),"");
 
-   S1back->Scale(S1data->Integral(S1data->FindBin(0),S1data->FindBin(0.85)) / S1back->Integral(S1back->FindBin(0),S1back->FindBin(0.85)));
+   // S1back->Scale(S1data->Integral(S1data->FindBin(0),S1data->FindBin(0.85)) / S1back->Integral(S1back->FindBin(0),S1back->FindBin(0.85)));
    TH1F *S1Result=(TH1F*)S1data->Clone("S1Result");
    S1Result->Add(S1back,-1);
 
@@ -859,7 +859,7 @@
    S2_Signal->ProjectionY("S2sig",1,hist_S2->GetNbinsX(),1,hist_S2->GetNbinsZ(),"");
    S2_Background->ProjectionY("S2back",1,hist_S2->GetNbinsX(),1,hist_S2->GetNbinsZ(),"");
 
-   S2back->Scale(S2data->Integral(S2data->FindBin(0),S2data->FindBin(0.85)) / S2back->Integral(S2back->FindBin(0),S2back->FindBin(0.85)));
+   // S2back->Scale(S2data->Integral(S2data->FindBin(0),S2data->FindBin(0.85)) / S2back->Integral(S2back->FindBin(0),S2back->FindBin(0.85)));
    TH1F *S2Result=(TH1F*)S2data->Clone("S2Result");
    S2Result->Add(S2back,-1);
 
@@ -867,7 +867,7 @@
    S3_Signal->ProjectionY("S3sig",1,hist_S3->GetNbinsX(),1,hist_S3->GetNbinsZ(),"");
    S3_Background->ProjectionY("S3back",1,hist_S3->GetNbinsX(),1,hist_S3->GetNbinsZ(),"");
 
-   S3back->Scale(S3data->Integral(S3data->FindBin(0),S3data->FindBin(1.55)) / S3back->Integral(S3back->FindBin(0),S3back->FindBin(1.55)));
+   // S3back->Scale(S3data->Integral(S3data->FindBin(0),S3data->FindBin(1.55)) / S3back->Integral(S3back->FindBin(0),S3back->FindBin(1.55)));
    TH1F *S3Result=(TH1F*)S3data->Clone("S3Result");
    S3Result->Add(S3back,-1);
 
